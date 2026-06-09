@@ -11,6 +11,7 @@ export interface User {
 export interface Tenant {
   id: number;
   razon_social: string;
+  cuit?: string | null;
   estado_plan: string;
 }
 
