@@ -121,21 +121,6 @@ export default function Home() {
     }
   };
 
-  const handleDemoLogin = async (demoEmail: string) => {
-    setAuthError(null);
-    setLoading(true);
-    try {
-      const data = await apiRequest<{ access_token: string; user: any; tenant: any }>('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email: demoEmail, password: 'admin123' }),
-      });
-      setAuth(data.access_token, data.user, data.tenant);
-    } catch (err: any) {
-      setAuthError(err.message || 'Error al iniciar sesión demo');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // --- CONTROLADORES DEL FORMULARIO DE PRODUCTOS ---
   const handleCreateProduct = async (e: React.FormEvent) => {
@@ -335,17 +320,7 @@ export default function Home() {
             </button>
           </form>
 
-          <div className="demo-box">
-            <h3 className="demo-title">Accesos de Demostración</h3>
-            <div className="demo-buttons">
-              <button onClick={() => handleDemoLogin('admin@novardesk.com')} className="btn-secondary" style={{ fontSize: '12px' }}>
-                Admin (Trial)
-              </button>
-              <button onClick={() => handleDemoLogin('vendedor@novardesk.com')} className="btn-secondary" style={{ fontSize: '12px' }}>
-                Vendedor (POS)
-              </button>
-            </div>
-          </div>
+
         </div>
       </div>
     );
