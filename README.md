@@ -1,159 +1,81 @@
-# Turborepo starter
+# NovarDesk ERP SaaS
 
-This Turborepo starter is maintained by the Turborepo core team.
+[🇪🇸 Español](#español) | [🇬🇧 English](#english)
 
-## Using this example
+---
 
-Run the following command:
+<a name="español"></a>
+## 🇪🇸 Español
 
-```sh
-npx create-turbo@latest
-```
+NovarDesk es un sistema ERP SaaS multi-inquilino (multi-tenant) moderno diseñado para la gestión integral de comercios, inventario y Punto de Venta (POS). Desarrollado con una arquitectura escalable en monorepo (Turborepo).
 
-## What's inside?
+### ✨ Características Principales
+* **Aislamiento Multi-Tenant (Inquilino):** Seguridad absoluta de datos entre diferentes comercios usando inyección de dependencias en Prisma y AsyncLocalStorage en NestJS.
+* **Punto de Venta (POS):** Interfaz fluida y rápida para registrar ventas, buscar por código de barras y generar transacciones.
+* **Catálogo de Productos:** Gestión de variantes, SKU dinámico y atributos extra en base al rubro comercial (Indumentaria, Almacén, etc.).
+* **Gestión de Suscripciones (SaaS):** Integración completa con **Mercado Pago** (Webhooks seguros) para el ciclo de cobro de planes de pago recurrentes, incluyendo un simulador offline de pasarela de pago.
+* **Modo Oscuro / Claro:** Transiciones suaves a nivel de interfaz global para una mejor experiencia de usuario.
+* **Arquitectura Monorepo:** Separación estricta entre Frontend, Backend y Database usando pnpm workspaces y Turborepo.
 
-This Turborepo includes the following packages/apps:
+### 🛠 Tecnologías Utilizadas
+* **Frontend:** Next.js (App Router), React, Zustand (Estado), React Query (Fetching), Vanilla CSS (Diseño a medida).
+* **Backend:** NestJS, JWT Auth, Mercado Pago SDK.
+* **Base de Datos:** MySQL y Prisma ORM.
 
-### Apps and Packages
+### 🚀 Instalación Local
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+1. Instalar dependencias con pnpm:
+   ```bash
+   pnpm install
+   ```
+2. Configurar variables de entorno:
+   Renombrar `.env.example` a `.env` y establecer credenciales de BD y JWT.
+3. Ejecutar las migraciones de base de datos y cargar datos iniciales (Seed):
+   ```bash
+   cd packages/database
+   npx prisma migrate dev --name init
+   npx ts-node prisma/seed.ts
+   ```
+4. Iniciar el entorno de desarrollo:
+   ```bash
+   pnpm run dev
+   ```
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+---
 
-### Utilities
+<a name="english"></a>
+## 🇬🇧 English
 
-This Turborepo has some additional tools already setup for you:
+NovarDesk is a modern multi-tenant SaaS ERP system designed for comprehensive business management, inventory tracking, and Point of Sale (POS). Developed with a highly scalable monorepo architecture (Turborepo).
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+### ✨ Key Features
+* **Multi-Tenant Isolation:** Absolute data security between different businesses using dependency injection in Prisma and AsyncLocalStorage in NestJS.
+* **Point of Sale (POS):** Fluid and fast interface for registering sales, barcode scanning, and transaction generation.
+* **Product Catalog:** Management of variants, dynamic SKUs, and extra attributes based on the business sector (Clothing, Grocery, etc.).
+* **Subscription Management (SaaS):** Full integration with **Mercado Pago** (Secure Webhooks) for recurring payment lifecycles, including an offline checkout simulator.
+* **Dark / Light Mode:** Smooth transitions at the global UI level for an enhanced user experience.
+* **Monorepo Architecture:** Strict separation between Frontend, Backend, and Database using pnpm workspaces and Turborepo.
 
-### Build
+### 🛠 Tech Stack
+* **Frontend:** Next.js (App Router), React, Zustand (State), React Query (Fetching), Vanilla CSS (Custom Design).
+* **Backend:** NestJS, JWT Auth, Mercado Pago SDK.
+* **Database:** MySQL and Prisma ORM.
 
-To build all apps and packages, run the following command:
+### 🚀 Local Setup
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo build
-pnpm dlx turbo build
-pnpm exec turbo build
-```
-
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-pnpm exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-pnpm exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-pnpm exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+1. Install dependencies with pnpm:
+   ```bash
+   pnpm install
+   ```
+2. Setup environment variables:
+   Rename `.env.example` to `.env` and set DB and JWT credentials.
+3. Run database migrations and load initial data (Seed):
+   ```bash
+   cd packages/database
+   npx prisma migrate dev --name init
+   npx ts-node prisma/seed.ts
+   ```
+4. Start the development server:
+   ```bash
+   pnpm run dev
+   ```
