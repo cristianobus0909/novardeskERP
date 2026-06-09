@@ -1,0 +1,161 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id                  Int       @id @default(autoincrement())
+  razon_social        String
+  cuit                String?
+  estado_plan         EstadoPlan @default(TRIAL)
+  mp_suscripcion_id   String?    
+  fin_prueba          DateTime?
+  fecha_proximo_cobro DateTime?
+  creado_el           DateTime   @default(now())
+
+  usuarios  User[]
+  roles     Role[]
+  productos Producto[]
+  ventas    Venta[]
+  variantes ProductoVariante[]
+
+  @@map("tenants")
+}
+
+enum EstadoPlan {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  FREE_BASIC
+}
+
+model Role {
+  id        Int      @id @default(autoincrement())
+  tenant_id Int
+  nombre    String   
+  
+  tenant    Tenant   @relation(fields: [tenant_id], references: [id])
+  usuarios  User[]
+  permisos  RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id             Int              @id @default(autoincrement())
+  codigo_permiso String           @unique 
+  descripcion    String?
+  
+  roles          RolePermission[]
+
+  @@map("permisos")
+}
+
+model RolePermission {
+  role_id       Int
+  permission_id Int
+
+  role       Role       @relation(fields: [role_id], references: [id])
+  permission Permission @relation(fields: [permission_id], references: [id])
+
+  @@id([role_id, permission_id])
+  @@map("rol_permisos")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  tenant_id Int
+  role_id   Int
+  email     String   
+  password  String   
+  nombre    String
+  activo    Boolean  @default(true)
+
+  tenant    Tenant   @relation(fields: [tenant_id], references: [id])
+  role      Role     @relation(fields: [role_id], references: [id])
+  ventas    Venta[]  
+
+  @@unique([tenant_id, email])
+  @@map("usuarios")
+}
+
+model Producto {
+  id          Int      @id @default(autoincrement())
+  tenant_id   Int
+  nombre      String
+  descripcion String?
+  categoria   String?
+  marca       String?
+  es_servicio Boolean  @default(false)
+
+  tenant      Tenant             @relation(fields: [tenant_id], references: [id])
+  variantes   ProductoVariante[]
+
+  @@map("productos")
+}
+
+model ProductoVariante {
+  id              Int      @id @default(autoincrement())
+  producto_id     Int
+  tenant_id       Int
+  sku             String   
+  codigo_barras   String?
+  precio_venta    Decimal  @db.Decimal(10, 2)
+  stock_actual    Decimal  @default(0) @db.Decimal(10, 3) 
+  atributos_extra Json?    
+  
+  producto        Producto       @relation(fields: [producto_id], references: [id], onDelete: Cascade)
+  tenant          Tenant         @relation(fields: [tenant_id], references: [id])
+  detalles_venta  VentaDetalle[]
+
+  @@unique([tenant_id, sku])
+  @@map("producto_variantes")
+}
+
+model Venta {
+  id               Int      @id @default(autoincrement())
+  tenant_id        Int
+  user_id          Int      
+  id_cliente       String?  
+  nombre_cliente   String?  @default("Consumidor Final")
+  total            Decimal  @db.Decimal(10, 2)
+  metodo_pago      String   
+  fecha_venta      DateTime @default(now())
+  estado_arca      EstadoARCA @default(NO_FISCAL)
+  cae              String?
+  vto_cae          DateTime?
+  tipo_comprobante String?    
+  arca_error       String?    @db.Text
+
+  tenant           Tenant         @relation(fields: [tenant_id], references: [id])
+  usuario          User           @relation(fields: [user_id], references: [id])
+  detalles         VentaDetalle[]
+
+  @@map("ventas")
+}
+
+enum EstadoARCA {
+  NO_FISCAL
+  PENDIENTE
+  APROBADO
+  RECHAZADO
+}
+
+model VentaDetalle {
+  id               Int      @id @default(autoincrement())
+  venta_id         Int
+  variante_id      Int
+  cantidad         Decimal  @db.Decimal(10, 3)
+  precio_unitario  Decimal  @db.Decimal(10, 2)
+  subtotal         Decimal  @db.Decimal(10, 2)
+
+  venta            Venta            @relation(fields: [venta_id], references: [id], onDelete: Cascade)
+  variante         ProductoVariante @relation(fields: [variante_id], references: [id])
+
+  @@map("venta_detalles")
+}
