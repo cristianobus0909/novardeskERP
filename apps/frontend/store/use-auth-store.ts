@@ -13,6 +13,10 @@ export interface Tenant {
   razon_social: string;
   cuit?: string | null;
   estado_plan: string;
+  mp_suscripcion_id?: string | null;
+  fin_prueba?: string | null;
+  fecha_proximo_cobro?: string | null;
+  creado_el?: string | null;
 }
 
 interface AuthState {
