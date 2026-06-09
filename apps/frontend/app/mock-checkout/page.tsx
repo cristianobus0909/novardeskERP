@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function MockCheckoutPage() {
+function MockCheckoutContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
@@ -113,5 +113,13 @@ export default function MockCheckoutPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function MockCheckoutPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: '40px', textAlign: 'center' }}>Cargando simulador...</div>}>
+      <MockCheckoutContent />
+    </Suspense>
   );
 }
