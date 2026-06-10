@@ -4,7 +4,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "start": "cd apps/backend && pnpm run start:prod",
+    "start": "export DATABASE_URL=${DATABASE_URL:-$MYSQL_URL} && cd apps/backend && pnpm run start:prod",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types"
