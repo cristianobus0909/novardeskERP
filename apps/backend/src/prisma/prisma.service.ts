@@ -7,7 +7,13 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   private readonly extendedPrisma: any;
 
   constructor(private readonly tenantContext: TenantContextService) {
-    super();
+    super({
+      datasources: {
+        db: {
+          url: process.env.DATABASE_URL || 'mysql://root:EbwVqcAJjyjAkFetzBYMjBTnQXPYJylH@interchange.proxy.rlwy.net:26804/railway',
+        },
+      },
+    });
 
     // Crear la extensión de Prisma para el aislamiento automático de inquilinos
     this.extendedPrisma = this.$extends({
