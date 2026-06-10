@@ -25,8 +25,10 @@ export function SettingsView() {
         razon_social: razonSocial,
         cuit: cuit,
       });
-      // Actualizar el estado global con el nuevo tenant
-      setAuth(token!, user!, result.tenant);
+      // Actualizar el estado global con el nuevo tenant, preservando el resto de las propiedades
+      if (tenant) {
+        setAuth(token!, user!, { ...tenant, ...result.tenant });
+      }
       alert('Datos de la empresa actualizados correctamente');
     } catch (err: any) {
       alert(err.message || 'Error al actualizar datos');

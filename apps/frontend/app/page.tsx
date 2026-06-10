@@ -898,6 +898,10 @@ export default function Home() {
             </div>
           </div>
         )}
+
+        {activeTab === 'settings' && (
+          <SettingsView />
+        )}
       </main>
 
       {/* Modal para Crear Producto */}

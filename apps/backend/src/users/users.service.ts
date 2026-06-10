@@ -1,4 +1,4 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../common/context/tenant-context.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
@@ -13,6 +13,8 @@ export class UsersService {
 
   async getEmployees() {
     const tenantId = this.tenantContext.getTenantId();
+    if (!tenantId) throw new UnauthorizedException('Tenant no identificado');
+    
     return this.prisma.user.findMany({
       where: { tenant_id: tenantId },
       select: {
@@ -30,6 +32,7 @@ export class UsersService {
 
   async createEmployee(dto: CreateEmployeeDto) {
     const tenantId = this.tenantContext.getTenantId();
+    if (!tenantId) throw new UnauthorizedException('Tenant no identificado');
     
     // 1. Verificar si el email ya existe en el tenant (o global)
     const existingUser = await this.prisma.user.findFirst({

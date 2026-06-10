@@ -86,6 +86,7 @@ export class TenantsController {
         id: tenant.id,
         razon_social: tenant.razon_social,
         cuit: tenant.cuit,
+        estado_plan: tenant.estado_plan,
       },
     };
   }
