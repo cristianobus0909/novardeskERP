@@ -1,8 +1,9 @@
-import { Controller, Get, Post, UseGuards, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, UseGuards, UnauthorizedException } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { TenantContextService } from '../common/context/tenant-context.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { MercadoPagoService } from './mercadopago.service';
+import { UpdateTenantDto } from './dto/update-tenant.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('tenants')
@@ -65,5 +66,27 @@ export class TenantsController {
     }
 
     return this.mercadopagoService.createSubscriptionPreference(tenantId, user.email);
+  }
+
+  @Patch('profile')
+  async updateProfile(@Body() updateDto: UpdateTenantDto) {
+    const tenantId = this.tenantContext.getTenantId();
+    if (!tenantId) {
+      throw new UnauthorizedException('No se pudo identificar el Tenant activo');
+    }
+
+    const tenant = await this.prisma.tenant.update({
+      where: { id: tenantId },
+      data: updateDto,
+    });
+
+    return {
+      message: 'Datos de la empresa actualizados correctamente',
+      tenant: {
+        id: tenant.id,
+        razon_social: tenant.razon_social,
+        cuit: tenant.cuit,
+      },
+    };
   }
 }

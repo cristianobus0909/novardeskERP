@@ -6,6 +6,8 @@ import { apiRequest } from '../lib/api-client';
 import { useProducts, useCreateProduct } from '../hooks/use-products';
 import { useCartStore } from '../store/use-cart-store';
 import { useSales, useCreateSale } from '../hooks/use-sales';
+import { useSettings } from '../hooks/use-settings';
+import { SettingsView } from '../components/settings/settings-view';
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -44,7 +46,7 @@ export default function Home() {
   const [activeCategoryFilter, setActiveCategoryFilter] = useState('Todos');
 
   // Estado de la pestaña activa en la barra lateral
-  const [activeTab, setActiveTab] = useState<'catalog' | 'pos' | 'sales' | 'subscription'>('catalog');
+  const [activeTab, setActiveTab] = useState<'catalog' | 'pos' | 'sales' | 'subscription' | 'settings'>('catalog');
 
   // Estado de búsqueda en POS
   const [posSearchQuery, setPosSearchQuery] = useState('');
@@ -370,7 +372,11 @@ export default function Home() {
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
               <span>Suscripción Premium</span>
             </li>
-            <li className="nav-item" style={{ opacity: 0.5, cursor: 'not-allowed', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <li 
+              className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`}
+              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
+              onClick={() => setActiveTab('settings')}
+            >
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
               <span>Configuración</span>
             </li>
@@ -402,12 +408,14 @@ export default function Home() {
               {activeTab === 'pos' && 'Punto de Venta (POS)'}
               {activeTab === 'sales' && 'Historial de Transacciones'}
               {activeTab === 'subscription' && 'Plan y Facturación'}
+              {activeTab === 'settings' && 'Configuración del Comercio'}
             </h1>
             <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginTop: '4px' }}>
               {activeTab === 'catalog' && 'Administra tus productos, variantes y niveles de stock.'}
               {activeTab === 'pos' && 'Busca productos por SKU o código de barras, arma el carrito y registra cobros.'}
               {activeTab === 'sales' && 'Consulta y audita las ventas registradas y estados fiscales.'}
               {activeTab === 'subscription' && 'Gestiona tu plan de suscripción a NovarDesk y estado de pagos.'}
+              {activeTab === 'settings' && 'Administra la información de tu empresa y cuentas de empleados.'}
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
