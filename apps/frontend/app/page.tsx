@@ -1244,7 +1244,7 @@ export default function Home() {
             )}
 
             {/* Cerrar Caja Z */}
-            {estadoCaja?.status === 'ABIERTA' && (
+            {activeTab === 'pos' && estadoCaja?.status === 'ABIERTA' && (
               <button
                 onClick={() => setIsCloseCajaModalOpen(true)}
                 className="font-semibold" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', padding: '6px 12px', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '13px', cursor: 'pointer' }}

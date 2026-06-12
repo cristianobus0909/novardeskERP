@@ -49,6 +49,47 @@ export class ImportService {
         if (errors.length > 0) hasErrors = true;
         validatedData.push({ ...row, _errors: errors });
       }
+
+    } else if (entity === 'proveedores') {
+      const cuits = data.map(item => item.cuit?.toString() || '').filter(s => s);
+      const existingProveedores = await this.prisma.proveedor.findMany({
+        where: { tenant_id: tenantId, cuit: { in: cuits } },
+        select: { cuit: true }
+      });
+      const existingCuits = new Set(existingProveedores.map(c => c.cuit));
+
+      for (const row of data) {
+        const errors = [...(row._errors || [])];
+        if (row.cuit && existingCuits.has(row.cuit.toString())) {
+          errors.push('El CUIT ya existe en BD');
+        }
+        if (!row.razon_social) errors.push('Razón social vacía');
+        if (errors.length > 0) hasErrors = true;
+        validatedData.push({ ...row, _errors: errors });
+      }
+
+    } else if (entity === 'stock') {
+      const skus = data.map(item => item.sku?.toString() || '').filter(s => s);
+      const existingVariants = await this.prisma.productoVariante.findMany({
+        where: { tenant_id: tenantId, sku: { in: skus } },
+        select: { sku: true }
+      });
+      const existingSkus = new Set(existingVariants.map(v => v.sku));
+
+      for (const row of data) {
+        const errors = [...(row._errors || [])];
+        if (!row.sku) {
+          errors.push('SKU vacío');
+        } else if (!existingSkus.has(row.sku.toString())) {
+          errors.push('El SKU no existe en la BD (debe existir para actualizar stock)');
+        }
+        if (row.nuevo_stock_total === undefined || isNaN(Number(row.nuevo_stock_total))) {
+          errors.push('El valor de stock es inválido');
+        }
+        if (errors.length > 0) hasErrors = true;
+        validatedData.push({ ...row, _errors: errors });
+      }
+
     } else {
       throw new BadRequestException('Entidad no soportada');
     }
@@ -92,6 +133,32 @@ export class ImportService {
               telefono: row.telefono?.toString(),
               direccion: row.direccion?.toString(),
               tenant_id: tenantId,
+            }
+          });
+          count++;
+        }
+      } else if (entity === 'proveedores') {
+        for (const row of data) {
+          await tx.proveedor.create({
+            data: {
+              cuit: row.cuit?.toString(),
+              razon_social: row.razon_social.toString(),
+              condicion_iva: row.condicion_iva?.toString() || 'Responsable Inscripto',
+              email: row.email?.toString(),
+              contacto: row.contacto?.toString(),
+              tenant_id: tenantId,
+            }
+          });
+          count++;
+        }
+      } else if (entity === 'stock') {
+        for (const row of data) {
+          await tx.productoVariante.update({
+            where: {
+              tenant_id_sku: { tenant_id: tenantId, sku: row.sku.toString() }
+            },
+            data: {
+              stock_actual: Number(row.nuevo_stock_total)
             }
           });
           count++;

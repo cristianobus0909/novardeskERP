@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import * as XLSX from 'xlsx';
 import { toast } from '../../store/use-toast-store';
 
-type EntityType = 'productos' | 'clientes';
+type EntityType = 'productos' | 'clientes' | 'proveedores' | 'stock';
 
 export function ImportCenterView() {
   const [selectedEntity, setSelectedEntity] = useState<EntityType>('productos');
@@ -15,8 +15,12 @@ export function ImportCenterView() {
     let headers: string[] = [];
     if (selectedEntity === 'productos') {
       headers = ['codigo', 'nombre', 'precio_venta', 'costo', 'stock_actual', 'categoria'];
-    } else {
+    } else if (selectedEntity === 'clientes') {
       headers = ['cuit_dni', 'razon_social', 'email', 'telefono', 'direccion', 'condicion_iva'];
+    } else if (selectedEntity === 'proveedores') {
+      headers = ['razon_social', 'cuit', 'email', 'contacto', 'condicion_iva'];
+    } else if (selectedEntity === 'stock') {
+      headers = ['sku', 'nuevo_stock_total'];
     }
 
     const ws = XLSX.utils.aoa_to_sheet([headers]);
@@ -114,14 +118,16 @@ export function ImportCenterView() {
           >
             <option value="productos">Catálogo de Productos</option>
             <option value="clientes">Directorio de Clientes</option>
+            <option value="proveedores">Directorio de Proveedores</option>
+            <option value="stock">Actualización de Stock</option>
           </select>
           
-          <button onClick={downloadTemplate} className="btn-secondary d-flex align-center gap-xs">
+          <button onClick={downloadTemplate} className="btn-secondary d-flex align-center gap-xs" style={{ width: 'auto' }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            Plantilla
+            Plantilla {selectedEntity === 'stock' ? 'Stock' : selectedEntity === 'proveedores' ? 'Proveedores' : selectedEntity === 'clientes' ? 'Clientes' : 'Productos'}
           </button>
 
-          <label className="btn-secondary d-flex align-center gap-xs" style={{ cursor: 'pointer', margin: 0, borderStyle: 'dashed', borderColor: 'var(--text-secondary)' }}>
+          <label className="btn-secondary d-flex align-center gap-xs" style={{ cursor: 'pointer', margin: 0, borderStyle: 'dashed', borderColor: 'var(--text-secondary)', width: 'auto' }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
             Subir Excel
             <input 
@@ -160,8 +166,13 @@ export function ImportCenterView() {
               </thead>
               <tbody>
                 {parsedData.map((row) => {
-                  const idCol = selectedEntity === 'productos' ? row.codigo : row.cuit_dni;
-                  const nameCol = selectedEntity === 'productos' ? row.nombre : row.razon_social;
+                  let idCol = '';
+                  let nameCol = '';
+                  if (selectedEntity === 'productos') { idCol = row.codigo; nameCol = row.nombre; }
+                  if (selectedEntity === 'clientes') { idCol = row.cuit_dni; nameCol = row.razon_social; }
+                  if (selectedEntity === 'proveedores') { idCol = row.cuit; nameCol = row.razon_social; }
+                  if (selectedEntity === 'stock') { idCol = row.sku; nameCol = `Nuevo Stock: ${row.nuevo_stock_total}`; }
+
                   const isError = row._errors && row._errors.length > 0;
 
                   return (
@@ -197,8 +208,8 @@ export function ImportCenterView() {
           <button 
             onClick={handleConfirm} 
             disabled={hasErrors || isValidating}
-            className="btn-primary d-flex align-center gap-sm"
-            style={{ opacity: hasErrors ? 0.5 : 1 }}
+            className="btn-primary d-flex align-center gap-sm justify-center"
+            style={{ opacity: hasErrors ? 0.5 : 1, width: 'auto' }}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
             Confirmar e Importar
