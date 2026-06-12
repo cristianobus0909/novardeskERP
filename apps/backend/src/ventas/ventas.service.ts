@@ -41,6 +41,40 @@ export class VentasService {
       throw new BadRequestException('DEBES_ABRIR_CAJA');
     }
 
+    // Lógica de Límites de Facturación y Auto-Escalado
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    const ventasCount = await this.prisma.venta.count({
+      where: {
+        tenant_id: tenantId,
+        fecha_venta: { gte: startOfMonth }
+      }
+    });
+
+    let currentTier = (tenant as any).plan_tier || 'TRIAL';
+    let limit = -1;
+    if (currentTier === 'TRIAL') limit = 50;
+    else if (currentTier === 'BASICO') limit = 250;
+    else if (currentTier === 'PREMIUM') limit = 1500;
+
+    let notificationToCreate = null;
+    let nextTier = null;
+
+    if (limit !== -1 && (ventasCount + 1) > limit) {
+      if (currentTier === 'TRIAL') nextTier = 'BASICO';
+      else if (currentTier === 'BASICO') nextTier = 'PREMIUM';
+      else if (currentTier === 'PREMIUM') nextTier = 'FULL';
+      
+      if (nextTier) {
+        notificationToCreate = {
+          tenant_id: tenantId,
+          titulo: 'Límite de Facturación Excedido',
+          mensaje: `Has superado el límite de ${limit} ventas mensuales de tu plan ${currentTier}. Tu plan ha sido actualizado a ${nextTier} para garantizar la continuidad del servicio. Tu próxima facturación será actualizada al monto de este nuevo plan.`,
+        };
+      }
+    }
+
     // Ejecutar transaccionalmente en la base de datos
     const ventaGuardada = await this.prisma.$transaction(async (tx) => {
       const detallesParaCrear = [];
@@ -223,6 +257,17 @@ export class VentasService {
             }
           });
         }
+      }
+
+      // 4. Procesar Auto-Escalabilidad si hubo upgrade
+      if (nextTier && notificationToCreate) {
+        await tx.tenant.update({
+          where: { id: tenantId },
+          data: { plan_tier: nextTier as any }
+        });
+        await (tx as any).notificacion.create({
+          data: notificationToCreate
+        });
       }
 
       return venta;

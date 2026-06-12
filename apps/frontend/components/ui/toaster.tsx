@@ -12,7 +12,7 @@ export function Toaster() {
   return (
     <div style={{
       position: 'fixed',
-      top: '20px',
+      top: '75px',
       right: '20px',
       zIndex: 9999,
       display: 'flex',
@@ -41,7 +41,8 @@ export function Toaster() {
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
-              animation: 'slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+              animation: 'popFromBell 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+              transformOrigin: 'top right',
               border: toast.type === 'info' ? '1px solid var(--border-color)' : 'none'
             }}
           >
@@ -67,9 +68,9 @@ export function Toaster() {
         );
       })}
       <style>{`
-        @keyframes slideInRight {
-          from { transform: translateX(100%); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
+        @keyframes popFromBell {
+          0% { transform: scale(0.5) translateY(-40px) translateX(20px); opacity: 0; }
+          100% { transform: scale(1) translateY(0) translateX(0); opacity: 1; }
         }
       `}</style>
     </div>

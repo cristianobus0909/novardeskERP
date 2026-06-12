@@ -5,6 +5,7 @@ import { toast } from '../store/use-toast-store';
 import { useAuthStore } from '../store/use-auth-store';
 import { apiRequest } from '../lib/api-client';
 import dynamic from 'next/dynamic';
+import { NotificationBell } from '../components/notifications/notification-bell';
 
 const LoadingFallback = () => <div className="text-center" style={{ padding: '60px', color: 'var(--text-secondary)' }}><div className="spinner" style={{ width: '30px', height: '30px', margin: '0 auto 16px' }}></div>Cargando módulo...</div>;
 
@@ -18,13 +19,13 @@ const ProveedoresView = dynamic(() => import('../components/finanzas/proveedores
 const CierreView = dynamic(() => import('../components/finanzas/cierre-view').then(mod => mod.CierreView), { loading: LoadingFallback });
 const HistorialCajaView = dynamic(() => import('../components/finanzas/historial-caja-view').then(mod => mod.HistorialCajaView), { loading: LoadingFallback });
 const DashboardView = dynamic(() => import('../components/dashboard/dashboard-view').then(mod => mod.DashboardView), { ssr: false, loading: LoadingFallback });
+const ImportCenterView = dynamic(() => import('../components/import/import-center-view').then(mod => mod.ImportCenterView), { loading: LoadingFallback });
+const SubscriptionView = dynamic(() => import('../components/subscription/subscription-view').then(mod => mod.SubscriptionView), { loading: LoadingFallback });
 
 import { ClienteSelector } from '../components/pos/cliente-selector';
 import { useProducts, useCreateProduct } from '../hooks/use-products';
 import { useEstadoCaja } from '../hooks/use-caja';
 import { AbrirCajaModal, CerrarCajaModal } from '../components/pos/caja-modal';
-
-import { ImportCenterView } from '../components/import/import-center-view';
 import { TicketView } from '../components/pos/ticket-view';
 import { PosSimpleView } from '../components/pos/pos-simple-view';
 import { useCartStore } from '../store/use-cart-store';
@@ -1147,12 +1148,23 @@ export default function Home() {
             <div className="profile-info">
               <span className="profile-name font-bold"   style={{ fontSize: '13px' }}>{tenant?.razon_social}</span>
               <span className="profile-role" style={{ fontSize: '11px' }}>{user?.nombre} · {user?.role}</span>
-              <span className="badge-plan" style={{ marginTop: '4px', display: 'inline-block', marginLeft: 0 }}>Plan: {tenant?.estado_plan}</span>
+              <span className="badge-plan" style={{ marginTop: '4px', display: 'inline-block', marginLeft: 0, cursor: 'pointer', transition: 'transform 0.2s' }} onClick={() => setActiveTab('subscription')} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} title="Gestionar Plan">Plan: {tenant?.estado_plan}</span>
             </div>
           </div>
 
           {/* Acciones */}
           <div className="hide-on-collapse d-flex flex-col gap-xs"  >
+              
+            {/* Mi Suscripción */}
+            <button
+              onClick={() => React.startTransition(() => setActiveTab('subscription'))}
+              className="d-flex align-center w-full text-left" style={{ gap: '10px', padding: '8px 10px', background: activeTab === 'subscription' ? 'rgba(var(--primary-rgb), 0.08)' : 'none', border: 'none', borderRadius: '8px', cursor: 'pointer', color: activeTab === 'subscription' ? 'hsl(var(--primary))' : 'var(--text-secondary)', fontSize: '13px', fontWeight: activeTab === 'subscription' ? '700' : '550', transition: 'background 0.2s' }}
+              onMouseEnter={e => { if (activeTab !== 'subscription') e.currentTarget.style.background = 'var(--bg-tertiary)'; }}
+              onMouseLeave={e => { if (activeTab !== 'subscription') e.currentTarget.style.background = 'none'; }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+              <span>Mi Suscripción</span>
+            </button>
 
             {/* Toggle Tema */}
             <button
@@ -1198,6 +1210,7 @@ export default function Home() {
               {activeTab === 'promociones' && 'Motor de Promociones'}
               {activeTab === 'finances' && 'Gestión de Contabilidad'}
               {activeTab === 'settings' && 'Configuración de la Empresa'}
+              {activeTab === 'subscription' && 'Mi Suscripción'}
             </h1>
             <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginTop: '4px' }}>
               {activeTab === 'dashboard' && 'Monitorea el rendimiento de ventas y productos en tiempo real.'}
@@ -1208,11 +1221,14 @@ export default function Home() {
               {activeTab === 'finances' && 'Administra tus cuentas, gastos y balances financieros.'}
               {activeTab === 'settings' && 'Administra la información de tu empresa y cuentas de empleados.'}
               {activeTab === 'import-center' && 'Importa masivamente clientes y productos desde planillas de cálculo.'}
+              {activeTab === 'subscription' && 'Gestiona tu plan, facturación y estados de cuenta.'}
             </p>
           </div>
           
           {/* Opciones Superiores Derecha — solo acciones contextuales */}
           <div className="d-flex align-center gap-md" style={{ flexShrink: 0 }}>
+            
+            <NotificationBell />
 
             {/* Toggle layout POS */}
             {activeTab === 'pos' && estadoCaja?.status === 'ABIERTA' && (
@@ -1589,6 +1605,7 @@ export default function Home() {
         )}
         {activeTab === 'settings' && <SettingsView />}
         {activeTab === 'import-center' && <ImportCenterView />}
+        {activeTab === 'subscription' && <SubscriptionView />}
 
         {/* --- VISTA POS --- */}
         {activeTab === 'pos' && (
@@ -1842,59 +1859,6 @@ export default function Home() {
           </div>
         )}
 
-        {activeTab === 'subscription' && (
-          <div className="p-lg" style={{ maxWidth: '800px', margin: '0 auto' }}>
-            <div className="auth-card scale-up text-center m-0"   style={{ padding: '40px 24px' }}>
-              <div className="align-center justify-center" style={{ display: 'inline-flex', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(var(--primary-rgb), 0.1)', color: 'hsl(var(--primary))', marginBottom: '24px' }}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-              </div>
-              
-              <h2 className="font-extrabold" style={{ fontSize: '28px', marginBottom: '8px' }}>
-                Plan Actual: <span style={{ color: tenant?.estado_plan === 'ACTIVE' ? 'hsl(var(--success))' : 'inherit' }}>{tenant?.estado_plan}</span>
-              </h2>
-              
-              <p style={{ color: 'var(--text-secondary)', fontSize: '16px', marginBottom: '32px' }}>
-                {tenant?.estado_plan === 'TRIAL' && 'Estás utilizando la versión de prueba. Pásate al plan Premium para desbloquear todas las funciones sin límites.'}
-                {tenant?.estado_plan === 'ACTIVE' && '¡Gracias por ser Premium! Tienes acceso a todas las funcionalidades del sistema.'}
-                {tenant?.estado_plan === 'PAST_DUE' && 'Tu último pago fue rechazado. Por favor, regulariza tu situación para seguir usando el sistema.'}
-                {tenant?.estado_plan === 'CANCELED' && 'Tu suscripción ha sido cancelada. Renueva tu plan para recuperar el acceso.'}
-              </p>
-
-              <div className="gap-xl text-left" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', marginBottom: '32px' }}>
-                <div style={{ padding: '20px', borderRadius: '12px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
-                  <span className="font-bold" style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Empresa</span>
-                  <strong style={{ fontSize: '16px' }}>{tenant?.razon_social}</strong>
-                  <div style={{ marginTop: '8px', fontSize: '14px', color: 'var(--text-secondary)' }}>CUIT: {tenant?.cuit}</div>
-                </div>
-                <div style={{ padding: '20px', borderRadius: '12px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
-                  <span className="font-bold" style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Próximo Vencimiento</span>
-                  <strong style={{ fontSize: '16px' }}>
-                    {tenant?.fecha_proximo_cobro ? new Date(tenant.fecha_proximo_cobro).toLocaleDateString('es-AR') : (tenant?.fin_prueba ? new Date(tenant.fin_prueba).toLocaleDateString('es-AR') : 'No definido')}
-                  </strong>
-                </div>
-              </div>
-
-              {tenant?.estado_plan !== 'ACTIVE' && (
-                <button 
-                  className="btn-primary" 
-                  style={{ fontSize: '16px', padding: '16px 32px', borderRadius: '100px', width: 'auto' }}
-                  onClick={async () => {
-                    try {
-                      const res = await apiRequest<{ init_point: string }>('/tenants/subscribe', { method: 'POST' });
-                      if (res.init_point) {
-                        window.location.href = res.init_point;
-                      }
-                    } catch (err: any) {
-                      toast.error('Error al generar la suscripción: ' + err.message);
-                    }
-                  }}
-                >
-                  Suscribirse por $2.500 / mes
-                </button>
-              )}
-            </div>
-          </div>
-        )}
 
 
       </main>

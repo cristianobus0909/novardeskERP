@@ -49,7 +49,18 @@ export class WebhooksController {
     if (type === 'preapproval' || action?.startsWith('preapproval')) {
       try {
         const details = await this.mercadopagoService.getSubscriptionDetails(resourceId);
-        const tenantId = details.external_reference ? parseInt(details.external_reference, 10) : null;
+        
+        let tenantIdStr = details.external_reference;
+        let tenantId: number | null = null;
+        let incomingTier: 'BASICO' | 'PREMIUM' | 'FULL' | null = null;
+
+        if (tenantIdStr) {
+          const parts = tenantIdStr.split('_');
+          tenantId = parseInt(parts[0], 10);
+          if (parts[1] && ['BASICO', 'PREMIUM', 'FULL'].includes(parts[1])) {
+            incomingTier = parts[1] as any;
+          }
+        }
 
         let tenant = null;
         if (tenantId && !isNaN(tenantId)) {
@@ -77,13 +88,20 @@ export class WebhooksController {
           estado_plan = 'CANCELED';
         }
 
+        // Update DB
+        const updateData: any = {
+          estado_plan,
+          mp_suscripcion_id: details.id,
+          fecha_proximo_cobro: details.next_payment_date ? new Date(details.next_payment_date) : null,
+        };
+
+        if (incomingTier && estado_plan === 'ACTIVE') {
+          updateData.plan_tier = incomingTier;
+        }
+
         await this.prisma.tenant.update({
           where: { id: tenant.id },
-          data: {
-            estado_plan,
-            mp_suscripcion_id: resourceId,
-            fecha_proximo_cobro: details.next_payment_date ? new Date(details.next_payment_date) : null,
-          },
+          data: updateData
         });
 
         this.logger.log(`Tenant ${tenant.id} (${tenant.razon_social}) actualizado a plan ${estado_plan}`);

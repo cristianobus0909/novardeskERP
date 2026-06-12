@@ -17,12 +17,13 @@ function MockCheckoutContent() {
   if (!mounted) return null;
 
   const preapprovalId = searchParams.get('preapproval_id');
-  const tenantId = searchParams.get('tenant_id') || '1';
+  const tenantId = searchParams.get('tenant_id');
+  const tier = searchParams.get('tier') || 'PREMIUM';
 
-  if (!preapprovalId) {
+  if (!preapprovalId || !tenantId) {
     return (
       <div style={{ padding: '40px', textAlign: 'center', fontFamily: 'sans-serif' }}>
-        <h2>Error: Falta preapproval_id</h2>
+        <h2>Error: Falta preapproval_id o tenant_id</h2>
         <button onClick={() => router.push('/')} style={{ marginTop: '20px', padding: '10px 20px', cursor: 'pointer' }}>
           Volver
         </button>
@@ -34,7 +35,7 @@ function MockCheckoutContent() {
     setLoading(true);
     try {
       const randomPart = Math.floor(Math.random() * 1000);
-      const newResourceId = `sub_${status}_${tenantId}_${randomPart}`;
+      const newResourceId = `sub_${status}_${tenantId}_${tier}_${randomPart}`;
 
       const payload = {
         type: 'preapproval',

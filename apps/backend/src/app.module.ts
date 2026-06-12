@@ -19,6 +19,7 @@ import { FinanzasModule } from './finanzas/finanzas.module';
 import { ProveedoresModule } from './proveedores/proveedores.module';
 import { GastosModule } from './gastos/gastos.module';
 import { ImportModule } from './import/import.module';
+import { NotificacionesModule } from './notificaciones/notificaciones.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { ImportModule } from './import/import.module';
     ProveedoresModule,
     GastosModule,
     ImportModule,
+    NotificacionesModule,
   ],
   controllers: [AppController],
   providers: [

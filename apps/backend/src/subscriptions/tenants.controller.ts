@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Body, UseGuards, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, UseGuards, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { TenantContextService } from '../common/context/tenant-context.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -40,6 +40,7 @@ export class TenantsController {
       razon_social: tenant.razon_social,
       cuit: tenant.cuit,
       estado_plan: tenant.estado_plan,
+      plan_tier: (tenant as any).plan_tier || 'TRIAL',
       mp_suscripcion_id: tenant.mp_suscripcion_id,
       fin_prueba: tenant.fin_prueba,
       fecha_proximo_cobro: tenant.fecha_proximo_cobro,
@@ -49,12 +50,17 @@ export class TenantsController {
   }
 
   @Post('subscribe')
-  async subscribe() {
+  async subscribe(@Body() body: { tier: string }) {
     const tenantId = this.tenantContext.getTenantId();
     const userId = this.tenantContext.getUserId();
 
     if (!tenantId || !userId) {
       throw new UnauthorizedException('Datos de sesión insuficientes');
+    }
+    
+    const { tier } = body;
+    if (!tier || !['BASICO', 'PREMIUM', 'FULL'].includes(tier)) {
+      throw new BadRequestException('Plan seleccionado inválido');
     }
 
     // El interceptor filtra por tenantId, por lo que la búsqueda de User es segura
@@ -66,7 +72,7 @@ export class TenantsController {
       throw new UnauthorizedException('Usuario no encontrado');
     }
 
-    return this.mercadopagoService.createSubscriptionPreference(tenantId, user.email);
+    return this.mercadopagoService.createSubscriptionPreference(tenantId, user.email, tier);
   }
 
   @Patch('profile')

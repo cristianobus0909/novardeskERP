@@ -19,6 +19,7 @@ model Tenant {
   afip_punto_venta    Int?
   afip_facturacion_automatica Boolean @default(false)
   estado_plan         EstadoPlan @default(TRIAL)
+  plan_tier           PlanTier   @default(TRIAL)
   mp_suscripcion_id   String?    
   mp_access_token     String?    @db.Text
   mp_caja_id          String?
@@ -40,6 +41,7 @@ model Tenant {
   cuentas_corrientes  CuentaCorriente[]
   proveedores         Proveedor[]
   gastos              Gasto[]
+  notificaciones      Notificacion[]
 
   @@map("tenants")
 }
@@ -50,6 +52,26 @@ enum EstadoPlan {
   PAST_DUE
   CANCELED
   FREE_BASIC
+}
+
+enum PlanTier {
+  TRIAL
+  BASICO
+  PREMIUM
+  FULL
+}
+
+model Notificacion {
+  id        Int      @id @default(autoincrement())
+  tenant_id Int
+  titulo    String
+  mensaje   String   @db.Text
+  leida     Boolean  @default(false)
+  creado_el DateTime @default(now())
+
+  tenant    Tenant   @relation(fields: [tenant_id], references: [id])
+
+  @@map("notificaciones")
 }
 
 model Role {
