@@ -160,10 +160,11 @@ export function DashboardView() {
             className="layout"
             width={width}
             layouts={layouts}
-            onLayoutChange={(layout: Layout[], allLayouts: Record<string, Layout[]>) => setLayouts(allLayouts)}
+            onLayoutChange={(currentLayout, allLayouts) => setLayouts(allLayouts as any)}
         breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
         cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
         rowHeight={60}
+        // @ts-ignore - react-grid-layout types are incomplete in this version
         draggableHandle=".drag-handle"
         style={{ minHeight: '80vh' }}
       >

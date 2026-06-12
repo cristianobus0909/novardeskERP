@@ -92,7 +92,7 @@ export default function Home() {
 
   const { data: cuentaCorriente } = useCuentaCorriente(cliente_id || null);
 
-  type TabType = 'dashboard' | 'catalog' | 'pos' | 'sales' | 'clientes' | 'promociones' | 'settings' | 'finances';
+  type TabType = 'dashboard' | 'catalog' | 'pos' | 'sales' | 'clientes' | 'promociones' | 'settings' | 'finances' | 'subscription';
   type FinanzasTab = 'cuentas' | 'movimientos' | 'gastos' | 'proveedores' | 'cierre' | 'historial-caja';
   // Estado de la pestaña activa en la barra lateral
   const [activeTab, setActiveTab] = useState<TabType>('pos');

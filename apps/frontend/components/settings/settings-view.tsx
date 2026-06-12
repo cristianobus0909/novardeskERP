@@ -13,11 +13,11 @@ export function SettingsView() {
   // Tenant form state
   const [razonSocial, setRazonSocial] = useState(tenant?.razon_social || '');
   const [cuit, setCuit] = useState(tenant?.cuit || '');
-  const [domicilioFiscal, setDomicilioFiscal] = useState(tenant?.domicilio_fiscal || '');
-  const [condicionIva, setCondicionIva] = useState(tenant?.condicion_iva || '');
-  const [afipPuntoVenta, setAfipPuntoVenta] = useState(tenant?.afip_punto_venta?.toString() || '');
-  const [afipCrt, setAfipCrt] = useState(tenant?.afip_crt || '');
-  const [afipKey, setAfipKey] = useState('');
+  const [domicilioFiscal, setDomicilioFiscal] = useState((tenant as any)?.domicilio_fiscal || '');
+  const [condicionIva, setCondicionIva] = useState((tenant as any)?.condicion_iva || '');
+  const [afipPuntoVenta, setAfipPuntoVenta] = useState((tenant as any)?.afip_punto_venta?.toString() || '');
+  const [afipCrt, setAfipCrt] = useState((tenant as any)?.afip_crt || '');
+  const [afipKey, setAfipKey] = useState((tenant as any)?.afip_key || '');
   const [afipFacturacionAutomatica, setAfipFacturacionAutomatica] = useState(tenant?.afip_facturacion_automatica || false);
   const [logoUrl, setLogoUrl] = useState(tenant?.logo_url || '');
 
@@ -49,12 +49,12 @@ export function SettingsView() {
         cuit: cuit,
         domicilio_fiscal: domicilioFiscal,
         condicion_iva: condicionIva,
-        afip_punto_venta: afipPuntoVenta ? parseInt(afipPuntoVenta) : undefined,
+        afip_punto_venta: afipPuntoVenta ? Number(afipPuntoVenta) : undefined,
         afip_crt: afipCrt,
         afip_key: afipKey || undefined,
         afip_facturacion_automatica: afipFacturacionAutomatica,
         logo_url: logoUrl || undefined,
-      });
+      } as any);
       // Actualizar el estado global con el nuevo tenant, preservando el resto de las propiedades
       if (tenant) {
         setAuth(token!, user!, { ...tenant, ...result.tenant });
