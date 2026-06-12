@@ -31,12 +31,12 @@ export function ClientesView() {
     setIsModalOpen(true);
   };
 
-  if (isLoading) return <div style={{ padding: '24px' }}>Cargando clientes...</div>;
+  if (isLoading) return <div className="p-lg">Cargando clientes...</div>;
 
   return (
-    <div style={{ padding: '24px' }}>
+    <div className="p-lg">
       <div className="catalog-header">
-        <h2 style={{ fontSize: '24px', fontWeight: 'bold' }}>Directorio de Clientes</h2>
+        <h2 className="font-bold" style={{ fontSize: '24px' }}>Directorio de Clientes</h2>
         <button onClick={openCreate} className="btn-primary" style={{ width: 'auto' }}>+ Nuevo Cliente</button>
       </div>
 
@@ -50,7 +50,7 @@ export function ClientesView() {
                 <th>Email</th>
                 <th>Teléfono</th>
                 <th>Condición IVA</th>
-                <th style={{ textAlign: 'right' }}>Acciones</th>
+                <th className="text-right">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -61,7 +61,7 @@ export function ClientesView() {
                   <td>{c.email || '-'}</td>
                   <td>{c.telefono || '-'}</td>
                   <td><span className="badge">{c.condicion_iva}</span></td>
-                  <td style={{ textAlign: 'right' }}>
+                  <td className="text-right">
                     <button onClick={() => { setEditingCliente(c); setIsCcModalOpen(true); }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--success))', marginRight: '12px' }}>Cta. Corriente</button>
                     <button onClick={() => openEdit(c)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--primary))', marginRight: '12px' }}>Editar</button>
                     <button onClick={() => handleDelete(c.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'hsl(var(--danger))' }}>Eliminar</button>
@@ -69,7 +69,7 @@ export function ClientesView() {
                 </tr>
               ))}
               {clientes?.length === 0 && (
-                <tr><td colSpan={6} style={{ textAlign: 'center', padding: '24px', color: 'var(--text-secondary)' }}>No hay clientes registrados.</td></tr>
+                <tr><td colSpan={6} className="text-center p-lg" style={{ color: 'var(--text-secondary)' }}>No hay clientes registrados.</td></tr>
               )}
             </tbody>
           </table>
@@ -125,7 +125,7 @@ function CuentaCorrienteModal({ cliente, onClose }: { cliente: any, onClose: () 
   return (
     <div className="modal-overlay">
       <div className="modal-content scale-up" style={{ maxWidth: '600px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <div className="d-flex justify-between align-center" style={{ marginBottom: '20px' }}>
           <h2>Cuenta Corriente: {cliente.razon_social}</h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: 'var(--text-secondary)' }}>&times;</button>
         </div>
@@ -135,25 +135,25 @@ function CuentaCorrienteModal({ cliente, onClose }: { cliente: any, onClose: () 
         ) : (
           <div>
             {!cuenta?.activa ? (
-              <div style={{ background: 'var(--bg-tertiary)', padding: '24px', borderRadius: '12px', textAlign: 'center' }}>
+              <div className="p-lg text-center" style={{ background: 'var(--bg-tertiary)', borderRadius: '12px' }}>
                 <p style={{ marginBottom: '16px' }}>Este cliente no tiene una Cuenta Corriente activa.</p>
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', alignItems: 'center' }}>
+                <div className="d-flex gap-md justify-center align-center">
                   <label>Límite de Crédito: $</label>
                   <input type="number" className="form-input" style={{ width: '150px' }} value={limite} onChange={(e) => setLimite(Number(e.target.value))} />
                   <button className="btn-primary" style={{ width: 'auto' }} onClick={handleActivar} disabled={enableMut.isPending}>Activar Cuenta</button>
                 </div>
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div className="d-flex flex-col gap-xl">
                 {/* Resumen */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                  <div className="profile-card" style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                <div className="gap-lg" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+                  <div className="profile-card p-md"   style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
                     <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Saldo Actual (Deuda)</span>
                     <h3 style={{ fontSize: '24px', color: Number(cuenta.saldo_actual) > 0 ? 'hsl(var(--danger))' : 'hsl(var(--success))', margin: '4px 0' }}>
                       ${Number(cuenta.saldo_actual).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                     </h3>
                   </div>
-                  <div className="profile-card" style={{ background: 'var(--bg-secondary)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                  <div className="profile-card p-md"   style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
                     <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Crédito Disponible</span>
                     <h3 style={{ fontSize: '24px', margin: '4px 0' }}>
                       {Number(cuenta.limite_credito) === -1 ? 'Ilimitado' : `$${(Number(cuenta.limite_credito) - Number(cuenta.saldo_actual)).toLocaleString('es-AR', { minimumFractionDigits: 2 })}`}
@@ -165,8 +165,8 @@ function CuentaCorrienteModal({ cliente, onClose }: { cliente: any, onClose: () 
                 </div>
 
                 {/* Ingresar Pago */}
-                <form onSubmit={handlePagar} style={{ display: 'flex', gap: '12px', alignItems: 'flex-end', background: 'var(--bg-tertiary)', padding: '16px', borderRadius: '12px' }}>
-                  <div className="form-group" style={{ flex: 1, marginBottom: 0 }}>
+                <form onSubmit={handlePagar} className="d-flex gap-md p-md" style={{ alignItems: 'flex-end', background: 'var(--bg-tertiary)', borderRadius: '12px' }}>
+                  <div className="form-group flex-1"   style={{ marginBottom: 0 }}>
                     <label className="form-label">Recibir Pago del Cliente</label>
                     <input type="number" className="form-input" placeholder="Monto a abonar" value={montoAbono} onChange={(e) => setMontoAbono(e.target.value)} required />
                   </div>
@@ -175,15 +175,15 @@ function CuentaCorrienteModal({ cliente, onClose }: { cliente: any, onClose: () 
 
                 {/* Historial */}
                 <div>
-                  <h4 style={{ marginBottom: '12px', fontSize: '14px', fontWeight: 'bold' }}>Últimos Movimientos</h4>
-                  <div style={{ maxHeight: '250px', overflowY: 'auto' }}>
+                  <h4 className="font-bold" style={{ marginBottom: '12px', fontSize: '14px' }}>Últimos Movimientos</h4>
+                  <div className="overflow-y-auto" style={{ maxHeight: '250px' }}>
                     <table className="product-table" style={{ fontSize: '13px' }}>
                       <thead>
                         <tr>
                           <th>Fecha</th>
                           <th>Concepto</th>
-                          <th style={{ textAlign: 'right' }}>Debe</th>
-                          <th style={{ textAlign: 'right' }}>Haber</th>
+                          <th className="text-right">Debe</th>
+                          <th className="text-right">Haber</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -191,16 +191,16 @@ function CuentaCorrienteModal({ cliente, onClose }: { cliente: any, onClose: () 
                           <tr key={m.id}>
                             <td>{new Date(m.fecha_movimiento).toLocaleDateString()}</td>
                             <td>{m.concepto}</td>
-                            <td style={{ textAlign: 'right', color: 'hsl(var(--danger))' }}>
+                            <td className="text-right" style={{ color: 'hsl(var(--danger))' }}>
                               {m.tipo_movimiento === 'CARGO' ? `$${Number(m.monto).toLocaleString('es-AR', {minimumFractionDigits: 2})}` : '-'}
                             </td>
-                            <td style={{ textAlign: 'right', color: 'hsl(var(--success))' }}>
+                            <td className="text-right" style={{ color: 'hsl(var(--success))' }}>
                               {m.tipo_movimiento === 'ABONO' ? `$${Number(m.monto).toLocaleString('es-AR', {minimumFractionDigits: 2})}` : '-'}
                             </td>
                           </tr>
                         ))}
                         {cuenta.movimientos.length === 0 && (
-                          <tr><td colSpan={4} style={{ textAlign: 'center' }}>No hay movimientos registrados.</td></tr>
+                          <tr><td colSpan={4} className="text-center">No hay movimientos registrados.</td></tr>
                         )}
                       </tbody>
                     </table>
@@ -268,13 +268,13 @@ function ClienteModal({ cliente, onClose }: { cliente: any, onClose: () => void 
   return (
     <div className="modal-overlay">
       <div className="modal-content" style={{ maxWidth: '500px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <div className="d-flex justify-between align-center" style={{ marginBottom: '20px' }}>
           <h2>{cliente ? 'Editar Cliente' : 'Nuevo Cliente'}</h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', color: 'var(--text-secondary)' }}>&times;</button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 3fr', gap: '12px' }}>
+        <form onSubmit={handleSubmit} className="d-flex flex-col gap-lg">
+          <div className="gap-md" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 3fr' }}>
             <div className="form-group">
               <label className="form-label">Tipo Doc.</label>
               <select className="form-input" value={formData.tipo_documento} onChange={(e) => setFormData({...formData, tipo_documento: e.target.value})}>
@@ -293,7 +293,7 @@ function ClienteModal({ cliente, onClose }: { cliente: any, onClose: () => void 
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div className="gap-md" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
             <div className="form-group">
               <label className="form-label">Email</label>
               <input type="email" className="form-input" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} />
@@ -309,7 +309,7 @@ function ClienteModal({ cliente, onClose }: { cliente: any, onClose: () => void 
             <input type="text" className="form-input" value={formData.direccion} onChange={(e) => setFormData({...formData, direccion: e.target.value})} />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div className="gap-md" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
             <div className="form-group">
               <label className="form-label">Condición frente al IVA</label>
               <select className="form-input" value={formData.condicion_iva} onChange={(e) => setFormData({...formData, condicion_iva: e.target.value})}>
@@ -321,9 +321,9 @@ function ClienteModal({ cliente, onClose }: { cliente: any, onClose: () => void 
             </div>
             <div className="form-group">
               <label className="form-label">Límite Cta. Corriente ($)</label>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <input type="number" min="0" className="form-input" disabled={formData.limite_credito === -1} value={formData.limite_credito === 0 || formData.limite_credito === -1 ? '' : formData.limite_credito} onChange={(e) => setFormData({...formData, limite_credito: Number(e.target.value) || 0})} placeholder={formData.limite_credito === -1 ? 'Sin límite' : 'Vacío (no activar)'} style={{ flex: 1 }} />
-                <label style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+              <div className="d-flex gap-sm align-center">
+                <input type="number" min="0" className="form-input flex-1" disabled={formData.limite_credito === -1} value={formData.limite_credito === 0 || formData.limite_credito === -1 ? '' : formData.limite_credito} onChange={(e) => setFormData({...formData, limite_credito: Number(e.target.value) || 0})} placeholder={formData.limite_credito === -1 ? 'Sin límite' : 'Vacío (no activar)'} />
+                <label className="d-flex align-center gap-xs" style={{ fontSize: '12px', cursor: 'pointer' }}>
                   <input type="checkbox" checked={formData.limite_credito === -1} onChange={(e) => setFormData({...formData, limite_credito: e.target.checked ? -1 : 0})} />
                   Sin Límite
                 </label>
@@ -331,7 +331,7 @@ function ClienteModal({ cliente, onClose }: { cliente: any, onClose: () => void 
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', marginTop: '8px', justifyContent: 'flex-end' }}>
+          <div className="d-flex gap-md" style={{ marginTop: '8px', justifyContent: 'flex-end' }}>
             <button type="button" className="btn-secondary" onClick={onClose}>Cancelar</button>
             <button type="submit" className="btn-primary" disabled={createMut.isPending || updateMut.isPending}>
               {createMut.isPending || updateMut.isPending ? 'Guardando...' : 'Guardar Cliente'}

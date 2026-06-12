@@ -174,19 +174,13 @@ export function PosSimpleView({
         />
       )}
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr',
-        height: 'calc(100vh - 160px)',
-        overflow: 'hidden',
-        gap: '12px'
-      }}>
+      <div className="overflow-hidden gap-md" style={{ display: 'grid', gridTemplateColumns: '1fr', height: 'calc(100vh - 160px)' }}>
         {/* ─── Buscador de productos ─── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', overflow: 'hidden' }}>
+        <div className="d-flex flex-col gap-md overflow-hidden">
 
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <div style={{ position: 'relative', flex: 1 }}>
-              <svg style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}
+          <div className="d-flex align-center" style={{ gap: '10px' }}>
+            <div className="relative flex-1">
+              <svg className="absolute" style={{ left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}
                 xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
@@ -201,7 +195,7 @@ export function PosSimpleView({
               />
             </div>
             {discountMonto > 0 && (
-              <span style={{ fontSize: '13px', fontWeight: '700', color: 'hsl(var(--success))', whiteSpace: 'nowrap', background: 'rgba(22,163,74,0.1)', padding: '6px 12px', borderRadius: '8px' }}>
+              <span className="font-bold" style={{ fontSize: '13px', color: 'hsl(var(--success))', whiteSpace: 'nowrap', background: 'rgba(22, 163, 74, 0.1)', padding: '6px 12px', borderRadius: '8px' }}>
                 Dto: -${discountMonto.toFixed(2)}
               </span>
             )}
@@ -209,31 +203,23 @@ export function PosSimpleView({
               type="button"
               onClick={() => setIsDescuentoModalOpen(true)}
               disabled={cartItems.length === 0}
-              style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0 14px', height: '44px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', color: 'hsl(var(--primary))', whiteSpace: 'nowrap', flexShrink: 0 }}
+              className="font-semibold" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0 14px', height: '44px', cursor: 'pointer', fontSize: '13px', color: 'hsl(var(--primary))', whiteSpace: 'nowrap', flexShrink: 0 }}
             >
               + Dto
             </button>
           </div>
 
           {/* Split: productos arriba, carrito + cobro abajo */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: '16px', flex: 1, overflow: 'hidden', minHeight: 0 }}>
+          <div className="gap-lg flex-1 overflow-hidden" style={{ display: 'grid', gridTemplateColumns: '1fr 360px', minHeight: 0 }}>
 
             {/* Productos */}
-            <div style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div className="overflow-hidden d-flex flex-col gap-sm">
+              <span className="font-bold" style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 {filteredProducts.length} Resultado{filteredProducts.length !== 1 ? 's' : ''}
               </span>
-              <div style={{
-                overflowY: 'auto',
-                flex: 1,
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))',
-                gap: '10px',
-                alignContent: 'start',
-                paddingRight: '4px'
-              }}>
+              <div className="overflow-y-auto flex-1" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: '10px', alignContent: 'start', paddingRight: '4px' }}>
                 {filteredProducts.length === 0 ? (
-                  <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '48px', color: 'var(--text-muted)' }}>
+                  <div className="text-center" style={{ gridColumn: '1/-1', padding: '48px', color: 'var(--text-muted)' }}>
                     {searchQuery ? 'Sin resultados' : 'Busca un producto arriba'}
                   </div>
                 ) : filteredProducts.map((v: any) => {
@@ -244,18 +230,7 @@ export function PosSimpleView({
                     <div
                       key={v.id}
                       onClick={() => !sinStock && addItem(v)}
-                      style={{
-                        background: 'var(--bg-secondary)',
-                        border: '1px solid var(--border-color)',
-                        borderRadius: '10px',
-                        padding: '12px',
-                        cursor: sinStock ? 'not-allowed' : 'pointer',
-                        opacity: sinStock ? 0.5 : 1,
-                        transition: 'all 0.15s ease',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '4px'
-                      }}
+                      className="d-flex flex-col gap-xs" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '12px', cursor: sinStock ? 'not-allowed' : 'pointer', opacity: sinStock ? 0.5 : 1, transition: 'all 0.15s ease' }}
                       onMouseEnter={e => {
                         if (!sinStock) {
                           e.currentTarget.style.transform = 'translateY(-2px)';
@@ -270,14 +245,14 @@ export function PosSimpleView({
                       }}
                     >
                       <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{v.sku}</span>
-                      <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', lineHeight: 1.2 }}>
+                      <span className="font-semibold" style={{ fontSize: '13px', color: 'var(--text-primary)', lineHeight: 1.2 }}>
                         {v.producto.nombre}
                       </span>
-                      <span style={{ fontSize: '15px', fontWeight: '800', color: 'hsl(var(--primary))', marginTop: '4px' }}>
+                      <span className="font-extrabold" style={{ fontSize: '15px', color: 'hsl(var(--primary))', marginTop: '4px' }}>
                         ${precio.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                       </span>
                       {!v.producto.es_servicio && (
-                        <span style={{ fontSize: '10px', color: stock < 5 ? 'hsl(var(--warning))' : 'hsl(var(--success))', fontWeight: '600' }}>
+                        <span className="font-semibold" style={{ fontSize: '10px', color: stock < 5 ? 'hsl(var(--warning))' : 'hsl(var(--success))' }}>
                           {sinStock ? 'Sin stock' : `Stock: ${stock}`}
                         </span>
                       )}
@@ -288,20 +263,20 @@ export function PosSimpleView({
             </div>
 
             {/* Carrito + Cobro */}
-            <form onSubmit={handleCheckout} style={{ display: 'flex', flexDirection: 'column', gap: '0', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '12px', overflow: 'hidden' }}>
+            <form onSubmit={handleCheckout} className="d-flex flex-col overflow-hidden" style={{ gap: '0', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '12px' }}>
               
               {/* Header carrito */}
-              <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-primary)', flexShrink: 0 }}>
-                <span style={{ fontWeight: '700', fontSize: '14px' }}>Ticket Actual</span>
+              <div className="d-flex justify-between align-center" style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', background: 'var(--bg-primary)', flexShrink: 0 }}>
+                <span className="font-bold" style={{ fontSize: '14px' }}>Ticket Actual</span>
                 <span style={{ fontSize: '12px', background: 'var(--bg-tertiary)', padding: '2px 8px', borderRadius: '100px' }}>
                   {cartItems.length} ítem{cartItems.length !== 1 ? 's' : ''}
                 </span>
               </div>
 
               {/* Lista de items — tabla compacta */}
-              <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+              <div className="flex-1 overflow-y-auto" style={{ minHeight: 0 }}>
                 {cartItems.length === 0 ? (
-                  <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
+                  <div className="text-center" style={{ padding: '32px', color: 'var(--text-muted)', fontSize: '13px' }}>
                     <svg style={{ display: 'block', margin: '0 auto 8px', opacity: 0.3 }} xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                       <circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle>
                       <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
@@ -309,34 +284,34 @@ export function PosSimpleView({
                     Agregá productos haciendo clic
                   </div>
                 ) : (
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                  <table className="w-full" style={{ borderCollapse: 'collapse', fontSize: '13px' }}>
                     <thead>
                       <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
-                        <th style={{ padding: '8px 12px', textAlign: 'left', color: 'var(--text-muted)', fontWeight: '600', fontSize: '11px', background: 'var(--bg-primary)' }}>Producto</th>
-                        <th style={{ padding: '8px 8px', textAlign: 'center', color: 'var(--text-muted)', fontWeight: '600', fontSize: '11px', background: 'var(--bg-primary)' }}>Cant</th>
-                        <th style={{ padding: '8px 12px', textAlign: 'right', color: 'var(--text-muted)', fontWeight: '600', fontSize: '11px', background: 'var(--bg-primary)' }}>Total</th>
+                        <th className="text-left font-semibold" style={{ padding: '8px 12px', color: 'var(--text-muted)', fontSize: '11px', background: 'var(--bg-primary)' }}>Producto</th>
+                        <th className="text-center font-semibold" style={{ padding: '8px 8px', color: 'var(--text-muted)', fontSize: '11px', background: 'var(--bg-primary)' }}>Cant</th>
+                        <th className="text-right font-semibold" style={{ padding: '8px 12px', color: 'var(--text-muted)', fontSize: '11px', background: 'var(--bg-primary)' }}>Total</th>
                       </tr>
                     </thead>
                     <tbody>
                       {cartItems.map(item => (
                         <tr key={item.variantId} style={{ borderBottom: '1px solid var(--border-color)' }}>
                           <td style={{ padding: '8px 12px' }}>
-                            <div style={{ fontWeight: '600', fontSize: '13px', lineHeight: 1.2 }}>{item.nombre}</div>
+                            <div className="font-semibold" style={{ fontSize: '13px', lineHeight: 1.2 }}>{item.nombre}</div>
                             <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{item.sku}</div>
                           </td>
-                          <td style={{ padding: '8px', textAlign: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '2px', justifyContent: 'center' }}>
+                          <td className="p-sm text-center">
+                            <div className="d-flex align-center justify-center" style={{ gap: '2px' }}>
                               <button type="button" onClick={() => updateQuantity(item.variantId, item.cantidad - 1)}
-                                style={{ width: '20px', height: '20px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', borderRadius: '4px', cursor: 'pointer', fontSize: '14px', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>-</button>
-                              <span style={{ minWidth: '28px', textAlign: 'center', fontWeight: '700' }}>{item.cantidad}</span>
+                                className="d-flex align-center justify-center" style={{ width: '20px', height: '20px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', borderRadius: '4px', cursor: 'pointer', fontSize: '14px', lineHeight: 1 }}>-</button>
+                              <span className="text-center font-bold" style={{ minWidth: '28px' }}>{item.cantidad}</span>
                               <button type="button" onClick={() => updateQuantity(item.variantId, item.cantidad + 1)}
-                                style={{ width: '20px', height: '20px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', borderRadius: '4px', cursor: 'pointer', fontSize: '14px', lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                                className="d-flex align-center justify-center" style={{ width: '20px', height: '20px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', borderRadius: '4px', cursor: 'pointer', fontSize: '14px', lineHeight: 1 }}>+</button>
                             </div>
                           </td>
-                          <td style={{ padding: '8px 12px', textAlign: 'right' }}>
-                            <div style={{ fontWeight: '700', fontSize: '13px' }}>${(item.subtotal * item.cantidad).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</div>
+                          <td className="text-right" style={{ padding: '8px 12px' }}>
+                            <div className="font-bold" style={{ fontSize: '13px' }}>${(item.subtotal * item.cantidad).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</div>
                             <button type="button" onClick={() => removeItem(item.variantId)}
-                              style={{ fontSize: '10px', color: 'hsl(var(--danger))', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontWeight: '600' }}>
+                              className="p-0 font-semibold" style={{ fontSize: '10px', color: 'hsl(var(--danger))', background: 'none', border: 'none', cursor: 'pointer' }}>
                               Quitar
                             </button>
                           </td>
@@ -348,17 +323,17 @@ export function PosSimpleView({
               </div>
 
               {/* Panel inferior: totales + cobro */}
-              <div style={{ flexShrink: 0, borderTop: '1px solid var(--border-color)', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '10px', background: 'var(--bg-primary)' }}>
+              <div className="d-flex flex-col" style={{ flexShrink: 0, borderTop: '1px solid var(--border-color)', padding: '12px 16px', gap: '10px', background: 'var(--bg-primary)' }}>
                 <ClienteSelector />
 
                 {/* Pagos acumulados */}
                 {pagosAgregados.length > 0 && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div className="d-flex flex-col gap-xs">
                     {pagosAgregados.map((p, idx) => (
-                      <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', padding: '4px 8px', background: 'var(--bg-secondary)', borderRadius: '6px' }}>
-                        <span style={{ fontWeight: '600' }}>{p.metodo_pago.replace(/_/g, ' ')}</span>
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <span style={{ fontWeight: '700', color: 'hsl(var(--primary))' }}>${p.monto.toFixed(2)}</span>
+                      <div key={idx} className="d-flex justify-between align-center" style={{ fontSize: '12px', padding: '4px 8px', background: 'var(--bg-secondary)', borderRadius: '6px' }}>
+                        <span className="font-semibold">{p.metodo_pago.replace(/_/g, ' ')}</span>
+                        <div className="d-flex gap-sm align-center">
+                          <span className="font-bold" style={{ color: 'hsl(var(--primary))' }}>${p.monto.toFixed(2)}</span>
                           <button type="button" onClick={() => setPagosAgregados(pagosAgregados.filter((_, i) => i !== idx))}
                             style={{ color: 'hsl(var(--danger))', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px' }}>✕</button>
                         </div>
@@ -368,29 +343,21 @@ export function PosSimpleView({
                 )}
 
                 {/* Total */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontWeight: '600', color: 'var(--text-secondary)', fontSize: '14px' }}>Total</span>
-                  <span style={{ fontWeight: '800', fontSize: '26px', color: 'hsl(var(--primary))', fontFamily: 'monospace' }}>
+                <div className="d-flex justify-between align-center">
+                  <span className="font-semibold" style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Total</span>
+                  <span className="font-extrabold" style={{ fontSize: '26px', color: 'hsl(var(--primary))', fontFamily: 'monospace' }}>
                     ${totalReal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                   </span>
                 </div>
 
                 {/* Selector de medio de pago rápido */}
-                <div style={{ display: 'flex', gap: '6px' }}>
+                <div className="d-flex" style={{ gap: '6px' }}>
                   {['EFECTIVO', 'TARJETA_DEBITO', 'TARJETA_CREDITO', 'MERCADOPAGO_QR', ...(cuentaCorriente?.activa ? ['CUENTA_CORRIENTE'] : [])].map(m => (
                     <button
                       key={m}
                       type="button"
                       onClick={() => setSelectedMedio(m)}
-                      style={{
-                        flex: 1, padding: '6px 2px', fontSize: '10px', fontWeight: '700',
-                        borderRadius: '6px', border: '1px solid',
-                        borderColor: selectedMedio === m ? 'hsl(var(--primary))' : 'var(--border-color)',
-                        background: selectedMedio === m ? 'rgba(var(--primary-rgb), 0.1)' : 'var(--bg-secondary)',
-                        color: selectedMedio === m ? 'hsl(var(--primary))' : 'var(--text-secondary)',
-                        cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.03em',
-                        transition: 'all 0.15s'
-                      }}
+                      className="flex-1 font-bold" style={{ padding: '6px 2px', fontSize: '10px', borderRadius: '6px', border: '1px solid', borderColor: selectedMedio === m ? 'hsl(var(--primary))' : 'var(--border-color)', background: selectedMedio === m ? 'rgba(var(--primary-rgb), 0.1)' : 'var(--bg-secondary)', color: selectedMedio === m ? 'hsl(var(--primary))' : 'var(--text-secondary)', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.03em', transition: 'all 0.15s' }}
                     >
                       {m === 'EFECTIVO' ? 'Efectivo' :
                        m === 'TARJETA_DEBITO' ? 'Débito' :
@@ -408,16 +375,9 @@ export function PosSimpleView({
                   transition: 'grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1), margin-top 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
                   marginTop: (selectedMedio === 'TARJETA_CREDITO' || selectedMedio === 'TARJETA_DEBITO') ? '8px' : '0px'
                 }}>
-                  <div style={{
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px',
-                    opacity: (selectedMedio === 'TARJETA_CREDITO' || selectedMedio === 'TARJETA_DEBITO') ? 1 : 0,
-                    transition: 'opacity 0.25s ease'
-                  }}>
+                  <div className="overflow-hidden d-flex flex-col gap-sm" style={{ opacity: (selectedMedio === 'TARJETA_CREDITO' || selectedMedio === 'TARJETA_DEBITO') ? 1 : 0, transition: 'opacity 0.25s ease' }}>
                     {/* Botones de Tarjetas */}
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                    <div className="d-flex flex-wrap" style={{ gap: '6px' }}>
                       {cuentasContables.filter(c => c.tipo === lastCardType).map(c => (
                         <button
                           key={c.id}
@@ -426,14 +386,7 @@ export function PosSimpleView({
                             setSelectedCuentaId(c.id);
                             setSelectedPlanId('');
                           }}
-                          style={{
-                            flex: '1 1 auto', padding: '6px 8px', fontSize: '11px', fontWeight: '700',
-                            borderRadius: '6px', border: '1px solid',
-                            borderColor: selectedCuentaId === c.id ? 'hsl(var(--primary))' : 'var(--border-color)',
-                            background: selectedCuentaId === c.id ? 'rgba(var(--primary-rgb), 0.1)' : 'var(--bg-secondary)',
-                            color: selectedCuentaId === c.id ? 'hsl(var(--primary))' : 'var(--text-secondary)',
-                            cursor: 'pointer', transition: 'all 0.15s'
-                          }}
+                          className="font-bold" style={{ flex: '1 1 auto', padding: '6px 8px', fontSize: '11px', borderRadius: '6px', border: '1px solid', borderColor: selectedCuentaId === c.id ? 'hsl(var(--primary))' : 'var(--border-color)', background: selectedCuentaId === c.id ? 'rgba(var(--primary-rgb), 0.1)' : 'var(--bg-secondary)', color: selectedCuentaId === c.id ? 'hsl(var(--primary))' : 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.15s' }}
                         >
                           {c.nombre}
                         </button>
@@ -447,12 +400,7 @@ export function PosSimpleView({
                       gridTemplateRows: (selectedCuentaId !== '' && (selectedMedio === 'TARJETA_CREDITO' || selectedMedio === 'TARJETA_DEBITO')) ? '1fr' : '0fr',
                       transition: 'grid-template-rows 0.35s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}>
-                      <div style={{
-                        overflow: 'hidden',
-                        display: 'flex', gap: '6px', flexWrap: 'wrap',
-                        opacity: (selectedCuentaId !== '' && (selectedMedio === 'TARJETA_CREDITO' || selectedMedio === 'TARJETA_DEBITO')) ? 1 : 0,
-                        transition: 'opacity 0.25s ease'
-                      }}>
+                      <div className="overflow-hidden d-flex flex-wrap" style={{ gap: '6px', opacity: (selectedCuentaId !== '' && (selectedMedio === 'TARJETA_CREDITO' || selectedMedio === 'TARJETA_DEBITO')) ? 1 : 0, transition: 'opacity 0.25s ease' }}>
                         {(() => {
                           const cuenta = cuentasContables.find(c => c.id === lastCuentaId);
                           if (cuenta && cuenta.planes_pago?.length > 0) {
@@ -461,14 +409,7 @@ export function PosSimpleView({
                                 key={p.id}
                                 type="button"
                                 onClick={() => setSelectedPlanId(p.id)}
-                                style={{
-                                  flex: '1 1 auto', padding: '6px 8px', fontSize: '11px', fontWeight: '700',
-                                  borderRadius: '6px', border: '1px solid',
-                                  borderColor: selectedPlanId === p.id ? 'hsl(var(--primary))' : 'var(--border-color)',
-                                  background: selectedPlanId === p.id ? 'rgba(var(--primary-rgb), 0.1)' : 'var(--bg-secondary)',
-                                  color: selectedPlanId === p.id ? 'hsl(var(--primary))' : 'var(--text-secondary)',
-                                  cursor: 'pointer', transition: 'all 0.15s'
-                                }}
+                                className="font-bold" style={{ flex: '1 1 auto', padding: '6px 8px', fontSize: '11px', borderRadius: '6px', border: '1px solid', borderColor: selectedPlanId === p.id ? 'hsl(var(--primary))' : 'var(--border-color)', background: selectedPlanId === p.id ? 'rgba(var(--primary-rgb), 0.1)' : 'var(--bg-secondary)', color: selectedPlanId === p.id ? 'hsl(var(--primary))' : 'var(--text-secondary)', cursor: 'pointer', transition: 'all 0.15s' }}
                               >
                                 {p.nombre} {p.recargo_porcentaje > 0 ? `(+${p.recargo_porcentaje}%)` : ''}
                               </button>
@@ -483,13 +424,13 @@ export function PosSimpleView({
 
                 {/* Saldo restante */}
                 {pagosAgregados.length > 0 && (
-                  <div style={{ textAlign: 'right', fontSize: '12px', fontWeight: '800', color: saldoRestante > 0 ? 'hsl(var(--danger))' : 'hsl(var(--success))' }}>
+                  <div className="text-right font-extrabold" style={{ fontSize: '12px', color: saldoRestante > 0 ? 'hsl(var(--danger))' : 'hsl(var(--success))' }}>
                     {saldoRestante > 0 ? `Resta: $${saldoRestante.toFixed(2)}` : `Cambio: $${Math.abs(saldoRestante).toFixed(2)}`}
                   </div>
                 )}
 
                 {/* Botones */}
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div className="d-flex gap-sm">
                   <button
                     type="button"
                     onClick={() => { clearCart(); setPagosAgregados([]); setDiscountMonto(0); setDiscountMotivo(''); }}
@@ -498,10 +439,10 @@ export function PosSimpleView({
                   >
                     Vaciar
                   </button>
-                  <button
+                  <button className="btn-primary flex-1 font-extrabold"
                     type="submit"
-                    className="btn-primary"
-                    style={{ flex: 1, padding: '12px', fontSize: '15px', fontWeight: '800' }}
+                    
+                     style={{ padding: '12px', fontSize: '15px' }}
                     disabled={cartItems.length === 0 || createSaleMutation.isPending || (pagosAgregados.length > 0 && saldoRestante > 0.01)}
                   >
                     {createSaleMutation.isPending ? 'Procesando...' : '✓ Cobrar'}

@@ -16,9 +16,9 @@ export function TicketView({ venta, tenant, onClose }: { venta: any; tenant: any
   return (
     <div className="ticket-overlay">
       <div className="ticket-print-area">
-        <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+        <div className="text-center" style={{ marginBottom: '16px' }}>
           <h2 style={{ fontSize: '18px', margin: '0 0 4px 0' }}>{tenant.razon_social}</h2>
-          <p style={{ fontSize: '12px', margin: '0' }}>CUIT: {tenant.cuit || '00-00000000-0'}</p>
+          <p className="m-0" style={{ fontSize: '12px' }}>CUIT: {tenant.cuit || '00-00000000-0'}</p>
         </div>
         
         <div style={{ fontSize: '12px', marginBottom: '12px', borderBottom: '1px dashed #000', paddingBottom: '8px' }}>
@@ -28,12 +28,12 @@ export function TicketView({ venta, tenant, onClose }: { venta: any; tenant: any
           <p style={{ margin: '2px 0' }}>Método Pago: {venta.metodo_pago}</p>
         </div>
 
-        <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse', marginBottom: '12px' }}>
+        <table className="w-full" style={{ fontSize: '12px', borderCollapse: 'collapse', marginBottom: '12px' }}>
           <thead>
             <tr style={{ borderBottom: '1px dashed #000' }}>
-              <th style={{ textAlign: 'left', padding: '4px 0' }}>Cant</th>
-              <th style={{ textAlign: 'left', padding: '4px 0' }}>Desc</th>
-              <th style={{ textAlign: 'right', padding: '4px 0' }}>Total</th>
+              <th className="text-left" style={{ padding: '4px 0' }}>Cant</th>
+              <th className="text-left" style={{ padding: '4px 0' }}>Desc</th>
+              <th className="text-right" style={{ padding: '4px 0' }}>Total</th>
             </tr>
           </thead>
           <tbody>
@@ -43,7 +43,7 @@ export function TicketView({ venta, tenant, onClose }: { venta: any; tenant: any
                 <td style={{ padding: '4px 0' }}>
                   {det.variante?.producto?.nombre}
                 </td>
-                <td style={{ padding: '4px 0', textAlign: 'right', verticalAlign: 'top' }}>
+                <td className="text-right" style={{ padding: '4px 0', verticalAlign: 'top' }}>
                   ${Number(det.subtotal).toFixed(2)}
                 </td>
               </tr>
@@ -51,19 +51,19 @@ export function TicketView({ venta, tenant, onClose }: { venta: any; tenant: any
           </tbody>
         </table>
 
-        <div style={{ borderTop: '1px dashed #000', paddingTop: '8px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '16px' }}>
+        <div className="d-flex justify-between font-bold" style={{ borderTop: '1px dashed #000', paddingTop: '8px', marginBottom: '16px', fontSize: '16px' }}>
           <span>TOTAL:</span>
           <span>${Number(venta.total).toFixed(2)}</span>
         </div>
 
         {venta.cae && (
-          <div style={{ borderTop: '1px dashed #000', paddingTop: '12px', marginTop: '12px', textAlign: 'center' }}>
-            <p style={{ margin: '0 0 4px 0', fontSize: '11px', fontWeight: 'bold' }}>Comprobante Autorizado por AFIP</p>
+          <div className="text-center" style={{ borderTop: '1px dashed #000', paddingTop: '12px', marginTop: '12px' }}>
+            <p className="font-bold" style={{ margin: '0 0 4px 0', fontSize: '11px' }}>Comprobante Autorizado por AFIP</p>
             <p style={{ margin: '0 0 2px 0', fontSize: '10px' }}>CAE: {venta.cae}</p>
             <p style={{ margin: '0 0 8px 0', fontSize: '10px' }}>
               Vto CAE: {venta.vto_cae ? new Date(venta.vto_cae).toLocaleDateString('es-AR') : ''}
             </p>
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
+            <div className="d-flex justify-center" style={{ marginTop: '8px' }}>
               {(() => {
                 try {
                   const qrData = {
@@ -92,13 +92,13 @@ export function TicketView({ venta, tenant, onClose }: { venta: any; tenant: any
           </div>
         )}
 
-        <div style={{ textAlign: 'center', fontSize: '11px', marginTop: '24px' }}>
+        <div className="text-center" style={{ fontSize: '11px', marginTop: '24px' }}>
           <p style={{ margin: '0 0 4px 0' }}>¡Gracias por su compra!</p>
-          <p style={{ margin: '0' }}>Powered by NovarDesk ERP</p>
+          <p className="m-0">Powered by NovarDesk ERP</p>
         </div>
       </div>
 
-      <div className="ticket-actions no-print" style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '12px' }}>
+      <div className="ticket-actions no-print absolute d-flex gap-md"   style={{ bottom: '20px', left: '50%', transform: 'translateX(-50%)' }}>
         <button onClick={() => window.print()} className="btn-primary">Imprimir de nuevo</button>
         <button onClick={onClose} className="btn-secondary">Cerrar</button>
       </div>
