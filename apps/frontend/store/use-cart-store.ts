@@ -43,6 +43,7 @@ export const useCartStore = create<CartState>((set) => ({
   cuenta_contable_id: undefined,
   plan_pago_id: undefined,
   recargo_monto: 0,
+  solicita_factura: false,
 
   addItem: (variant) => set((state) => {
     const existingIndex = state.items.findIndex(item => item.variantId === variant.id);
@@ -165,6 +166,7 @@ export const useCartStore = create<CartState>((set) => ({
     metodo_pago: 'EFECTIVO',
     cuenta_contable_id: undefined,
     plan_pago_id: undefined,
-    recargo_monto: 0
+    recargo_monto: 0,
+    solicita_factura: false
   })
 }));
