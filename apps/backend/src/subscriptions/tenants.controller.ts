@@ -44,6 +44,7 @@ export class TenantsController {
       fin_prueba: tenant.fin_prueba,
       fecha_proximo_cobro: tenant.fecha_proximo_cobro,
       dias_restantes,
+      afip_facturacion_automatica: tenant.afip_facturacion_automatica,
     };
   }
 
@@ -86,7 +87,12 @@ export class TenantsController {
         id: tenant.id,
         razon_social: tenant.razon_social,
         cuit: tenant.cuit,
+        domicilio_fiscal: tenant.domicilio_fiscal,
+        condicion_iva: tenant.condicion_iva,
+        afip_punto_venta: tenant.afip_punto_venta,
+        afip_crt: tenant.afip_crt,
         estado_plan: tenant.estado_plan,
+        afip_facturacion_automatica: tenant.afip_facturacion_automatica,
       },
     };
   }

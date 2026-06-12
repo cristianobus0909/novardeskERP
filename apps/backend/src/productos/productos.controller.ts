@@ -19,8 +19,13 @@ export class ProductosController {
 
   @Get()
   @Permissions('productos:read')
-  findAll(): Promise<any> {
-    return this.productosService.findAll();
+  async findAll(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string
+  ): Promise<any> {
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const limitNum = limit ? parseInt(limit, 10) : 50;
+    return this.productosService.findAll(pageNum, limitNum);
   }
 
   // Nota de Arquitectura: Ubicar esta ruta estática antes de '/:id' para evitar conflictos de ruteo

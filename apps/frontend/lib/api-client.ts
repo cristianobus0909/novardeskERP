@@ -24,6 +24,11 @@ export async function apiRequest<T = any>(path: string, options: RequestInit = {
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
+    // Si el servidor devuelve 401, la sesión expiró → limpiar y forzar re-login
+    if (response.status === 401) {
+      useAuthStore.getState().logout();
+      throw new Error('Sesión expirada. Por favor iniciá sesión nuevamente.');
+    }
     throw new Error(errorData.message || 'Ocurrió un error en el servidor');
   }
 

@@ -1,36 +1,48 @@
 import { create } from 'zustand';
+import { toast } from './use-toast-store';
 
 export interface CartItem {
   variantId: number;
   sku: string;
-  nombre: string; // Nombre del producto padre + atributos descriptivos
+  nombre: string; 
   precio_unitario: number;
   cantidad: number;
   subtotal: number;
   stock_actual: number;
   es_servicio: boolean;
+  producto_id?: number;
+  categoria?: string;
 }
 
 interface CartState {
   items: CartItem[];
+  cliente_id?: number;
   id_cliente: string;
   nombre_cliente: string;
   metodo_pago: string;
+  cuenta_contable_id?: number;
+  plan_pago_id?: number;
+  recargo_monto: number;
+  solicita_factura: boolean;
   
   addItem: (variant: any) => void;
   removeItem: (variantId: number) => void;
   updateQuantity: (variantId: number, cantidad: number) => void;
   updatePrice: (variantId: number, precio: number) => void;
-  setCliente: (id_cliente: string, nombre_cliente: string) => void;
-  setMetodoPago: (metodo_pago: string) => void;
+  setCliente: (cliente_id: number | undefined, id_cliente: string, nombre_cliente: string) => void;
+  setMetodoPago: (metodo_pago: string, cuentaId?: number, planId?: number, recargo?: number) => void;
   clearCart: () => void;
 }
 
 export const useCartStore = create<CartState>((set) => ({
   items: [],
+  cliente_id: undefined,
   id_cliente: '',
   nombre_cliente: 'Consumidor Final',
   metodo_pago: 'EFECTIVO',
+  cuenta_contable_id: undefined,
+  plan_pago_id: undefined,
+  recargo_monto: 0,
 
   addItem: (variant) => set((state) => {
     const existingIndex = state.items.findIndex(item => item.variantId === variant.id);
@@ -38,7 +50,6 @@ export const useCartStore = create<CartState>((set) => ({
     const itemStock = typeof variant.stock_actual === 'string' ? parseFloat(variant.stock_actual) : variant.stock_actual;
     const esServicio = variant.producto?.es_servicio ?? false;
 
-    // Crear descripción legible (ej: "Jean Levi's 511 (Talle: 32, Color: Azul)")
     const attrs = variant.atributos_extra ? Object.entries(variant.atributos_extra)
       .map(([k, v]) => `${k}: ${v}`)
       .join(', ') : '';
@@ -49,9 +60,8 @@ export const useCartStore = create<CartState>((set) => ({
       if (!existingItem) return state;
       const nuevaCantidad = existingItem.cantidad + 1;
 
-      // Validar stock si no es servicio
       if (!esServicio && nuevaCantidad > itemStock) {
-        alert(`No hay stock suficiente. Máximo disponible: ${itemStock}`);
+        toast.error(`No hay stock suficiente. Máximo disponible: ${itemStock}`);
         return state;
       }
 
@@ -62,12 +72,12 @@ export const useCartStore = create<CartState>((set) => ({
         subtotal: nuevaCantidad * existingItem.precio_unitario,
       };
 
+      toast.success('Producto agregado al carrito');
       return { items: updatedItems };
     }
 
-    // Validar stock para el primer item si no es servicio
     if (!esServicio && itemStock < 1) {
-      alert(`No hay stock disponible para este artículo.`);
+      toast.error(`No hay stock disponible para este artículo.`);
       return state;
     }
 
@@ -80,8 +90,11 @@ export const useCartStore = create<CartState>((set) => ({
       subtotal: itemPrecio,
       stock_actual: itemStock,
       es_servicio: esServicio,
+      producto_id: variant.producto?.id,
+      categoria: variant.producto?.categoria?.nombre
     };
 
+    toast.success('Producto agregado al carrito');
     return { items: [...state.items, newItem] };
   }),
 
@@ -97,9 +110,8 @@ export const useCartStore = create<CartState>((set) => ({
       return { items: state.items.filter(i => i.variantId !== variantId) };
     }
 
-    // Validar stock si no es servicio
     if (!item.es_servicio && cantidad > item.stock_actual) {
-      alert(`Cantidad excede el stock disponible (${item.stock_actual})`);
+      toast.error(`Cantidad excede el stock disponible (${item.stock_actual})`);
       return state;
     }
 
@@ -132,17 +144,27 @@ export const useCartStore = create<CartState>((set) => ({
     return { items: updatedItems };
   }),
 
-  setCliente: (id_cliente, nombre_cliente) => set({ 
+  setCliente: (cliente_id, id_cliente, nombre_cliente) => set({ 
+    cliente_id,
     id_cliente, 
     nombre_cliente: nombre_cliente.trim() || 'Consumidor Final' 
   }),
 
-  setMetodoPago: (metodo_pago) => set({ metodo_pago }),
+  setMetodoPago: (metodo_pago, cuentaId, planId, recargo) => set({ 
+    metodo_pago,
+    cuenta_contable_id: cuentaId,
+    plan_pago_id: planId,
+    recargo_monto: recargo || 0
+  }),
 
   clearCart: () => set({
     items: [],
+    cliente_id: undefined,
     id_cliente: '',
     nombre_cliente: 'Consumidor Final',
-    metodo_pago: 'EFECTIVO'
+    metodo_pago: 'EFECTIVO',
+    cuenta_contable_id: undefined,
+    plan_pago_id: undefined,
+    recargo_monto: 0
   })
 }));

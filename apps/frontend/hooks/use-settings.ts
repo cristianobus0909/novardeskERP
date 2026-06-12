@@ -35,7 +35,15 @@ export function useCreateEmployee() {
 
 export function useUpdateTenantProfile() {
   return useMutation({
-    mutationFn: (data: { razon_social?: string; cuit?: string }) =>
+    mutationFn: (data: { 
+      razon_social?: string; 
+      cuit?: string; 
+      domicilio_fiscal?: string;
+      condicion_iva?: string;
+      afip_crt?: string;
+      afip_key?: string;
+      afip_punto_venta?: number;
+    }) =>
       apiRequest('/tenants/profile', {
         method: 'PATCH',
         body: JSON.stringify(data),

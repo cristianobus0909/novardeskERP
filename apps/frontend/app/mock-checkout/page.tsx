@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { toast } from '../../store/use-toast-store';
 
 function MockCheckoutContent() {
   const router = useRouter();
@@ -56,10 +57,10 @@ function MockCheckoutContent() {
         throw new Error('Error al enviar webhook simulado');
       }
 
-      alert(`Webhook enviado exitosamente (Simulación: ${status}).`);
+      toast.success(`Webhook enviado exitosamente (Simulación: ${status}).`);
       router.push('/');
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }

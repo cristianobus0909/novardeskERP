@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 // Inyectar compatibilidad automática con variables de Railway
 console.log('========== INICIANDO DIAGNOSTICO DE ENTORNO RAILWAY ==========');
@@ -10,6 +11,7 @@ console.log('==============================================================');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.useGlobalFilters(new AllExceptionsFilter());
   app.enableCors({
     origin: process.env.CORS_ORIGIN || process.env.FRONTEND_URL || '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',

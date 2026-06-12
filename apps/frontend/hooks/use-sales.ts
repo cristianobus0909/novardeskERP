@@ -54,10 +54,20 @@ export interface CreateVentaPayload {
   }>;
 }
 
-export function useSales() {
-  return useQuery<Venta[]>({
-    queryKey: ['sales'],
-    queryFn: () => apiRequest<Venta[]>('/ventas'),
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
+export function useSales(page: number = 1, limit: number = 50) {
+  return useQuery<PaginatedResponse<Venta>>({
+    queryKey: ['sales', page, limit],
+    queryFn: () => apiRequest<PaginatedResponse<Venta>>(`/ventas?page=${page}&limit=${limit}`),
   });
 }
 

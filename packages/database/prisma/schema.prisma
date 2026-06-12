@@ -11,17 +11,35 @@ model Tenant {
   id                  Int       @id @default(autoincrement())
   razon_social        String
   cuit                String?
+  domicilio_fiscal    String?
+  condicion_iva       String?
+  logo_url            String?    @db.Text
+  afip_crt            String?    @db.Text
+  afip_key            String?    @db.Text
+  afip_punto_venta    Int?
+  afip_facturacion_automatica Boolean @default(false)
   estado_plan         EstadoPlan @default(TRIAL)
   mp_suscripcion_id   String?    
+  mp_access_token     String?    @db.Text
+  mp_caja_id          String?
   fin_prueba          DateTime?
   fecha_proximo_cobro DateTime?
   creado_el           DateTime   @default(now())
 
-  usuarios  User[]
-  roles     Role[]
-  productos Producto[]
-  ventas    Venta[]
-  variantes ProductoVariante[]
+  usuarios         User[]
+  roles            Role[]
+  productos        Producto[]
+  ventas           Venta[]
+  variantes        ProductoVariante[]
+  caja_turnos      CajaTurno[]
+  caja_movimientos    CajaMovimiento[]
+  clientes            Cliente[]
+  cupones             CuponDescuento[]
+  promociones         Promocion[]
+  cuentas_contables   CuentaContable[]
+  cuentas_corrientes  CuentaCorriente[]
+  proveedores         Proveedor[]
+  gastos              Gasto[]
 
   @@map("tenants")
 }
@@ -76,9 +94,12 @@ model User {
   nombre    String
   activo    Boolean  @default(true)
 
-  tenant    Tenant   @relation(fields: [tenant_id], references: [id])
-  role      Role     @relation(fields: [role_id], references: [id])
-  ventas    Venta[]  
+  tenant      Tenant      @relation(fields: [tenant_id], references: [id])
+  role        Role        @relation(fields: [role_id], references: [id])
+  ventas      Venta[]  
+  caja_turnos CajaTurno[]
+  
+  pin_autorizacion String? // PIN para autorizar descuentos/devoluciones
 
   @@unique([tenant_id, email])
   @@map("usuarios")
@@ -123,20 +144,116 @@ model Venta {
   user_id          Int      
   id_cliente       String?  
   nombre_cliente   String?  @default("Consumidor Final")
+  
+  subtotal         Decimal  @default(0) @db.Decimal(10, 2)
+  descuento_monto  Decimal  @default(0) @db.Decimal(10, 2)
+  descuento_motivo String?
+  recargo_monto    Decimal  @default(0) @db.Decimal(10, 2)
+  recargo_motivo   String?
   total            Decimal  @db.Decimal(10, 2)
-  metodo_pago      String   
+  
+  metodo_pago      String?  // Deprecado, usar VentaPago
+  
   fecha_venta      DateTime @default(now())
   estado_arca      EstadoARCA @default(NO_FISCAL)
   cae              String?
   vto_cae          DateTime?
   tipo_comprobante String?    
+  nro_factura      Int?
   arca_error       String?    @db.Text
 
+  cliente_id       Int?
+  caja_turno_id    Int?     // Opcional por compatibilidad con ventas pasadas
+  cupon_id         Int?
+  promocion_id     Int?
+  
   tenant           Tenant         @relation(fields: [tenant_id], references: [id])
   usuario          User           @relation(fields: [user_id], references: [id])
+  caja_turno       CajaTurno?     @relation(fields: [caja_turno_id], references: [id])
+  cliente          Cliente?       @relation(fields: [cliente_id], references: [id])
+  cupon            CuponDescuento? @relation(fields: [cupon_id], references: [id])
+  promocion        Promocion?     @relation(fields: [promocion_id], references: [id])
   detalles         VentaDetalle[]
+  pagos                           VentaPago[]
+  movimientos_cuenta_corriente    MovimientoCuentaCorriente[]
 
   @@map("ventas")
+}
+
+model Cliente {
+  id               Int      @id @default(autoincrement())
+  tenant_id        Int
+  tipo_documento   String?  @default("DNI")
+  cuit_dni         String
+  razon_social     String
+  email            String?
+  telefono         String?
+  direccion        String?
+  condicion_iva    String?  @default("Consumidor Final")
+  creado_el        DateTime @default(now())
+  
+  tenant           Tenant           @relation(fields: [tenant_id], references: [id])
+  ventas           Venta[]
+  cuenta_corriente CuentaCorriente?
+
+  @@unique([tenant_id, cuit_dni])
+  @@map("clientes")
+}
+
+model CajaTurno {
+  id               Int      @id @default(autoincrement())
+  tenant_id        Int
+  user_id          Int
+  fecha_apertura   DateTime @default(now())
+  fecha_cierre     DateTime?
+  estado           EstadoCaja @default(ABIERTA)
+  
+  // Monto inicial
+  monto_apertura   Decimal  @db.Decimal(10, 2)
+
+  // Declaraciones al cierre
+  declarado_caja           Decimal? @db.Decimal(10, 2) // Efectivo que queda en la gaveta
+  declarado_extraccion     Decimal? @db.Decimal(10, 2) // Efectivo enviado a administración
+  declarado_tarjeta_debito Decimal? @db.Decimal(10, 2)
+  declarado_tarjeta_credito Decimal? @db.Decimal(10, 2)
+  declarado_transferencia  Decimal? @db.Decimal(10, 2)
+  declarado_mercadopago    Decimal? @db.Decimal(10, 2)
+
+  notas_cierre     String?  @db.Text
+
+  tenant           Tenant           @relation(fields: [tenant_id], references: [id])
+  usuario          User             @relation(fields: [user_id], references: [id])
+  ventas           Venta[]
+  movimientos      CajaMovimiento[]
+  gastos           Gasto[]
+
+  @@map("caja_turnos")
+}
+
+enum EstadoCaja {
+  ABIERTA
+  CERRADA
+}
+
+model CajaMovimiento {
+  id               Int      @id @default(autoincrement())
+  tenant_id        Int
+  caja_turno_id    Int
+  tipo             TipoMovimientoCaja
+  metodo_pago      String
+  monto            Decimal  @db.Decimal(10, 2)
+  concepto         String
+  fecha            DateTime @default(now())
+
+  tenant           Tenant     @relation(fields: [tenant_id], references: [id])
+  caja_turno       CajaTurno  @relation(fields: [caja_turno_id], references: [id])
+
+  @@map("caja_movimientos")
+}
+
+enum TipoMovimientoCaja {
+  INGRESO
+  EGRESO
 }
 
 enum EstadoARCA {
@@ -158,4 +275,169 @@ model VentaDetalle {
   variante         ProductoVariante @relation(fields: [variante_id], references: [id])
 
   @@map("venta_detalles")
+}
+
+model VentaPago {
+  id                 Int      @id @default(autoincrement())
+  venta_id           Int
+  metodo_pago        String
+  monto              Decimal  @db.Decimal(10, 2)
+  cuenta_contable_id Int?
+  plan_pago_id       Int?
+
+  venta           Venta           @relation(fields: [venta_id], references: [id], onDelete: Cascade)
+  cuenta_contable CuentaContable? @relation(fields: [cuenta_contable_id], references: [id])
+  plan_pago       PlanPago?       @relation(fields: [plan_pago_id], references: [id])
+
+  @@map("venta_pagos")
+}
+
+model CuponDescuento {
+  id                   Int      @id @default(autoincrement())
+  tenant_id            Int
+  codigo               String
+  porcentaje_descuento Decimal? @db.Decimal(5, 2)
+  monto_fijo           Decimal? @db.Decimal(10, 2)
+  fecha_vto            DateTime?
+  usos_restantes       Int?
+  activo               Boolean  @default(true)
+  creado_el            DateTime @default(now())
+
+  tenant               Tenant   @relation(fields: [tenant_id], references: [id])
+  ventas               Venta[]
+
+  @@unique([tenant_id, codigo])
+  @@map("cupones_descuento")
+}
+
+enum TipoReglaPromocion {
+  GLOBAL
+  CATEGORIA
+  PRODUCTO
+}
+
+model Promocion {
+  id                   Int      @id @default(autoincrement())
+  tenant_id            Int
+  nombre               String
+  descripcion          String?
+  tipo_regla           TipoReglaPromocion @default(GLOBAL)
+  valor_regla          String?            // Guarda el nombre de Categoria o el ID de producto
+  cantidad_minima      Int?               // e.g. Lleva 3 (3x2 o 3 con 20% desc)
+  descuento_porcentaje Decimal? @db.Decimal(5, 2)
+  descuento_monto      Decimal? @db.Decimal(10, 2)
+  activa               Boolean  @default(true)
+  fecha_inicio         DateTime?
+  fecha_fin            DateTime?
+  creado_el            DateTime @default(now())
+
+  tenant               Tenant   @relation(fields: [tenant_id], references: [id])
+  ventas               Venta[]
+  
+  @@map("promociones")
+}
+
+model CuentaContable {
+  id          Int      @id @default(autoincrement())
+  tenant_id   Int
+  nombre      String   
+  tipo        TipoCuentaContable 
+  activa      Boolean  @default(true)
+  creado_el   DateTime @default(now())
+
+  tenant      Tenant      @relation(fields: [tenant_id], references: [id])
+  planes_pago PlanPago[]
+  pagos       VentaPago[]
+
+  @@map("cuentas_contables")
+}
+
+enum TipoCuentaContable {
+  EFECTIVO
+  BANCARIA
+  TARJETA_CREDITO
+  TARJETA_DEBITO
+  BILLETERA_VIRTUAL
+  CUENTA_CORRIENTE
+  MERCADO_PAGO
+}
+
+model PlanPago {
+  id                  Int      @id @default(autoincrement())
+  cuenta_contable_id  Int
+  nombre              String   
+  cuotas              Int      @default(1)
+  recargo_porcentaje  Decimal  @default(0) @db.Decimal(5, 2)
+  comision_porcentaje Decimal  @default(0) @db.Decimal(5, 2)
+  activo              Boolean  @default(true)
+
+  cuenta_contable     CuentaContable @relation(fields: [cuenta_contable_id], references: [id])
+  pagos               VentaPago[]
+
+  @@map("planes_pago")
+}
+
+model Proveedor {
+  id             Int      @id @default(autoincrement())
+  tenant_id      Int
+  razon_social   String
+  cuit           String?
+  condicion_iva  String?
+  contacto       String?
+  email          String?
+  creado_el      DateTime @default(now())
+
+  tenant         Tenant   @relation(fields: [tenant_id], references: [id])
+  gastos         Gasto[]
+
+  @@map("proveedores")
+}
+
+model Gasto {
+  id             Int      @id @default(autoincrement())
+  tenant_id      Int
+  descripcion    String
+  monto          Decimal  @db.Decimal(10, 2)
+  fecha          DateTime
+  categoria      String
+  proveedor_id   Int?
+  caja_turno_id  Int?
+  creado_el      DateTime @default(now())
+
+  tenant         Tenant     @relation(fields: [tenant_id], references: [id])
+  proveedor      Proveedor? @relation(fields: [proveedor_id], references: [id])
+  caja_turno     CajaTurno? @relation(fields: [caja_turno_id], references: [id])
+
+  @@map("gastos")
+}
+
+model CuentaCorriente {
+  id              Int      @id @default(autoincrement())
+  cliente_id      Int      @unique
+  tenant_id       Int
+  limite_credito  Decimal  @db.Decimal(10, 2)
+  saldo_actual    Decimal  @default(0) @db.Decimal(10, 2)
+  activa          Boolean  @default(true)
+  creado_el       DateTime @default(now())
+
+  tenant          Tenant   @relation(fields: [tenant_id], references: [id])
+  cliente         Cliente  @relation(fields: [cliente_id], references: [id])
+  movimientos     MovimientoCuentaCorriente[]
+
+  @@map("cuentas_corrientes")
+}
+
+model MovimientoCuentaCorriente {
+  id                   Int      @id @default(autoincrement())
+  cuenta_corriente_id  Int
+  tipo_movimiento      String   // "CARGO" (venta), "ABONO" (pago)
+  monto                Decimal  @db.Decimal(10, 2)
+  concepto             String?  
+  venta_id             Int?     
+  fecha_movimiento     DateTime @default(now())
+
+  cuenta_corriente CuentaCorriente @relation(fields: [cuenta_corriente_id], references: [id])
+  venta            Venta?          @relation(fields: [venta_id], references: [id])
+
+  @@map("movimientos_cuenta_corriente")
 }

@@ -23,11 +23,21 @@ export interface Producto {
   variantes: ProductoVariante[];
 }
 
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
 // Hook para listar productos del tenant activo
-export function useProducts() {
-  return useQuery<Producto[]>({
-    queryKey: ['products'],
-    queryFn: () => apiRequest<Producto[]>('/productos'),
+export function useProducts(page: number = 1, limit: number = 50) {
+  return useQuery<PaginatedResponse<Producto>>({
+    queryKey: ['products', page, limit],
+    queryFn: () => apiRequest<PaginatedResponse<Producto>>(`/productos?page=${page}&limit=${limit}`),
   });
 }
 

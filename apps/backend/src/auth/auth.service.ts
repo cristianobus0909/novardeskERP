@@ -127,4 +127,38 @@ export class AuthService {
       },
     };
   }
+
+  async setPin(userId: number, pin: string) {
+    // Solo puede haber pines de 4 a 6 dígitos
+    if (!pin || pin.length < 4 || pin.length > 6) {
+      throw new ConflictException('El PIN debe tener entre 4 y 6 caracteres');
+    }
+    const hash = await bcrypt.hash(pin, 10);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { pin_autorizacion: hash },
+    });
+    return { message: 'PIN actualizado correctamente' };
+  }
+
+  async autorizarPin(tenantId: number, pin: string) {
+    const adminRole = await this.prisma.role.findFirst({
+      where: { tenant_id: tenantId, nombre: 'Administrador' },
+    });
+    if (!adminRole) throw new UnauthorizedException('No se encontró rol administrador');
+
+    // Buscar al usuario administrador del tenant
+    const admin = await this.prisma.user.findFirst({
+      where: { tenant_id: tenantId, role_id: adminRole.id },
+    });
+
+    if (!admin || !admin.pin_autorizacion) {
+      throw new UnauthorizedException('El administrador no tiene configurado un PIN de autorización. Configúrelo primero.');
+    }
+
+    const match = await bcrypt.compare(pin, admin.pin_autorizacion);
+    if (!match) throw new UnauthorizedException('PIN incorrecto');
+
+    return { message: 'Acción autorizada', valid: true };
+  }
 }

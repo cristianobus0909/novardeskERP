@@ -11,6 +11,13 @@ import { ProductosModule } from './productos/productos.module';
 import { VentasModule } from './ventas/ventas.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { UsersModule } from './users/users.module';
+import { CajaModule } from './caja/caja.module';
+import { ClientesModule } from './clientes/clientes.module';
+import { PromocionesModule } from './promociones/promociones.module';
+import { MercadoPagoModule } from './mercadopago/mp.module';
+import { FinanzasModule } from './finanzas/finanzas.module';
+import { ProveedoresModule } from './proveedores/proveedores.module';
+import { GastosModule } from './gastos/gastos.module';
 
 @Module({
   imports: [
@@ -25,6 +32,13 @@ import { UsersModule } from './users/users.module';
     VentasModule,
     SubscriptionsModule,
     UsersModule,
+    CajaModule,
+    ClientesModule,
+    PromocionesModule,
+    MercadoPagoModule,
+    FinanzasModule,
+    ProveedoresModule,
+    GastosModule,
   ],
   controllers: [AppController],
   providers: [

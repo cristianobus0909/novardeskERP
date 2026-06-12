@@ -26,6 +26,12 @@ export class PermissionsGuard implements CanActivate {
       return false;
     }
 
+    // Bypass de seguridad para el Administrador (dueño del comercio)
+    // Garantiza acceso total aunque la base de datos esté desincronizada con los nuevos permisos
+    if (user.role === 'Administrador') {
+      return true;
+    }
+
     // Consultamos los permisos asociados al rol del usuario en la base de datos.
     // Al ejecutarse después del Interceptor de Tenant, la consulta de roles
     // se filtra automáticamente por el tenant_id del usuario, garantizando aislamiento.

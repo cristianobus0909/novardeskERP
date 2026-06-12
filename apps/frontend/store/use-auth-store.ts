@@ -12,11 +12,15 @@ export interface Tenant {
   id: number;
   razon_social: string;
   cuit?: string | null;
+  logo_url?: string | null;
   estado_plan: string;
   mp_suscripcion_id?: string | null;
   fin_prueba?: string | null;
   fecha_proximo_cobro?: string | null;
   creado_el?: string | null;
+  afip_punto_venta?: number | null;
+  afip_crt?: string | null;
+  afip_facturacion_automatica?: boolean | null;
 }
 
 interface AuthState {

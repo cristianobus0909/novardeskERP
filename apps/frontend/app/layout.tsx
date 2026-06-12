@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "Sistema de gestión ERP SaaS Multi-tenant",
 };
 
+import { Toaster } from "../components/ui/toaster";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -26,6 +28,7 @@ export default function RootLayout({
     <html lang="es">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <Providers>{children}</Providers>
+        <Toaster />
       </body>
     </html>
   );

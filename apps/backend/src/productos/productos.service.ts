@@ -63,16 +63,34 @@ export class ProductosService {
     });
   }
 
-  async findAll(): Promise<any> {
-    // PrismaService filtra de forma implícita por el tenant_id actual del contexto
-    return this.prisma.producto.findMany({
-      include: {
-        variantes: true,
-      },
-      orderBy: {
-        id: 'desc',
-      },
-    });
+  async findAll(page: number = 1, limit: number = 50): Promise<any> {
+    const skip = (page - 1) * limit;
+    
+    const [total, data] = await Promise.all([
+      this.prisma.producto.count(),
+      this.prisma.producto.findMany({
+        skip,
+        take: limit,
+        include: {
+          variantes: true,
+        },
+        orderBy: {
+          id: 'desc',
+        },
+      })
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages
+      }
+    };
   }
 
   async findOne(id: number): Promise<any> {
