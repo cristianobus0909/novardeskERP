@@ -18,6 +18,7 @@ import { MercadoPagoModule } from './mercadopago/mp.module';
 import { FinanzasModule } from './finanzas/finanzas.module';
 import { ProveedoresModule } from './proveedores/proveedores.module';
 import { GastosModule } from './gastos/gastos.module';
+import { ImportModule } from './import/import.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { GastosModule } from './gastos/gastos.module';
     FinanzasModule,
     ProveedoresModule,
     GastosModule,
+    ImportModule,
   ],
   controllers: [AppController],
   providers: [

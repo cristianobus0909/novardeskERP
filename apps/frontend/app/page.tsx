@@ -23,6 +23,8 @@ import { ClienteSelector } from '../components/pos/cliente-selector';
 import { useProducts, useCreateProduct } from '../hooks/use-products';
 import { useEstadoCaja } from '../hooks/use-caja';
 import { AbrirCajaModal, CerrarCajaModal } from '../components/pos/caja-modal';
+
+import { ImportCenterView } from '../components/import/import-center-view';
 import { TicketView } from '../components/pos/ticket-view';
 import { PosSimpleView } from '../components/pos/pos-simple-view';
 import { useCartStore } from '../store/use-cart-store';
@@ -92,7 +94,7 @@ export default function Home() {
 
   const { data: cuentaCorriente } = useCuentaCorriente(cliente_id || null);
 
-  type TabType = 'dashboard' | 'catalog' | 'pos' | 'sales' | 'clientes' | 'promociones' | 'settings' | 'finances' | 'subscription';
+  type TabType = 'dashboard' | 'catalog' | 'pos' | 'sales' | 'clientes' | 'promociones' | 'settings' | 'finances' | 'subscription' | 'import-center';
   type FinanzasTab = 'cuentas' | 'movimientos' | 'gastos' | 'proveedores' | 'cierre' | 'historial-caja';
   // Estado de la pestaña activa en la barra lateral
   const [activeTab, setActiveTab] = useState<TabType>('pos');
@@ -1111,6 +1113,13 @@ export default function Home() {
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                   <span>Configuración</span>
                 </li>
+                <li 
+                  className={`nav-item d-flex align-center gap-md ${activeTab === 'import-center' ? 'active' : ''}`} style={{ cursor: 'pointer' }}
+                  onClick={() => React.startTransition(() => setActiveTab('import-center'))}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  <span>Importar Datos</span>
+                </li>
               </>
             )}
           </ul>
@@ -1182,6 +1191,7 @@ export default function Home() {
             <h1 className="font-bold" style={{ fontSize: '26px' }}>
               {activeTab === 'dashboard' && 'Dashboard Gerencial'}
               {activeTab === 'catalog' && 'Inventario de Comercio'}
+              {activeTab === 'import-center' && 'Centro de Importación'}
               {activeTab === 'pos' && 'Punto de Venta (POS)'}
               {activeTab === 'sales' && 'Historial de Transacciones'}
               {activeTab === 'clientes' && 'Gestión de Clientes'}
@@ -1197,6 +1207,7 @@ export default function Home() {
               {activeTab === 'promociones' && 'Crea reglas automáticas de descuento para el Punto de Venta.'}
               {activeTab === 'finances' && 'Administra tus cuentas, gastos y balances financieros.'}
               {activeTab === 'settings' && 'Administra la información de tu empresa y cuentas de empleados.'}
+              {activeTab === 'import-center' && 'Importa masivamente clientes y productos desde planillas de cálculo.'}
             </p>
           </div>
           
@@ -1577,6 +1588,7 @@ export default function Home() {
           </>
         )}
         {activeTab === 'settings' && <SettingsView />}
+        {activeTab === 'import-center' && <ImportCenterView />}
 
         {/* --- VISTA POS --- */}
         {activeTab === 'pos' && (
