@@ -75,17 +75,17 @@ export function PromocionesView() {
 
   return (
     <div className="promociones-view">
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '24px' }}>
-        <h2 style={{ fontSize: '20px', fontWeight: 'bold' }}>Gestión de Promociones</h2>
+      <div className="d-flex justify-between" style={{ marginBottom: '24px' }}>
+        <h2 className="font-bold" style={{ fontSize: '20px' }}>Gestión de Promociones</h2>
         <button className="btn-primary" style={{ width: 'auto' }} onClick={() => setIsCreating(!isCreating)}>
           {isCreating ? 'Cancelar' : '+ Nueva Promoción'}
         </button>
       </div>
 
       {isCreating && (
-        <form onSubmit={handleSubmit} style={{ background: 'var(--bg-secondary)', padding: '24px', borderRadius: '8px', border: '1px solid var(--border-color)', marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <form onSubmit={handleSubmit} className="p-lg d-flex flex-col gap-lg" style={{ background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', marginBottom: '24px' }}>
           <h3>Crear Regla de Promoción</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div className="gap-lg" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
             <div className="form-group">
               <label className="form-label">Nombre de la Promoción</label>
               <input type="text" className="form-input" required value={formData.nombre} onChange={e => setFormData({...formData, nombre: e.target.value})} placeholder="Ej: Black Friday, 3x2 en Remeras" />
@@ -135,12 +135,12 @@ export function PromocionesView() {
       )}
 
       {isLoading ? <p>Cargando promociones...</p> : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div className="d-flex flex-col gap-lg">
           {promociones?.length === 0 && <p style={{ color: 'var(--text-muted)' }}>No hay promociones configuradas.</p>}
           {promociones?.map((promo: any) => (
-            <div key={promo.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', opacity: promo.activa ? 1 : 0.6 }}>
+            <div key={promo.id} className="d-flex justify-between align-center p-md" style={{ background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px solid var(--border-color)', opacity: promo.activa ? 1 : 0.6 }}>
               <div>
-                <h4 style={{ fontWeight: 'bold', fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h4 className="font-bold d-flex align-center gap-sm" style={{ fontSize: '16px' }}>
                   {promo.nombre}
                   <span style={{ fontSize: '11px', padding: '2px 8px', borderRadius: '12px', background: promo.activa ? 'hsl(var(--success))' : 'var(--border-color)', color: promo.activa ? 'black' : 'var(--text-secondary)' }}>
                     {promo.activa ? 'ACTIVA' : 'INACTIVA'}
@@ -153,7 +153,7 @@ export function PromocionesView() {
                 </p>
                 {promo.descripcion && <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Nota: {promo.descripcion}</p>}
               </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div className="d-flex gap-sm">
                 <button onClick={() => handleToggle(promo.id)} className="btn-secondary" style={{ padding: '6px 12px', width: 'auto' }}>
                   {promo.activa ? 'Desactivar' : 'Activar'}
                 </button>

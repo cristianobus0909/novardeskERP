@@ -97,12 +97,12 @@ export function SettingsView() {
   };
 
   return (
-    <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div className="p-lg d-flex flex-col gap-xl">
       
       {/* Tarjeta de Datos de Empresa */}
-      <div className="profile-card" style={{ background: 'var(--bg-secondary)', padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'block' }}>
-        <h2 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '16px' }}>Perfil del Comercio</h2>
-        <form onSubmit={handleUpdateTenant} style={{ display: 'grid', gap: '16px', maxWidth: '400px' }}>
+      <div className="profile-card p-lg"   style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'block' }}>
+        <h2 className="font-bold" style={{ fontSize: '18px', marginBottom: '16px' }}>Perfil del Comercio</h2>
+        <form onSubmit={handleUpdateTenant} className="gap-lg" style={{ display: 'grid', maxWidth: '400px' }}>
           <div className="form-group">
             <label className="form-label">Razón Social o Nombre del Negocio</label>
             <input
@@ -137,13 +137,13 @@ export function SettingsView() {
           {/* Logo del comercio */}
           <div className="form-group">
             <label className="form-label">Logo del Comercio (URL de imagen)</label>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: '700', color: 'var(--text-muted)' }}>
+            <div className="d-flex gap-md align-start">
+              <div className="overflow-hidden d-flex align-center justify-center font-bold" style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', flexShrink: 0, fontSize: '20px', color: 'var(--text-muted)' }}>
                 {logoUrl ? (
                   <img
                     src={logoUrl}
                     alt="Logo"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    className="w-full h-full" style={{ objectFit: 'cover' }}
                     onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                   />
                 ) : (
@@ -152,11 +152,10 @@ export function SettingsView() {
               </div>
               <input
                 type="url"
-                className="form-input"
+                className="form-input flex-1"
                 value={logoUrl}
                 onChange={(e) => setLogoUrl(e.target.value)}
                 placeholder="https://ejemplo.com/mi-logo.png"
-                style={{ flex: 1 }}
               />
             </div>
             <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '6px', display: 'block' }}>Pegá la URL directa de tu logo (PNG, JPG o SVG). Aparecerá en el menú lateral y en los tickets impresos.</span>
@@ -174,11 +173,11 @@ export function SettingsView() {
       </div>
 
       {/* Tarjeta de Facturación AFIP */}
-      <div className="profile-card" style={{ background: 'var(--bg-secondary)', padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'block' }}>
-        <h2 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '8px' }}>Facturación Electrónica (AFIP/ARCA)</h2>
+      <div className="profile-card p-lg"   style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'block' }}>
+        <h2 className="font-bold" style={{ fontSize: '18px', marginBottom: '8px' }}>Facturación Electrónica (AFIP/ARCA)</h2>
         <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>Configura tu certificado y punto de venta para emitir facturas oficiales desde la caja.</p>
-        <form onSubmit={handleUpdateTenant} style={{ display: 'grid', gap: '16px', maxWidth: '600px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <form onSubmit={handleUpdateTenant} className="gap-lg" style={{ display: 'grid', maxWidth: '600px' }}>
+          <div className="gap-lg" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
             <div className="form-group">
               <label className="form-label">Condición frente al IVA</label>
               <select className="form-input" value={condicionIva} onChange={(e) => setCondicionIva(e.target.value)}>
@@ -200,12 +199,12 @@ export function SettingsView() {
             </div>
           </div>
           
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+          <div className="d-flex align-center justify-between p-md" style={{ background: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
             <div>
-              <span style={{ fontWeight: '600', fontSize: '14px', display: 'block' }}>Facturación Automática</span>
+              <span className="font-semibold" style={{ fontSize: '14px', display: 'block' }}>Facturación Automática</span>
               <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Emitir comprobante legal automáticamente al cobrar un ticket en la caja.</span>
             </div>
-            <label className="toggle-switch" style={{ margin: 0 }}>
+            <label className="toggle-switch m-0"  >
               <input 
                 type="checkbox" 
                 checked={afipFacturacionAutomatica}
@@ -249,9 +248,9 @@ export function SettingsView() {
       </div>
 
       {/* Tarjeta de Gestión de Empleados */}
-      <div className="profile-card" style={{ background: 'var(--bg-secondary)', padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'block' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: '700' }}>Gestión de Cuentas (Empleados)</h2>
+      <div className="profile-card p-lg"   style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'block' }}>
+        <div className="d-flex justify-between align-center" style={{ marginBottom: '16px' }}>
+          <h2 className="font-bold" style={{ fontSize: '18px' }}>Gestión de Cuentas (Empleados)</h2>
           <button onClick={() => setIsEmployeeModalOpen(true)} className="btn-primary" style={{ width: 'auto', padding: '6px 16px' }}>
             + Nuevo Empleado
           </button>
@@ -270,23 +269,23 @@ export function SettingsView() {
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan={4} style={{ textAlign: 'center', padding: '20px' }}>Cargando empleados...</td>
+                  <td colSpan={4} className="text-center" style={{ padding: '20px' }}>Cargando empleados...</td>
                 </tr>
               ) : employees.length === 0 ? (
                 <tr>
-                  <td colSpan={4} style={{ textAlign: 'center', padding: '20px' }}>No hay empleados registrados.</td>
+                  <td colSpan={4} className="text-center" style={{ padding: '20px' }}>No hay empleados registrados.</td>
                 </tr>
               ) : (
                 employees.map((emp) => (
                   <tr key={emp.id}>
-                    <td style={{ fontWeight: '600' }}>{emp.nombre}</td>
+                    <td className="font-semibold">{emp.nombre}</td>
                     <td>{emp.email}</td>
                     <td><span className="badge-plan" style={{ background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>{emp.role?.nombre}</span></td>
                     <td>
                       {emp.activo ? (
-                        <span style={{ color: 'hsl(var(--success))', fontSize: '13px', fontWeight: '600' }}>Activo</span>
+                        <span className="font-semibold" style={{ color: 'hsl(var(--success))', fontSize: '13px' }}>Activo</span>
                       ) : (
-                        <span style={{ color: 'var(--text-muted)', fontSize: '13px', fontWeight: '600' }}>Inactivo</span>
+                        <span className="font-semibold" style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Inactivo</span>
                       )}
                     </td>
                   </tr>
@@ -298,12 +297,12 @@ export function SettingsView() {
       </div>
 
       {/* Tarjeta de Mercado Pago */}
-      <div className="profile-card" style={{ background: 'var(--bg-secondary)', padding: '24px', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'block' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#009EE3', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold' }}>
+      <div className="profile-card p-lg"   style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'block' }}>
+        <div className="d-flex align-center gap-md" style={{ marginBottom: '16px' }}>
+          <div className="d-flex align-center justify-center font-bold" style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#009EE3', color: 'white' }}>
             MP
           </div>
-          <h2 style={{ fontSize: '18px', fontWeight: '700' }}>Integración Mercado Pago</h2>
+          <h2 className="font-bold" style={{ fontSize: '18px' }}>Integración Mercado Pago</h2>
         </div>
         <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '20px' }}>
           Configura tus credenciales para recibir pagos con Smart POS o Códigos QR directamente en tu cuenta.
@@ -312,7 +311,7 @@ export function SettingsView() {
         {isLoadingMp ? (
           <p>Cargando configuración...</p>
         ) : (
-          <form onSubmit={handleSaveMpConfig} style={{ display: 'grid', gap: '16px', maxWidth: '600px' }}>
+          <form onSubmit={handleSaveMpConfig} className="gap-lg" style={{ display: 'grid', maxWidth: '600px' }}>
             <div className="form-group">
               <label className="form-label">Production Access Token</label>
               <input
@@ -356,7 +355,7 @@ export function SettingsView() {
               <button className="modal-close" onClick={() => setIsEmployeeModalOpen(false)}>&times;</button>
             </div>
             
-            <form onSubmit={handleCreateEmployee} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <form onSubmit={handleCreateEmployee} className="d-flex flex-col gap-lg">
               <div className="form-group">
                 <label className="form-label">Nombre Completo</label>
                 <input
@@ -389,7 +388,7 @@ export function SettingsView() {
                 />
               </div>
 
-              <div style={{ marginTop: '16px', display: 'flex', gap: '12px' }}>
+              <div className="d-flex gap-md" style={{ marginTop: '16px' }}>
                 <button type="submit" className="btn-primary" disabled={createEmployeeMutation.isPending}>
                   {createEmployeeMutation.isPending ? 'Creando...' : 'Crear Cuenta'}
                 </button>

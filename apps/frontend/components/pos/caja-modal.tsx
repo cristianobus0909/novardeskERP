@@ -46,7 +46,7 @@ export function AbrirCajaModal({ onClose }: { onClose?: () => void }) {
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+          <div className="d-flex gap-md" style={{ marginTop: '24px' }}>
             <button
               type="submit"
               className="btn-primary"
@@ -100,7 +100,7 @@ export function CerrarCajaModal({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="modal-overlay">
-      <div className="modal-content" style={{ maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto' }}>
+      <div className="modal-content overflow-y-auto"   style={{ maxWidth: '600px', maxHeight: '90vh' }}>
         <h2>Cierre de Caja (Z)</h2>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>
           Declare los montos físicos y electrónicos contados al finalizar el turno.
@@ -109,7 +109,7 @@ export function CerrarCajaModal({ onClose }: { onClose: () => void }) {
         {sumario && (
           <div style={{ background: 'var(--bg-secondary)', padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '13px' }}>
             <h4 style={{ margin: '0 0 8px 0' }}>Sumario Calculado por Sistema</h4>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <div className="gap-sm" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
               <div>Efectivo: ${sumario.efectivo.toFixed(2)}</div>
               <div>Débito: ${sumario.debito.toFixed(2)}</div>
               <div>Crédito: ${sumario.credito.toFixed(2)}</div>
@@ -119,13 +119,13 @@ export function CerrarCajaModal({ onClose }: { onClose: () => void }) {
         )}
 
         <form onSubmit={handleCerrar}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <div className="form-group" style={{ gridColumn: '1 / -1', background: 'rgba(22, 163, 74, 0.05)', padding: '16px', border: '1px solid hsl(var(--success))', borderRadius: '8px' }}>
+          <div className="gap-lg" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+            <div className="form-group p-md"   style={{ gridColumn: '1 / -1', background: 'rgba(22, 163, 74, 0.05)', border: '1px solid hsl(var(--success))', borderRadius: '8px' }}>
               <label className="form-label" style={{ color: 'hsl(var(--success))', fontSize: '15px' }}>Total Efectivo Contado (Físico) $</label>
               <input type="number" step="0.01" className="form-input" value={efectivoTotal} onChange={(e) => setEfectivoTotal(e.target.value)} required style={{ fontSize: '18px', padding: '12px' }} />
               
               {efectivoTotal && !isNaN(Number(efectivoTotal)) && (
-                <div style={{ display: 'flex', gap: '16px', marginTop: '12px', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                <div className="d-flex gap-lg" style={{ marginTop: '12px', fontSize: '13px', color: 'var(--text-secondary)' }}>
                   <div><strong>Queda en Gaveta:</strong> ${Math.min(Number(efectivoTotal), Number(estadoCaja?.turno?.monto_apertura || 0)).toLocaleString('es-AR', {minimumFractionDigits:2})}</div>
                   <div><strong>A Extraer (Sobre):</strong> ${Math.max(0, Number(efectivoTotal) - Number(estadoCaja?.turno?.monto_apertura || 0)).toLocaleString('es-AR', {minimumFractionDigits:2})}</div>
                 </div>
@@ -151,7 +151,7 @@ export function CerrarCajaModal({ onClose }: { onClose: () => void }) {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', marginTop: '24px', justifyContent: 'flex-end' }}>
+          <div className="d-flex gap-md" style={{ marginTop: '24px', justifyContent: 'flex-end' }}>
             <button type="button" className="btn-secondary" onClick={onClose}>Cancelar</button>
             <button type="submit" className="btn-primary" style={{ background: 'hsl(var(--danger))' }} disabled={cerrarCajaMut.isPending}>
               {cerrarCajaMut.isPending ? 'Cerrando...' : 'Confirmar Cierre Z'}

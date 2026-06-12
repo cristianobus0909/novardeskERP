@@ -30,9 +30,9 @@ export function GastosView() {
 
   return (
     <div style={{ padding: '32px', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px' }}>
+      <div className="d-flex justify-between align-center" style={{ marginBottom: '28px' }}>
         <div>
-          <h1 style={{ fontSize: '22px', fontWeight: '800', marginBottom: '6px' }}>Gastos / Egresos</h1>
+          <h1 className="font-extrabold" style={{ fontSize: '22px', marginBottom: '6px' }}>Gastos / Egresos</h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
             Registrá los gastos operativos del negocio para calcular tu rentabilidad real.
           </p>
@@ -43,32 +43,32 @@ export function GastosView() {
       </div>
 
       {gastos.length === 0 ? (
-        <div style={{ background: 'var(--bg-secondary)', border: '1px dashed var(--border-color)', borderRadius: '12px', padding: '60px', textAlign: 'center' }}>
+        <div className="text-center" style={{ background: 'var(--bg-secondary)', border: '1px dashed var(--border-color)', borderRadius: '12px', padding: '60px' }}>
           <svg style={{ display: 'block', margin: '0 auto 16px', opacity: 0.3 }} xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-          <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '8px' }}>Sin gastos registrados</h3>
+          <h3 className="font-bold" style={{ fontSize: '18px', marginBottom: '8px' }}>Sin gastos registrados</h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '20px' }}>Comenzá registrando tus primeros gastos operativos.</p>
           <button className="btn-primary" style={{ width: 'auto', margin: '0 auto' }} onClick={() => setIsModalOpen(true)}>Registrar Gasto</button>
         </div>
       ) : (
-        <div style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '12px', overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+        <div className="overflow-hidden" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '12px' }}>
+          <table className="w-full" style={{ borderCollapse: 'collapse', fontSize: '14px' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--bg-primary)' }}>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Fecha</th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Descripción</th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Categoría</th>
-                <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: '600', fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Proveedor</th>
-                <th style={{ padding: '12px 16px', textAlign: 'right', fontWeight: '600', fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Monto</th>
+                <th className="text-left font-semibold" style={{ padding: '12px 16px', fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Fecha</th>
+                <th className="text-left font-semibold" style={{ padding: '12px 16px', fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Descripción</th>
+                <th className="text-left font-semibold" style={{ padding: '12px 16px', fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Categoría</th>
+                <th className="text-left font-semibold" style={{ padding: '12px 16px', fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Proveedor</th>
+                <th className="text-right font-semibold" style={{ padding: '12px 16px', fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Monto</th>
               </tr>
             </thead>
             <tbody>
               {gastos.map((g: any, i: number) => (
                 <tr key={i} style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '12px 16px' }}>{g.fecha}</td>
-                  <td style={{ padding: '12px 16px', fontWeight: '600' }}>{g.descripcion}</td>
+                  <td className="font-semibold" style={{ padding: '12px 16px' }}>{g.descripcion}</td>
                   <td style={{ padding: '12px 16px' }}><span style={{ background: 'var(--bg-tertiary)', padding: '2px 8px', borderRadius: '4px', fontSize: '12px' }}>{g.categoria}</span></td>
                   <td style={{ padding: '12px 16px', fontSize: '12px', color: 'var(--text-secondary)' }}>{g.proveedor?.razon_social ?? '—'}</td>
-                  <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: '700', color: 'hsl(var(--danger))' }}>-${Number(g.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
+                  <td className="text-right font-bold" style={{ padding: '12px 16px', color: 'hsl(var(--danger))' }}>-${Number(g.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
                 </tr>
               ))}
             </tbody>
@@ -79,16 +79,16 @@ export function GastosView() {
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
           <div className="modal-content scale-up" style={{ maxWidth: '460px', padding: '28px' }} onClick={e => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: '800', margin: 0 }}>Nuevo Gasto</h2>
+            <div className="d-flex justify-between align-center" style={{ marginBottom: '20px' }}>
+              <h2 className="font-extrabold m-0" style={{ fontSize: '18px' }}>Nuevo Gasto</h2>
               <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: '20px' }}>×</button>
             </div>
-            <form style={{ display: 'flex', flexDirection: 'column', gap: '16px' }} onSubmit={handleSubmit}>
+            <form className="d-flex flex-col gap-lg" onSubmit={handleSubmit}>
               <div className="form-group">
                 <label className="form-label">Descripción</label>
                 <input className="form-input" type="text" placeholder="Ej: Alquiler junio" value={form.descripcion} onChange={e => setForm({...form, descripcion: e.target.value})} required />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="gap-md" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
                 <div className="form-group">
                   <label className="form-label">Monto ($)</label>
                   <input className="form-input" type="number" min="0" step="0.01" placeholder="0.00" value={form.monto} onChange={e => setForm({...form, monto: e.target.value})} required />
@@ -98,7 +98,7 @@ export function GastosView() {
                   <input className="form-input" type="date" value={form.fecha} onChange={e => setForm({...form, fecha: e.target.value})} required />
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div className="gap-md" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
                 <div className="form-group">
                   <label className="form-label">Categoría</label>
                   <select className="form-input" value={form.categoria} onChange={e => setForm({...form, categoria: e.target.value})}>

@@ -33,27 +33,27 @@ export function HistorialCajaView() {
   return (
     <div style={{ padding: '32px', maxWidth: '1200px', margin: '0 auto' }}>
       <div style={{ marginBottom: '28px' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: '800', marginBottom: '6px' }}>Historial de Caja</h1>
+        <h1 className="font-extrabold" style={{ fontSize: '22px', marginBottom: '6px' }}>Historial de Caja</h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
           Todos los turnos de apertura y cierre de caja registrados.
         </p>
       </div>
 
       {isLoading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '60px' }}>
+        <div className="d-flex justify-center" style={{ padding: '60px' }}>
           <div className="spinner" style={{ width: '40px', height: '40px' }}></div>
         </div>
       ) : turnos.length === 0 ? (
-        <div style={{ background: 'var(--bg-secondary)', border: '1px dashed var(--border-color)', borderRadius: '12px', padding: '60px', textAlign: 'center' }}>
+        <div className="text-center" style={{ background: 'var(--bg-secondary)', border: '1px dashed var(--border-color)', borderRadius: '12px', padding: '60px' }}>
           <svg style={{ display: 'block', margin: '0 auto 16px', opacity: 0.3 }} xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path d="M3 14h18a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1z"></path>
             <path d="M5 14v-6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v6"></path>
           </svg>
-          <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '8px' }}>Sin turnos registrados</h3>
+          <h3 className="font-bold" style={{ fontSize: '18px', marginBottom: '8px' }}>Sin turnos registrados</h3>
           <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Los turnos de caja aparecerán aquí una vez que se abra la primera caja.</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div className="d-flex flex-col" style={{ gap: '10px' }}>
           {turnos.map((turno: any) => {
             const isOpen = turno.estado === 'ABIERTA';
             const isExpanded = expanded === turno.id;
@@ -66,49 +66,45 @@ export function HistorialCajaView() {
                 {/* Fila principal — clickeable para expandir */}
                 <div
                   onClick={() => setExpanded(isExpanded ? null : turno.id)}
-                  style={{ display: 'grid', gridTemplateColumns: '120px 1fr 120px 120px 120px 80px 36px', alignItems: 'center', gap: '12px', padding: '14px 20px', cursor: 'pointer' }}
+                  className="align-center gap-md" style={{ display: 'grid', gridTemplateColumns: '120px 1fr 120px 120px 120px 80px 36px', padding: '14px 20px', cursor: 'pointer' }}
                 >
                   {/* Estado */}
-                  <span style={{
-                    fontSize: '11px', fontWeight: '700', padding: '3px 10px', borderRadius: '100px', textAlign: 'center',
-                    background: isOpen ? 'rgba(22,163,74,0.12)' : 'rgba(100,116,139,0.1)',
-                    color: isOpen ? 'hsl(var(--success))' : 'var(--text-muted)'
-                  }}>
+                  <span className="font-bold text-center" style={{ fontSize: '11px', padding: '3px 10px', borderRadius: '100px', background: isOpen ? 'rgba(22, 163, 74, 0.12)' : 'rgba(100, 116, 139, 0.1)', color: isOpen ? 'hsl(var(--success))' : 'var(--text-muted)' }}>
                     {isOpen ? '● ABIERTA' : '○ CERRADA'}
                   </span>
 
                   {/* Usuario + fechas */}
                   <div>
-                    <div style={{ fontWeight: '700', fontSize: '14px' }}>{turno.usuario?.nombre ?? '—'}</div>
+                    <div className="font-bold" style={{ fontSize: '14px' }}>{turno.usuario?.nombre ?? '—'}</div>
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
                       {formatDate(turno.creado_el)} → {isOpen ? 'activo' : formatDate(turno.fecha_cierre)}
                     </div>
                   </div>
 
                   {/* Duración */}
-                  <div style={{ textAlign: 'right', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                  <div className="text-right" style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
                     {duration(turno.creado_el, turno.fecha_cierre)}
                   </div>
 
                   {/* Apertura */}
-                  <div style={{ textAlign: 'right' }}>
+                  <div className="text-right">
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Apertura</div>
-                    <div style={{ fontWeight: '700', fontSize: '14px' }}>{formatMoney(turno.monto_apertura)}</div>
+                    <div className="font-bold" style={{ fontSize: '14px' }}>{formatMoney(turno.monto_apertura)}</div>
                   </div>
 
                   {/* Total ventas */}
-                  <div style={{ textAlign: 'right' }}>
+                  <div className="text-right">
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Ventas</div>
-                    <div style={{ fontWeight: '700', fontSize: '14px', color: 'hsl(var(--primary))' }}>
+                    <div className="font-bold" style={{ fontSize: '14px', color: 'hsl(var(--primary))' }}>
                       {formatMoney(turno.sumario?.totalVentas ?? 0)}
                     </div>
                     <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{turno.sumario?.cantVentas ?? 0} transac.</div>
                   </div>
 
                   {/* Efectivo */}
-                  <div style={{ textAlign: 'right' }}>
+                  <div className="text-right">
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Efect.</div>
-                    <div style={{ fontWeight: '700', fontSize: '14px', color: 'hsl(var(--success))' }}>
+                    <div className="font-bold" style={{ fontSize: '14px', color: 'hsl(var(--success))' }}>
                       {formatMoney(turno.sumario?.efectivoCaja ?? 0)}
                     </div>
                   </div>
@@ -123,15 +119,15 @@ export function HistorialCajaView() {
                 {/* Detalle expandible - Auditoría */}
                 {isExpanded && (
                   <div style={{ borderTop: '1px solid var(--border-color)', padding: '16px 20px', background: 'var(--bg-primary)' }}>
-                    <h4 style={{ fontSize: '13px', fontWeight: '700', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Auditoría de Cierre</h4>
+                    <h4 className="font-bold" style={{ fontSize: '13px', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Auditoría de Cierre</h4>
                     <div style={{ overflowX: 'auto' }}>
-                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                      <table className="w-full" style={{ borderCollapse: 'collapse', fontSize: '13px' }}>
                         <thead>
                           <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
-                            <th style={{ textAlign: 'left', padding: '8px', color: 'var(--text-muted)' }}>Medio de Cobro</th>
-                            <th style={{ textAlign: 'right', padding: '8px', color: 'var(--text-muted)' }}>Esperado (Sistema)</th>
-                            <th style={{ textAlign: 'right', padding: '8px', color: 'var(--text-muted)' }}>Declarado (Cierre)</th>
-                            <th style={{ textAlign: 'right', padding: '8px', color: 'var(--text-muted)' }}>Diferencia</th>
+                            <th className="text-left p-sm" style={{ color: 'var(--text-muted)' }}>Medio de Cobro</th>
+                            <th className="text-right p-sm" style={{ color: 'var(--text-muted)' }}>Esperado (Sistema)</th>
+                            <th className="text-right p-sm" style={{ color: 'var(--text-muted)' }}>Declarado (Cierre)</th>
+                            <th className="text-right p-sm" style={{ color: 'var(--text-muted)' }}>Diferencia</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -157,13 +153,13 @@ export function HistorialCajaView() {
 
                             return (
                               <tr key={i} style={{ borderBottom: '1px solid var(--border-color)', opacity: hasSys ? 1 : 0.8 }}>
-                                <td style={{ padding: '8px', fontWeight: hasSys ? '600' : '400', paddingLeft: hasSys ? '8px' : '24px' }}>
+                                <td className="p-sm" style={{ fontWeight: hasSys ? '600' : '400', paddingLeft: hasSys ? '8px' : '24px' }}>
                                   {row.label}
                                   {row.note && <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginLeft: '6px' }}>({row.note})</span>}
                                 </td>
-                                <td style={{ padding: '8px', textAlign: 'right' }}>{hasSys ? formatMoney(row.sys) : '—'}</td>
-                                <td style={{ padding: '8px', textAlign: 'right', fontWeight: '700' }}>{row.dec != null ? formatMoney(row.dec) : '—'}</td>
-                                <td style={{ padding: '8px', textAlign: 'right', color: difColor, fontWeight: hasSys ? '700' : '400' }}>
+                                <td className="p-sm text-right">{hasSys ? formatMoney(row.sys) : '—'}</td>
+                                <td className="p-sm text-right font-bold">{row.dec != null ? formatMoney(row.dec) : '—'}</td>
+                                <td className="p-sm text-right" style={{ color: difColor, fontWeight: hasSys ? '700' : '400' }}>
                                   {hasSys ? (dif > 0 ? '+' : '') + formatMoney(dif) : '—'}
                                 </td>
                               </tr>
@@ -185,7 +181,7 @@ export function HistorialCajaView() {
 
           {/* Paginación */}
           {meta && meta.totalPages > 1 && (
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '8px', alignItems: 'center' }}>
+            <div className="d-flex justify-center align-center" style={{ gap: '10px', marginTop: '8px' }}>
               <button className="btn-secondary" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
                 style={{ width: 'auto', padding: '6px 16px' }}>Anterior</button>
               <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Pág. {page} de {meta.totalPages}</span>

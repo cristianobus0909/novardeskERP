@@ -106,13 +106,13 @@ export function DashboardView() {
     setChartTypes(prev => ({ ...prev, [key]: prev[key] === 'pie' ? 'bar' : 'pie' }));
   };
 
-  if (loading) return <div style={{ padding: '24px' }}>Cargando panel...</div>;
+  if (loading) return <div className="p-lg">Cargando panel...</div>;
   if (errorMsg) return (
-    <div style={{ padding: '24px', color: 'var(--destructive)', background: 'hsl(var(--destructive)/0.1)', borderRadius: '8px', margin: '24px' }}>
+    <div className="p-lg" style={{ color: 'var(--destructive)', background: 'hsl(var(--destructive)/0.1)', borderRadius: '8px', margin: '24px' }}>
       <strong>Error al cargar métricas:</strong> {errorMsg}
     </div>
   );
-  if (!stats) return <div style={{ padding: '24px' }}>Error al cargar métricas (datos vacíos).</div>;
+  if (!stats) return <div className="p-lg">Error al cargar métricas (datos vacíos).</div>;
 
   const CustomPieTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -151,8 +151,8 @@ export function DashboardView() {
   };
 
   return (
-    <div style={{ padding: '24px' }}>
-      <h2 style={{ marginBottom: '16px', fontSize: '24px', fontWeight: 'bold' }}>Dashboard</h2>
+    <div className="p-lg">
+      <h2 className="font-bold" style={{ marginBottom: '16px', fontSize: '24px' }}>Dashboard</h2>
       
       <div ref={containerRef} style={{ minHeight: '80vh' }}>
         {mounted && (
@@ -168,36 +168,36 @@ export function DashboardView() {
         draggableHandle=".drag-handle"
         style={{ minHeight: '80vh' }}
       >
-        <div key="kpi-today" style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
-          <div className="drag-handle" style={{ padding: '8px', cursor: 'grab', background: 'var(--bg-tertiary)', borderBottom: '1px solid var(--border-color)', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+        <div key="kpi-today" className="d-flex flex-col" style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+          <div className="drag-handle p-sm"   style={{ cursor: 'grab', background: 'var(--bg-tertiary)', borderBottom: '1px solid var(--border-color)', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', fontSize: '12px', color: 'var(--text-secondary)' }}>
             ≡ Mover
           </div>
-          <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div className="p-md flex-1 d-flex flex-col justify-center">
             <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Ventas del Día</span>
-            <span style={{ fontSize: '24px', fontWeight: 'bold', color: 'hsl(var(--primary))' }}>
+            <span className="font-bold" style={{ fontSize: '24px', color: 'hsl(var(--primary))' }}>
               ${Number(stats.ventasHoy).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
             </span>
           </div>
         </div>
 
-        <div key="kpi-month" style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
-          <div className="drag-handle" style={{ padding: '8px', cursor: 'grab', background: 'var(--bg-tertiary)', borderBottom: '1px solid var(--border-color)', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+        <div key="kpi-month" className="d-flex flex-col" style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+          <div className="drag-handle p-sm"   style={{ cursor: 'grab', background: 'var(--bg-tertiary)', borderBottom: '1px solid var(--border-color)', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', fontSize: '12px', color: 'var(--text-secondary)' }}>
             ≡ Mover
           </div>
-          <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div className="p-md flex-1 d-flex flex-col justify-center">
             <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>Ventas del Mes</span>
-            <span style={{ fontSize: '24px', fontWeight: 'bold', color: 'hsl(var(--success))' }}>
+            <span className="font-bold" style={{ fontSize: '24px', color: 'hsl(var(--success))' }}>
               ${Number(stats.ventasMes).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
             </span>
           </div>
         </div>
 
-        <div key="bar-chart" style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
-          <div className="drag-handle" style={{ padding: '8px', cursor: 'grab', background: 'var(--bg-tertiary)', borderBottom: '1px solid var(--border-color)', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
+        <div key="bar-chart" className="d-flex flex-col" style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+          <div className="drag-handle p-sm d-flex justify-between"   style={{ cursor: 'grab', background: 'var(--bg-tertiary)', borderBottom: '1px solid var(--border-color)', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', fontSize: '12px', color: 'var(--text-secondary)' }}>
             <span>≡ Mover</span>
             <span>Evolución (Últimos 7 días)</span>
           </div>
-          <div style={{ padding: '16px', flex: 1, width: '100%', height: '100%', minHeight: 0 }}>
+          <div className="p-md flex-1 w-full h-full" style={{ minHeight: 0 }}>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={stats.chartVentas}>
                 <XAxis dataKey="fecha" tick={{ fontSize: 11, fill: 'var(--text-secondary)' }} tickFormatter={(val) => val.split('-').reverse().join('-')} />
@@ -209,17 +209,17 @@ export function DashboardView() {
           </div>
         </div>
 
-        <div key="pie-chart" style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
-          <div className="drag-handle" style={{ padding: '8px', cursor: 'grab', background: 'var(--bg-tertiary)', borderBottom: '1px solid var(--border-color)', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{flex: 1}}>≡ Mover</span>
-            <span style={{flex: 2, textAlign: 'center', fontWeight: 'bold'}}>Top 5 Productos Vendidos</span>
-            <div style={{flex: 1, textAlign: 'right'}}>
+        <div key="pie-chart" className="d-flex flex-col" style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+          <div className="drag-handle p-sm d-flex justify-between align-center"   style={{ cursor: 'grab', background: 'var(--bg-tertiary)', borderBottom: '1px solid var(--border-color)', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+            <span className="flex-1">≡ Mover</span>
+            <span className="text-center font-bold" style={{ flex: 2 }}>Top 5 Productos Vendidos</span>
+            <div className="flex-1 text-right">
               <button onClick={() => toggleChartType('topProductos')} style={{ background: 'none', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '10px', padding: '2px 6px', cursor: 'pointer', color: 'var(--text-secondary)' }}>
                 {chartTypes.topProductos === 'pie' ? '📊 Barra' : '🍩 Circular'}
               </button>
             </div>
           </div>
-          <div style={{ padding: '16px', flex: 1, width: '100%', height: '100%', minHeight: 0 }}>
+          <div className="p-md flex-1 w-full h-full" style={{ minHeight: 0 }}>
             <ResponsiveContainer width="100%" height="100%">
               {chartTypes.topProductos === 'pie' ? (
                 <PieChart>
@@ -243,17 +243,17 @@ export function DashboardView() {
           </div>
         </div>
 
-        <div key="pie-metodos" style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
-          <div className="drag-handle" style={{ padding: '8px', cursor: 'grab', background: 'var(--bg-tertiary)', borderBottom: '1px solid var(--border-color)', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{flex: 1}}>≡ Mover</span>
-            <span style={{flex: 2, textAlign: 'center', fontWeight: 'bold'}}>Ingresos por Medio de Pago</span>
-            <div style={{flex: 1, textAlign: 'right'}}>
+        <div key="pie-metodos" className="d-flex flex-col" style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+          <div className="drag-handle p-sm d-flex justify-between align-center"   style={{ cursor: 'grab', background: 'var(--bg-tertiary)', borderBottom: '1px solid var(--border-color)', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+            <span className="flex-1">≡ Mover</span>
+            <span className="text-center font-bold" style={{ flex: 2 }}>Ingresos por Medio de Pago</span>
+            <div className="flex-1 text-right">
               <button onClick={() => toggleChartType('metodos')} style={{ background: 'none', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '10px', padding: '2px 6px', cursor: 'pointer', color: 'var(--text-secondary)' }}>
                 {chartTypes.metodos === 'pie' ? '📊 Barra' : '🍩 Circular'}
               </button>
             </div>
           </div>
-          <div style={{ padding: '16px', flex: 1, width: '100%', height: '100%', minHeight: 0 }}>
+          <div className="p-md flex-1 w-full h-full" style={{ minHeight: 0 }}>
             <ResponsiveContainer width="100%" height="100%">
               {chartTypes.metodos === 'pie' ? (
                 <PieChart>
@@ -277,17 +277,17 @@ export function DashboardView() {
           </div>
         </div>
 
-        <div key="pie-vendedores" style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
-          <div className="drag-handle" style={{ padding: '8px', cursor: 'grab', background: 'var(--bg-tertiary)', borderBottom: '1px solid var(--border-color)', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{flex: 1}}>≡ Mover</span>
-            <span style={{flex: 2, textAlign: 'center', fontWeight: 'bold'}}>Ingresos por Vendedor</span>
-            <div style={{flex: 1, textAlign: 'right'}}>
+        <div key="pie-vendedores" className="d-flex flex-col" style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+          <div className="drag-handle p-sm d-flex justify-between align-center"   style={{ cursor: 'grab', background: 'var(--bg-tertiary)', borderBottom: '1px solid var(--border-color)', borderTopLeftRadius: '12px', borderTopRightRadius: '12px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+            <span className="flex-1">≡ Mover</span>
+            <span className="text-center font-bold" style={{ flex: 2 }}>Ingresos por Vendedor</span>
+            <div className="flex-1 text-right">
               <button onClick={() => toggleChartType('vendedores')} style={{ background: 'none', border: '1px solid var(--border-color)', borderRadius: '4px', fontSize: '10px', padding: '2px 6px', cursor: 'pointer', color: 'var(--text-secondary)' }}>
                 {chartTypes.vendedores === 'pie' ? '📊 Barra' : '🍩 Circular'}
               </button>
             </div>
           </div>
-          <div style={{ padding: '16px', flex: 1, width: '100%', height: '100%', minHeight: 0 }}>
+          <div className="p-md flex-1 w-full h-full" style={{ minHeight: 0 }}>
             <ResponsiveContainer width="100%" height="100%">
               {chartTypes.vendedores === 'pie' ? (
                 <PieChart>
