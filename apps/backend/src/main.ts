@@ -13,7 +13,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalFilters(new AllExceptionsFilter());
   app.enableCors({
-    origin: process.env.CORS_ORIGIN || process.env.FRONTEND_URL || '*',
+    origin: true, // Permite cualquier origen de forma dinámica para que no falle con credentials: true
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
