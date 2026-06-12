@@ -29,7 +29,7 @@ import { useCartStore } from '../store/use-cart-store';
 import { useSales, useCreateSale } from '../hooks/use-sales';
 import { usePromocionesActivas } from '../hooks/use-promociones';
 import { useMpQrIntent, useMpPosIntent } from '../hooks/use-mp';
-import { useAuth } from '../hooks/use-auth';
+
 import { useCuentasContables } from '../hooks/use-finanzas';
 import { useCuentaCorriente } from '../hooks/use-cuenta-corriente';
 
