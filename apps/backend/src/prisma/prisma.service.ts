@@ -25,7 +25,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
             if (tenantScopedModels.includes(model)) {
               const tenantId = tenantContext.getTenantId();
-              console.log(`[PrismaService] Operation "${operation}" on model "${model}" - active tenantId in context: ${tenantId}`);
+
 
               // Solo aplicamos el aislamiento si hay un tenantId establecido en el contexto asíncrono
               if (tenantId) {

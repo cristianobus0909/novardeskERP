@@ -2,12 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
-// Inyectar compatibilidad automática con variables de Railway
-console.log('========== INICIANDO DIAGNOSTICO DE ENTORNO RAILWAY ==========');
-console.log('¿Existe DATABASE_URL?', !!process.env.DATABASE_URL);
-console.log('¿Existe MYSQL_URL?', !!process.env.MYSQL_URL);
-console.log('Variables disponibles en la caja del Backend:', Object.keys(process.env).join(', '));
-console.log('==============================================================');
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

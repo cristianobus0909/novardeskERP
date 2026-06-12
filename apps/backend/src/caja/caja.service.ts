@@ -232,10 +232,7 @@ export class CajaService {
     const ingresos = libro.filter(x => x.is_ingreso).reduce((acc, x) => acc + x.monto, 0);
     const egresos = libro.filter(x => !x.is_ingreso).reduce((acc, x) => acc + x.monto, 0);
 
-    console.log("=== API getLibroCaja ===");
-    console.log("Movimientos:", libro.length);
-    console.log("Ingresos:", ingresos);
-    console.log("Egresos:", egresos);
+
 
     return {
       movimientos: libro,

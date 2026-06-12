@@ -22,7 +22,7 @@ export function DashboardView() {
         const data = await apiRequest('/ventas/stats');
         setStats(data);
       } catch (err: any) {
-        console.error('Error fetching stats:', err);
+        // Error silencioso, se maneja en el catch
         setErrorMsg(err.message || 'Error desconocido al cargar métricas');
       } finally {
         setLoading(false);

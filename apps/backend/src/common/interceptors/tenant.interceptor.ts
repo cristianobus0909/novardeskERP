@@ -44,7 +44,7 @@ export class TenantInterceptor implements NestInterceptor {
         throw new BadRequestException('El tenant_id proporcionado en la solicitud no es un número válido');
       }
 
-      console.log(`[TenantInterceptor] Setting Context - tenantId: ${parsedTenantId}, userId: ${parsedUserId}`);
+
 
       return new Observable((subscriber) => {
         this.tenantContextService.run(

@@ -6,7 +6,7 @@ import { useAuthStore } from '../store/use-auth-store';
 import { apiRequest } from '../lib/api-client';
 import dynamic from 'next/dynamic';
 
-const LoadingFallback = () => <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-secondary)' }}><div className="spinner" style={{ width: '30px', height: '30px', margin: '0 auto 16px' }}></div>Cargando módulo...</div>;
+const LoadingFallback = () => <div className="text-center" style={{ padding: '60px', color: 'var(--text-secondary)' }}><div className="spinner" style={{ width: '30px', height: '30px', margin: '0 auto 16px' }}></div>Cargando módulo...</div>;
 
 const ClientesView = dynamic(() => import('../components/clientes/clientes-view').then(mod => mod.ClientesView), { loading: LoadingFallback });
 const PromocionesView = dynamic(() => import('../components/promociones/promociones-view').then(mod => mod.PromocionesView), { loading: LoadingFallback });
@@ -529,8 +529,8 @@ export default function Home() {
   // --- RENDER VISTA LOGIN ---
   if (!token) {
     return (
-      <div className="auth-wrapper fade-in" style={{ position: 'relative' }}>
-        <div style={{ position: 'absolute', top: '24px', right: '24px', zIndex: 10 }}>
+      <div className="auth-wrapper fade-in relative"  >
+        <div className="absolute" style={{ top: '24px', right: '24px', zIndex: 10 }}>
           <div
             onClick={toggleTheme}
             className="theme-switch-container"
@@ -579,7 +579,7 @@ export default function Home() {
             </div>
 
             {authError && (
-              <p style={{ color: 'red', fontSize: '13px', marginBottom: '16px', textAlign: 'center' }}>
+              <p className="text-center" style={{ color: 'red', fontSize: '13px', marginBottom: '16px' }}>
                 {authError}
               </p>
             )}
@@ -607,8 +607,8 @@ export default function Home() {
     return (
     <>
       {/* Carrito (Mitad Superior) */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '20px', borderBottom: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
-        <h3 style={{ fontSize: '16px', fontWeight: '700', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="flex-1 overflow-y-auto d-flex flex-col" style={{ padding: '20px', borderBottom: '1px solid var(--border-color)' }}>
+        <h3 className="font-bold d-flex justify-between align-center" style={{ fontSize: '16px', marginBottom: '16px' }}>
           <span>Ticket Actual</span>
           {cartItems.length > 0 && (
             <span style={{ background: 'var(--bg-tertiary)', padding: '2px 8px', borderRadius: '12px', fontSize: '12px' }}>{cartItems.length} ítems</span>
@@ -616,17 +616,17 @@ export default function Home() {
         </h3>
         
         {cartItems.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)', margin: 'auto' }}>
+          <div className="text-center" style={{ padding: '60px 20px', color: 'var(--text-muted)', margin: 'auto' }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ margin: '0 auto 16px auto', display: 'block', color: 'var(--text-muted)' }}><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
             Haz clic en los productos para agregarlos al carrito.
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div className="d-flex flex-col gap-md">
             {cartItems.map((item) => (
-              <div key={item.variantId} style={{ background: 'var(--bg-primary)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div key={item.variantId} className="d-flex flex-col gap-sm" style={{ background: 'var(--bg-primary)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <div className="d-flex justify-between align-start">
                   <div>
-                    <span style={{ fontWeight: '600', display: 'block', fontSize: '14px', lineHeight: 1.2 }}>{item.nombre}</span>
+                    <span className="font-semibold" style={{ display: 'block', fontSize: '14px', lineHeight: 1.2 }}>{item.nombre}</span>
                     <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{item.sku}</span>
                   </div>
                   <button 
@@ -639,11 +639,11 @@ export default function Home() {
                   </button>
                 </div>
                 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'var(--bg-secondary)', borderRadius: '6px', padding: '2px' }}>
+                <div className="d-flex justify-between align-center">
+                  <div className="d-flex align-center gap-xs" style={{ background: 'var(--bg-secondary)', borderRadius: '6px', padding: '2px' }}>
                     <button 
                       type="button"
-                      style={{ width: '24px', height: '24px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', borderRadius: '4px' }}
+                      className="p-0 d-flex align-center justify-center" style={{ width: '24px', height: '24px', background: 'none', border: 'none', cursor: 'pointer', borderRadius: '4px' }}
                       onClick={() => updateQuantity(item.variantId, item.cantidad - 1)}
                     >
                       -
@@ -651,20 +651,20 @@ export default function Home() {
                     <input
                       type="number"
                       step={item.es_servicio ? '1' : '0.001'}
-                      style={{ width: '40px', height: '24px', textAlign: 'center', padding: '0', background: 'transparent', border: 'none', fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)' }}
+                      className="text-center p-0 font-semibold" style={{ width: '40px', height: '24px', background: 'transparent', border: 'none', fontSize: '13px', color: 'var(--text-primary)' }}
                       value={item.cantidad}
                       onChange={(e) => updateQuantity(item.variantId, parseFloat(e.target.value) || 0)}
                     />
                     <button 
                       type="button"
-                      style={{ width: '24px', height: '24px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: 'none', cursor: 'pointer', borderRadius: '4px' }}
+                      className="p-0 d-flex align-center justify-center" style={{ width: '24px', height: '24px', background: 'none', border: 'none', cursor: 'pointer', borderRadius: '4px' }}
                       onClick={() => updateQuantity(item.variantId, item.cantidad + 1)}
                     >
                       +
                     </button>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <span style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)' }}>
+                  <div className="text-right">
+                    <span className="font-bold" style={{ fontSize: '16px', color: 'var(--text-primary)' }}>
                       ${(item.subtotal * item.cantidad).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                     </span>
                   </div>
@@ -676,48 +676,48 @@ export default function Home() {
       </div>
 
       {/* Cobro (Mitad Inferior) */}
-      <div style={{ padding: '16px', background: 'var(--bg-primary)', borderTop: '1px solid var(--border-color)', flexShrink: 0 }}>
+      <div className="p-md" style={{ background: 'var(--bg-primary)', borderTop: '1px solid var(--border-color)', flexShrink: 0 }}>
         
         {/* Descuentos section */}
         {discountMonto > 0 && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', paddingBottom: '8px', borderBottom: '1px dashed var(--border-color)', color: 'hsl(var(--success))' }}>
-            <span style={{ fontSize: '13px', fontWeight: '600' }}>Descuento ({discountMotivo})</span>
-            <span style={{ fontSize: '13px', fontWeight: 'bold' }}>-${discountMonto.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
+          <div className="d-flex justify-between" style={{ marginBottom: '8px', paddingBottom: '8px', borderBottom: '1px dashed var(--border-color)', color: 'hsl(var(--success))' }}>
+            <span className="font-semibold" style={{ fontSize: '13px' }}>Descuento ({discountMotivo})</span>
+            <span className="font-bold" style={{ fontSize: '13px' }}>-${discountMonto.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
           </div>
         )}
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-secondary)' }}>Total</span>
+        <div className="d-flex justify-between align-center" style={{ marginBottom: '12px' }}>
+          <div className="d-flex flex-col">
+            <span className="font-bold" style={{ fontSize: '16px', color: 'var(--text-secondary)' }}>Total</span>
             {cartItems.length > 0 && (
               <button 
                 type="button" 
                 onClick={() => setIsDescuentoModalOpen(true)} 
-                style={{ fontSize: '11px', padding: 0, textAlign: 'left', background: 'none', border: 'none', color: 'hsl(var(--primary))', cursor: 'pointer', fontWeight: 600 }}
+                className="p-0 text-left font-semibold" style={{ fontSize: '11px', background: 'none', border: 'none', color: 'hsl(var(--primary))', cursor: 'pointer' }}
               >
                 + Aplicar Descuento
               </button>
             )}
           </div>
-          <span style={{ fontSize: '28px', fontWeight: '800', color: 'hsl(var(--primary))', fontFamily: 'monospace' }}>
+          <span className="font-extrabold" style={{ fontSize: '28px', color: 'hsl(var(--primary))', fontFamily: 'monospace' }}>
             ${totalReal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
           </span>
         </div>
 
-        <form onSubmit={handleCheckout} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <form onSubmit={handleCheckout} className="d-flex flex-col gap-lg">
           <ClienteSelector />
 
           {/* Pagos Múltiples */}
           <div style={{ background: 'var(--bg-secondary)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-            <div style={{ fontWeight: 600, marginBottom: '8px', fontSize: '13px', color: 'var(--text-secondary)' }}>MÉTODOS DE PAGO</div>
+            <div className="font-semibold" style={{ marginBottom: '8px', fontSize: '13px', color: 'var(--text-secondary)' }}>MÉTODOS DE PAGO</div>
             
             {pagosAgregados.length > 0 && (
-               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '12px' }}>
+               <div className="d-flex flex-col" style={{ gap: '6px', marginBottom: '12px' }}>
                  {pagosAgregados.map((p, idx) => (
-                    <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', background: 'var(--bg-primary)', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
-                      <span style={{ fontWeight: 600 }}>{p.metodo_pago.replace('_', ' ')}</span>
-                      <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                        <span style={{ fontWeight: '800', color: 'hsl(var(--primary))' }}>${p.monto.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
+                    <div key={idx} className="d-flex justify-between align-center p-sm" style={{ fontSize: '13px', background: 'var(--bg-primary)', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
+                      <span className="font-semibold">{p.metodo_pago.replace('_', ' ')}</span>
+                      <div className="d-flex gap-md align-center">
+                        <span className="font-extrabold" style={{ color: 'hsl(var(--primary))' }}>${p.monto.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
                         <button type="button" onClick={() => setPagosAgregados(pagosAgregados.filter((_, i) => i !== idx))} style={{ color: 'hsl(var(--danger))', border: 'none', background: 'none', cursor: 'pointer', padding: '2px 4px', borderRadius: '4px' }}>✕</button>
                       </div>
                     </div>
@@ -726,10 +726,9 @@ export default function Home() {
             )}
 
             {/* Select de Cuentas Contables y Planes */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div style={{ display: 'flex', gap: '8px' }}>
+            <div className="d-flex flex-col gap-sm">
+              <div className="d-flex gap-sm">
                 <select 
-                  className="form-input" 
                   value={selectedMedioBase} 
                   onChange={(e) => {
                     const val = e.target.value;
@@ -741,28 +740,28 @@ export default function Home() {
                     }
                     setSelectedPlanId('');
                   }} 
-                  style={{ flex: 1, padding: '0 8px', fontSize: '13px' }}
+                  className="form-input flex-1" style={{ padding: '0 8px', fontSize: '13px' }}
                 >
                   <option value="">Seleccionar Medio de Pago...</option>
-                  <option value="EFECTIVO" style={{ fontWeight: 'bold' }}>Efectivo</option>
+                  <option value="EFECTIVO" className="font-bold">Efectivo</option>
                   {cuentaCorriente && cuentaCorriente.activa && (
-                    <option value="CUENTA_CORRIENTE" style={{ fontWeight: 'bold', color: 'hsl(var(--primary))' }}>
+                    <option value="CUENTA_CORRIENTE" className="font-bold" style={{ color: 'hsl(var(--primary))' }}>
                       Cuenta Corriente (Disp: {Number(cuentaCorriente.limite_credito) === -1 ? 'Ilimitado' : `$${(Number(cuentaCorriente.limite_credito) - Number(cuentaCorriente.saldo_actual)).toLocaleString('es-AR', { minimumFractionDigits: 2 })}`})
                     </option>
                   )}
-                  <option value="MERCADOPAGO_QR" style={{ fontWeight: 'bold' }}>Mercado Pago QR</option>
-                  <option value="MERCADOPAGO_POS" style={{ fontWeight: 'bold' }}>Mercado Pago Smart POS</option>
-                  <option value="TARJETA_CREDITO" style={{ fontWeight: 'bold' }}>Tarjeta de Crédito</option>
-                  <option value="TARJETA_DEBITO" style={{ fontWeight: 'bold' }}>Tarjeta de Débito</option>
-                  <option value="TRANSFERENCIA" style={{ fontWeight: 'bold' }}>Transferencia</option>
-                  <option value="OTRO" style={{ fontWeight: 'bold' }}>Otro</option>
+                  <option value="MERCADOPAGO_QR" className="font-bold">Mercado Pago QR</option>
+                  <option value="MERCADOPAGO_POS" className="font-bold">Mercado Pago Smart POS</option>
+                  <option value="TARJETA_CREDITO" className="font-bold">Tarjeta de Crédito</option>
+                  <option value="TARJETA_DEBITO" className="font-bold">Tarjeta de Débito</option>
+                  <option value="TRANSFERENCIA" className="font-bold">Transferencia</option>
+                  <option value="OTRO" className="font-bold">Otro</option>
                 </select>
 
-                <input 
+                <input className="form-input text-center font-bold" 
                   type="number" 
-                  className="form-input" 
+                   
                   placeholder="Monto a abonar" 
-                  style={{ width: '160px', textAlign: 'center', fontWeight: 'bold' }} 
+                   style={{ width: '160px' }} 
                   value={nuevoMontoPago} 
                   onChange={e => setNuevoMontoPago(e.target.value)} 
                   onKeyDown={(e) => {
@@ -885,17 +884,17 @@ export default function Home() {
             
             {/* Validar Saldo */}
             {pagosAgregados.length > 0 && (
-                 <div style={{ marginTop: '12px', textAlign: 'right', fontSize: '13px', color: saldoRestante > 0 ? 'hsl(var(--danger))' : 'hsl(var(--success))', fontWeight: '800' }}>
+                 <div className="text-right font-extrabold" style={{ marginTop: '12px', fontSize: '13px', color: saldoRestante > 0 ? 'hsl(var(--danger))' : 'hsl(var(--success))' }}>
                    {saldoRestante > 0 ? `Resta abonar: $${saldoRestante.toLocaleString('es-AR', {minimumFractionDigits: 2})}` : `Cambio a favor: $${Math.abs(saldoRestante).toLocaleString('es-AR', {minimumFractionDigits: 2})}`}
                  </div>
             )}
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-            <button 
+          <div className="d-flex gap-md" style={{ marginTop: '8px' }}>
+            <button className="btn-primary flex-1 p-md font-bold" 
               type="submit" 
-              className="btn-primary" 
-              style={{ flex: 1, padding: '16px', fontSize: '16px', fontWeight: '700' }}
+               
+               style={{ fontSize: '16px' }}
               disabled={cartItems.length === 0 || createSaleMutation.isPending || (pagosAgregados.length > 0 && saldoRestante > 0.01)}
             >
               {createSaleMutation.isPending ? 'Procesando...' : 'Cobrar Ticket'}
@@ -927,7 +926,7 @@ export default function Home() {
       {/* Topbar móvil */}
       <div className="mobile-topbar mobile-only">
         <button className="hamburger-btn" onClick={() => setIsMobileMenuOpen(true)}>☰</button>
-        <span style={{ fontWeight: 700, fontSize: '18px', color: 'hsl(var(--primary))' }}>NovarDesk</span>
+        <span className="font-bold" style={{ fontSize: '18px', color: 'hsl(var(--primary))' }}>NovarDesk</span>
         <div style={{ width: '24px' }}></div>
       </div>
 
@@ -940,9 +939,9 @@ export default function Home() {
         }}
       >
         <div>
-          <div 
-            className="logo-section" 
-            style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: '12px', transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)', padding: '8px', userSelect: 'none' }}
+          <div className="logo-section d-flex align-center gap-md p-sm" 
+             
+             style={{ cursor: 'pointer', transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)', userSelect: 'none' }}
             onClick={(e) => {
               const textEl = e.currentTarget.querySelector('.logo-text-container') as HTMLElement;
               const avatarEl = e.currentTarget.querySelector('.avatar') as HTMLElement;
@@ -959,7 +958,7 @@ export default function Home() {
               }
             }}
           >
-            <div className="avatar" style={{ background: 'transparent', color: 'hsl(var(--primary))', width: '42px', height: '42px', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)', transformOrigin: 'center left' }}>
+            <div className="avatar d-flex align-center justify-center"   style={{ background: 'transparent', color: 'hsl(var(--primary))', width: '42px', height: '42px', border: 'none', transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)', transformOrigin: 'center left' }}>
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: 'translateX(-4px)' }}>
                 {/* Asa de la bolsa (Curva de la D, la parte recta es el borde de la bolsa) */}
                 <path d="M8 10V6a4 4 0 0 1 8 0v4" />
@@ -973,27 +972,18 @@ export default function Home() {
                 <text x="12" y="19.5" fontFamily="inherit" fontSize="10" fontWeight="800" textAnchor="middle" fill="currentColor" stroke="none" style={{ textRendering: 'geometricPrecision', WebkitFontSmoothing: 'antialiased' }}>N</text>
               </svg>
             </div>
-            <div 
-              className="logo-text-container"
-              style={{ 
-                maxWidth: '150px', 
-                opacity: 1, 
-                transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)', 
-                overflow: 'hidden', 
-                whiteSpace: 'nowrap',
-                display: 'flex',
-                alignItems: 'center'
-              }}
+            <div className="logo-text-container overflow-hidden d-flex align-center" 
+              
+               style={{ maxWidth: '150px', opacity: 1, transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)', whiteSpace: 'nowrap' }}
             >
-              <span className="logo-text" style={{ fontSize: '20px', fontWeight: '800', letterSpacing: '-0.5px' }}>NovarDesk</span>
+              <span className="logo-text font-extrabold"   style={{ fontSize: '20px', letterSpacing: '-0.5px' }}>NovarDesk</span>
             </div>
           </div>
 
           <ul className="nav-links">
             {!isVendedor && (
               <li 
-                className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
-                style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
+                className={`nav-item d-flex align-center gap-md ${activeTab === 'dashboard' ? 'active' : ''}`} style={{ cursor: 'pointer' }}
                 onClick={() => React.startTransition(() => setActiveTab('dashboard'))}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
@@ -1001,20 +991,19 @@ export default function Home() {
               </li>
             )}
             <li 
-              className={`nav-item ${activeTab === 'pos' ? 'active' : ''}`}
-              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
+              className={`nav-item d-flex align-center gap-md ${activeTab === 'pos' ? 'active' : ''}`} style={{ cursor: 'pointer' }}
               onClick={() => setActiveTab('pos')}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
               <span>Punto de Venta (POS)</span>
             </li>
             
-            <li 
-              className="nav-item"
-              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'space-between' }}
+            <li className="nav-item d-flex align-center gap-md justify-between" 
+              
+               style={{ cursor: 'pointer' }}
               onClick={() => setIsCajaDropdownOpen(!isCajaDropdownOpen)}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div className="d-flex align-center gap-md">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 14h18a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1z"></path><path d="M5 14v-6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v6"></path><rect x="9" y="3" width="6" height="3" rx="1"></rect><circle cx="12" cy="17" r="1"></circle></svg>
                 <span>Gestión de Caja</span>
               </div>
@@ -1024,9 +1013,9 @@ export default function Home() {
             {/* Menú Desplegable (Animado con CSS) */}
             <div className={`sidebar-dropdown ${isCajaDropdownOpen ? 'open' : ''}`}>
               {estadoCaja?.status !== 'ABIERTA' && (
-                <li 
-                  className="nav-item sub-menu-item"
-                  style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
+                <li className="nav-item sub-menu-item d-flex align-center gap-md" 
+                  
+                   style={{ cursor: 'pointer' }}
                   onClick={() => {
                     React.startTransition(() => setActiveTab('pos'));
                   }}
@@ -1036,9 +1025,9 @@ export default function Home() {
                 </li>
               )}
               {estadoCaja?.status === 'ABIERTA' && (
-                <li 
-                  className="nav-item sub-menu-item"
-                  style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
+                <li className="nav-item sub-menu-item d-flex align-center gap-md" 
+                  
+                   style={{ cursor: 'pointer' }}
                   onClick={() => setIsCloseCajaModalOpen(true)}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
@@ -1048,24 +1037,21 @@ export default function Home() {
             </div>
 
             <li 
-              className={`nav-item ${activeTab === 'sales' ? 'active' : ''}`}
-              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
+              className={`nav-item d-flex align-center gap-md ${activeTab === 'sales' ? 'active' : ''}`} style={{ cursor: 'pointer' }}
               onClick={() => React.startTransition(() => setActiveTab('sales'))}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
               <span>Historial de Ventas</span>
             </li>
             <li 
-              className={`nav-item ${activeTab === 'catalog' ? 'active' : ''}`}
-              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
+              className={`nav-item d-flex align-center gap-md ${activeTab === 'catalog' ? 'active' : ''}`} style={{ cursor: 'pointer' }}
               onClick={() => React.startTransition(() => setActiveTab('catalog'))}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
               <span>Catálogo de Productos</span>
             </li>
             <li 
-              className={`nav-item ${activeTab === 'clientes' ? 'active' : ''}`}
-              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
+              className={`nav-item d-flex align-center gap-md ${activeTab === 'clientes' ? 'active' : ''}`} style={{ cursor: 'pointer' }}
               onClick={() => React.startTransition(() => setActiveTab('clientes'))}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
@@ -1074,16 +1060,14 @@ export default function Home() {
             {!isVendedor && (
               <>
                 <li 
-                  className={`nav-item ${activeTab === 'promociones' ? 'active' : ''}`}
-                  style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
+                  className={`nav-item d-flex align-center gap-md ${activeTab === 'promociones' ? 'active' : ''}`} style={{ cursor: 'pointer' }}
                   onClick={() => React.startTransition(() => setActiveTab('promociones'))}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
                   <span>Promociones</span>
                 </li>
                 <li 
-                  className={`nav-item ${activeTab === 'finances' ? 'active' : ''}`}
-                  style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'space-between' }}
+                  className={`nav-item d-flex align-center gap-md justify-between ${activeTab === 'finances' ? 'active' : ''}`} style={{ cursor: 'pointer' }}
                   onClick={() => {
                     setIsFinanzasDropdownOpen(!isFinanzasDropdownOpen);
                     if (activeTab !== 'finances') {
@@ -1092,7 +1076,7 @@ export default function Home() {
                     }
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div className="d-flex align-center gap-md">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                     <span>Contabilidad</span>
                   </div>
@@ -1100,7 +1084,7 @@ export default function Home() {
                 </li>
 
                 {/* Sub-menú Contabilidad */}
-                <div style={{ overflow: 'hidden', maxHeight: isFinanzasDropdownOpen ? '300px' : '0', transition: 'max-height 0.3s ease' }}>
+                <div className="overflow-hidden" style={{ maxHeight: isFinanzasDropdownOpen ? '300px' : '0', transition: 'max-height 0.3s ease' }}>
                   {([
                     { id: 'cuentas', label: 'Cuentas Contables', icon: <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg> },
                     { id: 'movimientos', label: 'Libro de Caja', icon: <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg> },
@@ -1109,17 +1093,10 @@ export default function Home() {
                     { id: 'cierre', label: 'Cierre del Día', icon: <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> },
                     { id: 'historial-caja', label: 'Historial de Caja', icon: <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 14h18a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1z"></path><path d="M5 14v-6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v6"></path><rect x="9" y="3" width="6" height="3" rx="1"></rect></svg> },
                   ] as { id: FinanzasTab; label: string; icon: React.ReactNode }[]).map(item => (
-                    <li
+                    <li className="nav-item sub-menu-item d-flex align-center"
                       key={item.id}
-                      className="nav-item sub-menu-item"
-                      style={{
-                        cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px',
-                        paddingLeft: '36px', fontSize: '13px',
-                        background: activeTab === 'finances' && finanzasSubTab === item.id ? 'rgba(var(--primary-rgb), 0.08)' : 'transparent',
-                        color: activeTab === 'finances' && finanzasSubTab === item.id ? 'hsl(var(--primary))' : 'var(--text-secondary)',
-                        fontWeight: activeTab === 'finances' && finanzasSubTab === item.id ? '700' : '400',
-                        borderRadius: '8px', marginBottom: '2px'
-                      }}
+                      
+                       style={{ cursor: 'pointer', gap: '10px', paddingLeft: '36px', fontSize: '13px', background: activeTab === 'finances' && finanzasSubTab === item.id ? 'rgba(var(--primary-rgb), 0.08)' : 'transparent', color: activeTab === 'finances' && finanzasSubTab === item.id ? 'hsl(var(--primary))' : 'var(--text-secondary)', fontWeight: activeTab === 'finances' && finanzasSubTab === item.id ? '700' : '400', borderRadius: '8px', marginBottom: '2px' }}
                       onClick={() => React.startTransition(() => { setActiveTab('finances'); setFinanzasSubTab(item.id); })}
                     >
                       {item.icon}
@@ -1128,8 +1105,7 @@ export default function Home() {
                   ))}
                 </div>
                 <li 
-                  className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`}
-                  style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}
+                  className={`nav-item d-flex align-center gap-md ${activeTab === 'settings' ? 'active' : ''}`} style={{ cursor: 'pointer' }}
                   onClick={() => React.startTransition(() => setActiveTab('settings'))}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
@@ -1140,16 +1116,16 @@ export default function Home() {
           </ul>
         </div>
         
-        <div className="user-profile-section" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div className="user-profile-section d-flex flex-col gap-sm"   style={{ borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
 
           {/* Tenant + User info */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '4px 0' }}>
-            <div className="avatar" style={{ flexShrink: 0, overflow: 'hidden', padding: tenant?.logo_url ? 0 : undefined }}>
+          <div className="d-flex align-center gap-md" style={{ padding: '4px 0' }}>
+            <div className="avatar overflow-hidden"   style={{ flexShrink: 0, padding: tenant?.logo_url ? 0 : undefined }}>
               {tenant?.logo_url ? (
                 <img
                   src={tenant.logo_url}
                   alt={tenant.razon_social}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+                  className="w-full h-full" style={{ objectFit: 'cover', borderRadius: '50%' }}
                   onError={e => {
                     (e.currentTarget as HTMLImageElement).style.display = 'none';
                     (e.currentTarget.parentElement as HTMLElement).textContent = user?.nombre?.charAt(0).toUpperCase() || 'T';
@@ -1160,19 +1136,19 @@ export default function Home() {
               )}
             </div>
             <div className="profile-info">
-              <span className="profile-name" style={{ fontSize: '13px', fontWeight: '700' }}>{tenant?.razon_social}</span>
+              <span className="profile-name font-bold"   style={{ fontSize: '13px' }}>{tenant?.razon_social}</span>
               <span className="profile-role" style={{ fontSize: '11px' }}>{user?.nombre} · {user?.role}</span>
               <span className="badge-plan" style={{ marginTop: '4px', display: 'inline-block', marginLeft: 0 }}>Plan: {tenant?.estado_plan}</span>
             </div>
           </div>
 
           {/* Acciones */}
-          <div className="hide-on-collapse" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <div className="hide-on-collapse d-flex flex-col gap-xs"  >
 
             {/* Toggle Tema */}
             <button
               onClick={toggleTheme}
-              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', background: 'none', border: 'none', borderRadius: '8px', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: '13px', fontWeight: '550', width: '100%', textAlign: 'left', transition: 'background 0.2s' }}
+              className="d-flex align-center w-full text-left" style={{ gap: '10px', padding: '8px 10px', background: 'none', border: 'none', borderRadius: '8px', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: '13px', fontWeight: '550', transition: 'background 0.2s' }}
               onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-tertiary)'}
               onMouseLeave={e => e.currentTarget.style.background = 'none'}
               title={theme === 'light' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'}
@@ -1188,7 +1164,7 @@ export default function Home() {
             {/* Cerrar sesión */}
             <button
               onClick={handleLogout}
-              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', background: 'none', border: 'none', borderRadius: '8px', cursor: 'pointer', color: 'hsl(var(--danger))', fontSize: '13px', fontWeight: '550', width: '100%', textAlign: 'left', transition: 'background 0.2s' }}
+              className="d-flex align-center w-full text-left" style={{ gap: '10px', padding: '8px 10px', background: 'none', border: 'none', borderRadius: '8px', cursor: 'pointer', color: 'hsl(var(--danger))', fontSize: '13px', fontWeight: '550', transition: 'background 0.2s' }}
               onMouseEnter={e => e.currentTarget.style.background = 'rgba(220, 38, 38, 0.06)'}
               onMouseLeave={e => e.currentTarget.style.background = 'none'}
             >
@@ -1201,9 +1177,9 @@ export default function Home() {
 
       {/* Panel de Contenido Principal */}
       <main className="main-content">
-        <header className="top-bar" style={{ flexWrap: 'wrap', gap: '16px', alignItems: 'center' }}>
-          <div style={{ flex: 1, minWidth: '200px' }}>
-            <h1 style={{ fontSize: '26px', fontWeight: '700' }}>
+        <header className="top-bar flex-wrap gap-lg align-center"  >
+          <div className="flex-1" style={{ minWidth: '200px' }}>
+            <h1 className="font-bold" style={{ fontSize: '26px' }}>
               {activeTab === 'dashboard' && 'Dashboard Gerencial'}
               {activeTab === 'catalog' && 'Inventario de Comercio'}
               {activeTab === 'pos' && 'Punto de Venta (POS)'}
@@ -1225,18 +1201,13 @@ export default function Home() {
           </div>
           
           {/* Opciones Superiores Derecha — solo acciones contextuales */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+          <div className="d-flex align-center gap-md" style={{ flexShrink: 0 }}>
 
             {/* Toggle layout POS */}
             {activeTab === 'pos' && estadoCaja?.status === 'ABIERTA' && (
               <div
                 title={posLayout === 'classic' ? 'Cambiar a vista Caja Rápida' : 'Cambiar a vista Clásica'}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer',
-                  padding: '6px 12px', borderRadius: '8px', background: 'var(--bg-secondary)',
-                  border: '1px solid var(--border-color)', fontSize: '12px', fontWeight: '600',
-                  color: 'var(--text-secondary)', userSelect: 'none', transition: 'all 0.2s'
-                }}
+                className="d-flex align-center font-semibold" style={{ gap: '6px', cursor: 'pointer', padding: '6px 12px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', fontSize: '12px', color: 'var(--text-secondary)', userSelect: 'none', transition: 'all 0.2s' }}
                 onClick={togglePosLayout}
                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--bg-tertiary)'}
                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'var(--bg-secondary)'}
@@ -1265,11 +1236,7 @@ export default function Home() {
             {estadoCaja?.status === 'ABIERTA' && (
               <button
                 onClick={() => setIsCloseCajaModalOpen(true)}
-                style={{
-                  background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)',
-                  padding: '6px 12px', borderRadius: '6px', color: 'var(--text-primary)',
-                  fontSize: '13px', fontWeight: '600', cursor: 'pointer'
-                }}
+                className="font-semibold" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', padding: '6px 12px', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '13px', cursor: 'pointer' }}
               >
                 Cerrar Caja Z
               </button>
@@ -1280,13 +1247,7 @@ export default function Home() {
 
 
         {visitedTabs.has('dashboard') && (
-          <div style={{ 
-            position: activeTab === 'dashboard' ? 'relative' : 'absolute', 
-            left: activeTab === 'dashboard' ? 0 : '-10000px',
-            top: activeTab === 'dashboard' ? 0 : '-10000px',
-            visibility: activeTab === 'dashboard' ? 'visible' : 'hidden',
-            width: '100%' 
-          }}>
+          <div className="w-full" style={{ position: activeTab === 'dashboard' ? 'relative' : 'absolute', left: activeTab === 'dashboard' ? 0 : '-10000px', top: activeTab === 'dashboard' ? 0 : '-10000px', visibility: activeTab === 'dashboard' ? 'visible' : 'hidden' }}>
             <DashboardView />
           </div>
         )}
@@ -1332,7 +1293,7 @@ export default function Home() {
               </div>
 
               {/* Filtros de Categoría */}
-              <div style={{ padding: '12px 24px', display: 'flex', gap: '8px', flexWrap: 'wrap', borderBottom: '1px solid var(--border-color)' }}>
+              <div className="d-flex gap-sm flex-wrap" style={{ padding: '12px 24px', borderBottom: '1px solid var(--border-color)' }}>
                 {uniqueCategories.map((cat) => (
                   <button
                     key={cat}
@@ -1369,20 +1330,20 @@ export default function Home() {
                   <tbody>
                     {isLoadingProducts ? (
                       <tr>
-                        <td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                        <td colSpan={5} className="text-center" style={{ padding: '40px', color: 'var(--text-muted)' }}>
                           Cargando catálogo...
                         </td>
                       </tr>
                     ) : filteredProducts.length === 0 ? (
                       <tr>
-                        <td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                        <td colSpan={5} className="text-center" style={{ padding: '40px', color: 'var(--text-muted)' }}>
                           No se encontraron productos en este comercio.
                         </td>
                       </tr>
                     ) : (
                       filteredProducts.map((p) => (
                         <tr key={p.id}>
-                          <td style={{ fontWeight: '600' }}>{p.nombre}</td>
+                          <td className="font-semibold">{p.nombre}</td>
                           <td>{p.marca || '-'}</td>
                           <td>
                             <span className="variant-tag" style={{ background: 'var(--bg-tertiary)', color: 'var(--text-primary)' }}>
@@ -1390,10 +1351,10 @@ export default function Home() {
                             </span>
                           </td>
                           <td>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                            <div className="d-flex flex-col" style={{ gap: '6px' }}>
                               {p.variantes.map((v) => (
-                                <div key={v.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                  <span style={{ fontFamily: 'monospace', fontWeight: 'bold', fontSize: '13px' }}>
+                                <div key={v.id} className="d-flex align-center gap-sm flex-wrap">
+                                  <span className="font-bold" style={{ fontFamily: 'monospace', fontSize: '13px' }}>
                                     {v.sku}
                                   </span>
                                   <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>
@@ -1436,7 +1397,7 @@ export default function Home() {
 
               {/* Paginación Catálogo */}
               {productsMeta && productsMeta.totalPages > 1 && (
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '16px', alignItems: 'center' }}>
+                <div className="d-flex justify-center gap-md align-center" style={{ marginTop: '16px' }}>
                   <button 
                     className="btn-secondary" 
                     onClick={() => setProductPage(p => Math.max(1, p - 1))}
@@ -1468,12 +1429,12 @@ export default function Home() {
         {/* MODAL APLICAR DESCUENTO */}
         {isMpModalOpen && (
           <div className="modal-overlay">
-            <div className="modal-content scale-up" style={{ maxWidth: '400px', textAlign: 'center', padding: '32px' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(0, 158, 227, 0.1)', color: '#009EE3', marginBottom: '16px' }}>
+            <div className="modal-content scale-up text-center"   style={{ maxWidth: '400px', padding: '32px' }}>
+              <div className="align-center justify-center" style={{ display: 'inline-flex', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(0, 158, 227, 0.1)', color: '#009EE3', marginBottom: '16px' }}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
               </div>
               
-              <h2 style={{ fontSize: '20px', fontWeight: '800', marginBottom: '8px' }}>
+              <h2 className="font-extrabold" style={{ fontSize: '20px', marginBottom: '8px' }}>
                 {mpMode === 'QR' ? 'Cobro con Código QR' : 'Cobro con Lector Smart POS'}
               </h2>
               
@@ -1484,18 +1445,18 @@ export default function Home() {
               </p>
 
               {mpMode === 'QR' && mpQrData ? (
-                <div style={{ background: '#fff', padding: '16px', borderRadius: '12px', display: 'inline-block', marginBottom: '24px' }}>
+                <div className="p-md" style={{ background: '#fff', borderRadius: '12px', display: 'inline-block', marginBottom: '24px' }}>
                   {/* Simulador visual de QR */}
                   <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(mpQrData)}`} alt="QR Code" style={{ width: '200px', height: '200px' }} />
                 </div>
               ) : (
                 <div style={{ padding: '40px', background: 'var(--bg-tertiary)', borderRadius: '12px', marginBottom: '24px' }}>
                   <div className="spinner" style={{ margin: '0 auto' }}></div>
-                  <p style={{ marginTop: '16px', fontSize: '13px', fontWeight: '600' }}>Conectando con Mercado Pago...</p>
+                  <p className="font-semibold" style={{ marginTop: '16px', fontSize: '13px' }}>Conectando con Mercado Pago...</p>
                 </div>
               )}
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div className="d-flex flex-col gap-md">
                 <button 
                   className="btn-primary"
                   style={{ background: '#009EE3', color: 'white', borderColor: '#009EE3' }}
@@ -1538,7 +1499,7 @@ export default function Home() {
                 <h2>Aplicar Descuento</h2>
                 <button onClick={() => setIsDescuentoModalOpen(false)} className="close-btn">&times;</button>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
+              <div className="d-flex flex-col gap-lg" style={{ marginTop: '16px' }}>
                 <div className="form-group">
                   <label className="form-label">Motivo o Cupón</label>
                   <input type="text" className="form-input" value={discountMotivo} onChange={e => setDiscountMotivo(e.target.value)} placeholder="Ej. Cliente VIP, PROMO20" />
@@ -1551,7 +1512,7 @@ export default function Home() {
                 {isVendedor && (
                   <div className="form-group" style={{ background: 'var(--bg-secondary)', padding: '12px', borderRadius: '8px', border: '1px dashed hsl(var(--danger))' }}>
                     <label className="form-label" style={{ color: 'hsl(var(--danger))' }}>PIN de Autorización (Administrador)</label>
-                    <input type="password" maxLength={6} className="form-input" value={pinAutorizacion} onChange={e => setPinAutorizacion(e.target.value)} placeholder="****" style={{ textAlign: 'center', letterSpacing: '8px', fontSize: '20px' }} />
+                    <input className="form-input text-center" type="password" maxLength={6}  value={pinAutorizacion} onChange={e => setPinAutorizacion(e.target.value)} placeholder="****"  style={{ letterSpacing: '8px', fontSize: '20px' }} />
                     <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>Requerido para autorizar este descuento.</span>
                   </div>
                 )}
@@ -1639,11 +1600,11 @@ export default function Home() {
             {/* Columna Izquierda: Catálogo Visual */}
             <div className="pos-catalog-panel">
               <div className="pos-catalog-header">
-                <input
+                <input className="form-input w-full"
                   type="text"
                   placeholder="Buscar por nombre, SKU o marca..."
-                  className="form-input"
-                  style={{ width: '100%', fontSize: '15px' }}
+                  
+                   style={{ fontSize: '15px' }}
                   value={posSearchQuery}
                   onChange={(e) => setPosSearchQuery(e.target.value)}
                   autoFocus
@@ -1673,17 +1634,7 @@ export default function Home() {
                       <div 
                         key={variante.id}
                         onClick={() => addItem(variante)}
-                        style={{
-                          background: 'var(--bg-primary)',
-                          borderRadius: '12px',
-                          border: '1px solid var(--border-color)',
-                          overflow: 'hidden',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
-                        }}
+                        className="overflow-hidden d-flex flex-col" style={{ background: 'var(--bg-primary)', borderRadius: '12px', border: '1px solid var(--border-color)', cursor: 'pointer', transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.02)' }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.transform = 'translateY(-4px)';
                           e.currentTarget.style.boxShadow = '0 12px 24px rgba(0,0,0,0.08)';
@@ -1700,11 +1651,11 @@ export default function Home() {
                           {variante.producto.nombre.substring(0, 2).toUpperCase()}
                         </div>
                         
-                        <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+                        <div className="d-flex flex-col gap-xs flex-1" style={{ padding: '12px' }}>
                           <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{variante.sku}</span>
-                          <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)', lineHeight: 1.2 }}>{variante.producto.nombre}</span>
+                          <span className="font-semibold" style={{ fontSize: '14px', color: 'var(--text-primary)', lineHeight: 1.2 }}>{variante.producto.nombre}</span>
                           <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{variantName}</span>
-                          <span style={{ fontSize: '16px', fontWeight: '800', color: 'hsl(var(--primary))', marginTop: 'auto', paddingTop: '8px' }}>
+                          <span className="font-extrabold" style={{ fontSize: '16px', color: 'hsl(var(--primary))', marginTop: 'auto', paddingTop: '8px' }}>
                             ${Number(variante.precio_venta).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                           </span>
                         </div>
@@ -1715,16 +1666,16 @@ export default function Home() {
             </div>
 
             {/* Columna Derecha: Panel de Carrito y Cobro (DESKTOP ONLY) */}
-            <div className="pos-checkout-panel desktop-only" style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+            <div className="pos-checkout-panel desktop-only d-flex flex-col overflow-hidden"   style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
               {renderCartPanel()}
             </div>
 
             {/* Bottom Bar Flotante (MOBILE ONLY) */}
-            <div className="mobile-cart-bar mobile-only" style={{ flexDirection: 'column', gap: '12px', alignItems: 'stretch' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 600 }}>Ticket ({cartItems.length} ítems)</span>
-                  <span style={{ fontSize: '22px', fontWeight: '800', color: 'hsl(var(--primary))', lineHeight: 1 }}>
+            <div className="mobile-cart-bar mobile-only flex-col gap-md"   style={{ alignItems: 'stretch' }}>
+              <div className="d-flex justify-between align-center">
+                <div className="d-flex flex-col">
+                  <span className="font-semibold" style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Ticket ({cartItems.length} ítems)</span>
+                  <span className="font-extrabold" style={{ fontSize: '22px', color: 'hsl(var(--primary))', lineHeight: 1 }}>
                     ${cartItems.reduce((acc, item) => acc + (item.subtotal * item.cantidad), 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                   </span>
                 </div>
@@ -1738,7 +1689,7 @@ export default function Home() {
                 </button>
               </div>
               
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div className="d-flex gap-sm">
                 <button 
                   type="button"
                   className="btn-secondary" 
@@ -1748,10 +1699,10 @@ export default function Home() {
                 >
                   Vaciar
                 </button>
-                <button 
+                <button className="btn-primary flex-1 font-bold" 
                   type="button"
-                  className="btn-primary" 
-                  style={{ flex: 1, padding: '12px', borderRadius: '8px', fontSize: '15px', fontWeight: '700', boxShadow: '0 4px 12px rgba(var(--primary-rgb), 0.3)' }}
+                   
+                   style={{ padding: '12px', borderRadius: '8px', fontSize: '15px', boxShadow: '0 4px 12px rgba(var(--primary-rgb), 0.3)' }}
                   onClick={() => setIsMobileCartOpen(true)}
                   disabled={cartItems.length === 0}
                 >
@@ -1764,10 +1715,10 @@ export default function Home() {
             {isMobileCartOpen && (
               <div className="mobile-cart-drawer mobile-only">
                 <div className="drawer-header">
-                  <h3 style={{ fontSize: '18px', fontWeight: '700' }}>Detalle del Ticket</h3>
+                  <h3 className="font-bold" style={{ fontSize: '18px' }}>Detalle del Ticket</h3>
                   <button onClick={() => setIsMobileCartOpen(false)} className="close-btn">&times;</button>
                 </div>
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', paddingBottom: '80px' /* Espacio inferior extra para scrollear */ }}>
+                <div className="flex-1 d-flex flex-col overflow-hidden" style={{ paddingBottom: '80px' /* Espacio inferior extra para scrollear */ }}>
                   {renderCartPanel()}
                 </div>
               </div>
@@ -1778,7 +1729,7 @@ export default function Home() {
         )}
 
         {activeTab === 'sales' && (
-          <div style={{ padding: '24px' }}>
+          <div className="p-lg">
             <div className="catalog-section">
               <div className="product-table-wrapper">
                 <table className="product-table">
@@ -1790,30 +1741,30 @@ export default function Home() {
                       <th>Vendedor</th>
                       <th>Método de Pago</th>
                       <th>Estado Fiscal</th>
-                      <th style={{ textAlign: 'right' }}>Total</th>
-                      <th style={{ textAlign: 'center' }}>Acciones</th>
+                      <th className="text-right">Total</th>
+                      <th className="text-center">Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
                     {isLoadingSales ? (
                       <tr>
-                        <td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                        <td colSpan={8} className="text-center" style={{ padding: '40px', color: 'var(--text-muted)' }}>
                           Cargando historial de ventas...
                         </td>
                       </tr>
                     ) : sales.length === 0 ? (
                       <tr>
-                        <td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>
+                        <td colSpan={8} className="text-center" style={{ padding: '40px', color: 'var(--text-muted)' }}>
                           No se han registrado ventas en este comercio aún.
                         </td>
                       </tr>
                     ) : (
                       sales.map((sale) => (
                         <tr key={sale.id}>
-                          <td style={{ fontWeight: 'bold' }}>#{sale.id}</td>
+                          <td className="font-bold">#{sale.id}</td>
                           <td>{new Date(sale.fecha_venta).toLocaleString('es-AR')}</td>
                           <td>
-                            <span style={{ fontWeight: '600', display: 'block' }}>{sale.nombre_cliente}</span>
+                            <span className="font-semibold" style={{ display: 'block' }}>{sale.nombre_cliente}</span>
                             {sale.id_cliente && <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>DNI/CUIT: {sale.id_cliente}</span>}
                           </td>
                           <td>{sale.usuario.nombre}</td>
@@ -1831,10 +1782,10 @@ export default function Home() {
                               {sale.estado_arca}
                             </span>
                           </td>
-                          <td style={{ textAlign: 'right', fontWeight: 'bold', fontFamily: 'monospace' }}>
+                          <td className="text-right font-bold" style={{ fontFamily: 'monospace' }}>
                             ${parseFloat(sale.total as string).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                           </td>
-                          <td style={{ textAlign: 'center' }}>
+                          <td className="text-center">
                             <button
                               className="btn-secondary"
                               style={{ padding: '4px 10px', fontSize: '12px', width: 'auto', height: 'auto' }}
@@ -1855,7 +1806,7 @@ export default function Home() {
 
               {/* Paginación Ventas */}
               {salesMeta && salesMeta.totalPages > 1 && (
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '16px', alignItems: 'center' }}>
+                <div className="d-flex justify-center gap-md align-center" style={{ marginTop: '16px' }}>
                   <button 
                     className="btn-secondary" 
                     onClick={() => setSalesPage(p => Math.max(1, p - 1))}
@@ -1880,13 +1831,13 @@ export default function Home() {
         )}
 
         {activeTab === 'subscription' && (
-          <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto' }}>
-            <div className="auth-card scale-up" style={{ textAlign: 'center', padding: '40px 24px', margin: '0' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(var(--primary-rgb), 0.1)', color: 'hsl(var(--primary))', marginBottom: '24px' }}>
+          <div className="p-lg" style={{ maxWidth: '800px', margin: '0 auto' }}>
+            <div className="auth-card scale-up text-center m-0"   style={{ padding: '40px 24px' }}>
+              <div className="align-center justify-center" style={{ display: 'inline-flex', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(var(--primary-rgb), 0.1)', color: 'hsl(var(--primary))', marginBottom: '24px' }}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
               </div>
               
-              <h2 style={{ fontSize: '28px', fontWeight: '800', marginBottom: '8px' }}>
+              <h2 className="font-extrabold" style={{ fontSize: '28px', marginBottom: '8px' }}>
                 Plan Actual: <span style={{ color: tenant?.estado_plan === 'ACTIVE' ? 'hsl(var(--success))' : 'inherit' }}>{tenant?.estado_plan}</span>
               </h2>
               
@@ -1897,14 +1848,14 @@ export default function Home() {
                 {tenant?.estado_plan === 'CANCELED' && 'Tu suscripción ha sido cancelada. Renueva tu plan para recuperar el acceso.'}
               </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px', textAlign: 'left' }}>
+              <div className="gap-xl text-left" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', marginBottom: '32px' }}>
                 <div style={{ padding: '20px', borderRadius: '12px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
-                  <span style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '700', marginBottom: '4px' }}>Empresa</span>
+                  <span className="font-bold" style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Empresa</span>
                   <strong style={{ fontSize: '16px' }}>{tenant?.razon_social}</strong>
                   <div style={{ marginTop: '8px', fontSize: '14px', color: 'var(--text-secondary)' }}>CUIT: {tenant?.cuit}</div>
                 </div>
                 <div style={{ padding: '20px', borderRadius: '12px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)' }}>
-                  <span style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: '700', marginBottom: '4px' }}>Próximo Vencimiento</span>
+                  <span className="font-bold" style={{ display: 'block', fontSize: '13px', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Próximo Vencimiento</span>
                   <strong style={{ fontSize: '16px' }}>
                     {tenant?.fecha_proximo_cobro ? new Date(tenant.fecha_proximo_cobro).toLocaleDateString('es-AR') : (tenant?.fin_prueba ? new Date(tenant.fin_prueba).toLocaleDateString('es-AR') : 'No definido')}
                   </strong>
@@ -1948,7 +1899,7 @@ export default function Home() {
             </div>
 
             <form onSubmit={handleCreateProduct}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="gap-lg" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
                 <div className="form-group">
                   <label className="form-label">Nombre del Producto</label>
                   <input
@@ -1973,7 +1924,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="gap-lg" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
                 <div className="form-group">
                   <label className="form-label">Categoría / Rubro</label>
                   <select
@@ -1989,7 +1940,7 @@ export default function Home() {
 
                 <div className="form-group">
                   <label className="form-label">¿Es un Servicio?</label>
-                  <div style={{ display: 'flex', alignItems: 'center', height: '42px', gap: '8px' }}>
+                  <div className="d-flex align-center gap-sm" style={{ height: '42px' }}>
                     <input
                       type="checkbox"
                       checked={esServicio}
@@ -2017,7 +1968,7 @@ export default function Home() {
 
               {/* Formulario de Variantes */}
               <div className="variants-section">
-                <h3 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px', color: 'hsl(var(--primary))' }}>
+                <h3 className="font-bold" style={{ fontSize: '15px', marginBottom: '16px', color: 'hsl(var(--primary))' }}>
                   Datos de la Variante Principal (SKU)
                 </h3>
 
@@ -2071,12 +2022,12 @@ export default function Home() {
 
                   {/* Carga dinámica de atributos según el rubro */}
                   <div className="variant-full-row" style={{ borderTop: '1px dashed var(--border-color)', paddingTop: '12px' }}>
-                    <h4 style={{ fontSize: '12px', fontWeight: '700', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                    <h4 className="font-bold" style={{ fontSize: '12px', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '12px' }}>
                       Atributos Extra de Rubro ({categoria})
                     </h4>
 
                     {categoria === 'Indumentaria' && (
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                      <div className="gap-lg" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
                         <div className="form-group">
                           <label className="form-label">Talle</label>
                           <select className="form-input" value={talle} onChange={(e) => setTalle(e.target.value)}>
@@ -2105,7 +2056,7 @@ export default function Home() {
                     )}
 
                     {categoria === 'Almacén' && (
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                      <div className="gap-lg" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
                         <div className="form-group">
                           <label className="form-label">Unidad de Medida</label>
                           <select className="form-input" value={unidad} onChange={(e) => setUnidad(e.target.value)}>
@@ -2117,7 +2068,7 @@ export default function Home() {
                         </div>
                         <div className="form-group">
                           <label className="form-label">¿Es Fraccionable?</label>
-                          <div style={{ display: 'flex', alignItems: 'center', height: '42px', gap: '8px' }}>
+                          <div className="d-flex align-center gap-sm" style={{ height: '42px' }}>
                             <input
                               type="checkbox"
                               checked={fraccionable}
@@ -2133,7 +2084,7 @@ export default function Home() {
                     )}
 
                     {categoria === 'Otros' && (
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                      <div className="gap-lg" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
                         <div className="form-group">
                           <label className="form-label">Nombre del Atributo (Ej: material)</label>
                           <input
@@ -2160,7 +2111,7 @@ export default function Home() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+              <div className="d-flex gap-md" style={{ marginTop: '24px' }}>
                 <button type="submit" className="btn-primary" disabled={createProductMutation.isPending}>
                   {createProductMutation.isPending ? 'Guardando...' : 'Crear Producto'}
                 </button>
@@ -2184,7 +2135,7 @@ export default function Home() {
               </button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid var(--border-color)', fontSize: '13px' }}>
+            <div className="gap-lg" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid var(--border-color)', fontSize: '13px' }}>
               <div>
                 <span style={{ color: 'var(--text-secondary)', display: 'block' }}>Fecha y Hora:</span>
                 <strong>{new Date(selectedSale.fecha_venta).toLocaleString('es-AR')}</strong>
@@ -2204,15 +2155,15 @@ export default function Home() {
               </div>
             </div>
 
-            <h3 style={{ fontSize: '14px', fontWeight: '700', marginBottom: '10px' }}>Artículos Vendidos</h3>
+            <h3 className="font-bold" style={{ fontSize: '14px', marginBottom: '10px' }}>Artículos Vendidos</h3>
             <div style={{ overflowX: 'auto', marginBottom: '20px' }}>
-              <table className="product-table" style={{ width: '100%', fontSize: '13px' }}>
+              <table className="product-table w-full"   style={{ fontSize: '13px' }}>
                 <thead>
                   <tr>
-                    <th style={{ padding: '8px' }}>Artículo</th>
-                    <th style={{ padding: '8px', textAlign: 'center' }}>Cant.</th>
-                    <th style={{ padding: '8px', textAlign: 'right' }}>Unitario</th>
-                    <th style={{ padding: '8px', textAlign: 'right' }}>Subtotal</th>
+                    <th className="p-sm">Artículo</th>
+                    <th className="p-sm text-center">Cant.</th>
+                    <th className="p-sm text-right">Unitario</th>
+                    <th className="p-sm text-right">Subtotal</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2224,13 +2175,13 @@ export default function Home() {
 
                     return (
                       <tr key={det.id}>
-                        <td style={{ padding: '8px' }}>
-                          <span style={{ fontWeight: '600', display: 'block' }}>{nombreDesc}</span>
+                        <td className="p-sm">
+                          <span className="font-semibold" style={{ display: 'block' }}>{nombreDesc}</span>
                           <span style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{det.variante.sku}</span>
                         </td>
-                        <td style={{ padding: '8px', textAlign: 'center' }}>{Number(det.cantidad)}</td>
-                        <td style={{ padding: '8px', textAlign: 'right' }}>${parseFloat(det.precio_unitario as string).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
-                        <td style={{ padding: '8px', textAlign: 'right', fontWeight: 'bold' }}>${parseFloat(det.subtotal as string).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
+                        <td className="p-sm text-center">{Number(det.cantidad)}</td>
+                        <td className="p-sm text-right">${parseFloat(det.precio_unitario as string).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
+                        <td className="p-sm text-right font-bold">${parseFloat(det.subtotal as string).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
                       </tr>
                     );
                   })}
@@ -2238,22 +2189,22 @@ export default function Home() {
               </table>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-tertiary)', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+            <div className="d-flex justify-between align-center p-md" style={{ background: 'var(--bg-tertiary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
               <div>
                 <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Estado de Facturación</span>
-                <span style={{ display: 'block', fontWeight: 'bold', fontSize: '14px', color: selectedSale.estado_arca === 'APROBADO' ? 'hsl(var(--success))' : 'var(--text-primary)' }}>
+                <span className="font-bold" style={{ display: 'block', fontSize: '14px', color: selectedSale.estado_arca === 'APROBADO' ? 'hsl(var(--success))' : 'var(--text-primary)' }}>
                   {selectedSale.estado_arca}
                 </span>
               </div>
-              <div style={{ textAlign: 'right' }}>
+              <div className="text-right">
                 <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Monto Total Pagado</span>
-                <span style={{ display: 'block', fontWeight: 'bold', fontSize: '20px', fontFamily: 'monospace', color: 'hsl(var(--primary))' }}>
+                <span className="font-bold" style={{ display: 'block', fontSize: '20px', fontFamily: 'monospace', color: 'hsl(var(--primary))' }}>
                   ${parseFloat(selectedSale.total as string).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                 </span>
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '12px', marginTop: '24px', justifyContent: 'flex-end' }}>
+            <div className="d-flex gap-md" style={{ marginTop: '24px', justifyContent: 'flex-end' }}>
               <button type="button" className="btn-secondary" style={{ width: 'auto' }} onClick={() => setIsSaleDetailOpen(false)}>
                 Cerrar
               </button>
