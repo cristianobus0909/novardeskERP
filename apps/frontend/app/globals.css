@@ -237,6 +237,10 @@ body {
 }
 
 .sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: hidden;
   background: var(--bg-secondary);
   border-right: 1px solid var(--border-color);
   padding: 24px 20px;
@@ -249,6 +253,15 @@ body {
   overflow: hidden;
   white-space: nowrap;
   z-index: 50;
+}
+
+/* Hide scrollbar for clean sidebar look */
+.sidebar-top::-webkit-scrollbar {
+  display: none;
+}
+.sidebar-top {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .sidebar:hover {
@@ -301,6 +314,8 @@ body {
 }
 
 .sub-menu-item {
+  padding-top: 8px;
+  padding-bottom: 8px;
   padding-left: 11px;
   font-size: 13px;
   font-weight: 500;

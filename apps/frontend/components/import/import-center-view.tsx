@@ -114,7 +114,7 @@ export function ImportCenterView() {
               setSelectedEntity(e.target.value as EntityType);
               setParsedData([]);
             }}
-            style={{ width: '200px', margin: 0 }}
+            style={{ width: '240px', height: '42px', margin: 0, flexShrink: 0 }}
           >
             <option value="productos">Catálogo de Productos</option>
             <option value="clientes">Directorio de Clientes</option>
@@ -122,12 +122,12 @@ export function ImportCenterView() {
             <option value="stock">Actualización de Stock</option>
           </select>
           
-          <button onClick={downloadTemplate} className="btn-secondary d-flex align-center gap-xs" style={{ width: 'auto' }}>
+          <button onClick={downloadTemplate} className="btn-secondary d-flex align-center gap-xs justify-center" style={{ width: '180px', height: '42px', flexShrink: 0, padding: '0 16px' }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            Plantilla {selectedEntity === 'stock' ? 'Stock' : selectedEntity === 'proveedores' ? 'Proveedores' : selectedEntity === 'clientes' ? 'Clientes' : 'Productos'}
+            Descargar Plantilla
           </button>
 
-          <label className="btn-secondary d-flex align-center gap-xs" style={{ cursor: 'pointer', margin: 0, borderStyle: 'dashed', borderColor: 'var(--text-secondary)', width: 'auto' }}>
+          <label className="btn-secondary d-flex align-center gap-xs justify-center" style={{ cursor: 'pointer', margin: 0, borderStyle: 'dashed', borderColor: 'var(--text-secondary)', width: '160px', height: '42px', flexShrink: 0, padding: '0 16px' }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
             Subir Excel
             <input 

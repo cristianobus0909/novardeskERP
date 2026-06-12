@@ -940,7 +940,7 @@ export default function Home() {
           setIsFinanzasDropdownOpen(false);
         }}
       >
-        <div>
+        <div className="sidebar-top flex-1 overflow-y-auto d-flex flex-col" style={{ paddingBottom: '16px' }}>
           <div className="logo-section d-flex align-center gap-md p-sm" 
              
              style={{ cursor: 'pointer', transition: 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)', userSelect: 'none' }}
