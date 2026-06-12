@@ -95,122 +95,116 @@ export function ImportCenterView() {
   };
 
   return (
-    <div className="p-lg h-full d-flex flex-col gap-lg fade-in">
-      <div>
-        <h2 className="font-bold text-lg mb-sm">Centro de Importación Masiva</h2>
-        <p className="text-muted text-sm">Descargá una plantilla, completala en Excel y subila para importar datos de forma rápida.</p>
-      </div>
-
-      <div className="d-flex gap-lg">
-        {/* Panel Izquierdo: Controles */}
-        <div className="profile-card d-flex flex-col gap-md p-md bg-surface border rounded-md" style={{ width: '350px' }}>
+    <div className="p-lg h-full d-flex flex-col gap-md fade-in">
+      <div className="d-flex align-center justify-between border-b pb-md">
+        <div>
+          <h2 className="font-bold text-lg">Centro de Importación</h2>
+          <p className="text-muted text-sm mt-xs">Importa catálogos de productos y clientes desde Excel.</p>
+        </div>
+        
+        <div className="d-flex align-center gap-sm">
+          <select 
+            className="form-input" 
+            value={selectedEntity} 
+            onChange={(e) => {
+              setSelectedEntity(e.target.value as EntityType);
+              setParsedData([]);
+            }}
+            style={{ width: '200px', margin: 0 }}
+          >
+            <option value="productos">Catálogo de Productos</option>
+            <option value="clientes">Directorio de Clientes</option>
+          </select>
           
-          <div className="form-group mb-0">
-            <label className="form-label">1. ¿Qué deseas importar?</label>
-            <select 
-              className="form-input" 
-              value={selectedEntity} 
-              onChange={(e) => {
-                setSelectedEntity(e.target.value as EntityType);
-                setParsedData([]);
-              }}
-            >
-              <option value="productos">Catálogo de Productos</option>
-              <option value="clientes">Directorio de Clientes</option>
-            </select>
-          </div>
+          <button onClick={downloadTemplate} className="btn-secondary d-flex align-center gap-xs">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Plantilla
+          </button>
 
-          <div className="border-t pt-sm">
-            <label className="form-label">2. Descargar Plantilla</label>
-            <p className="text-muted text-sm mb-sm">Usá nuestro archivo pre-formateado para asegurar que los datos se carguen correctamente.</p>
-            <button onClick={downloadTemplate} className="btn-secondary w-full d-flex align-center justify-center gap-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              Descargar {selectedEntity === 'productos' ? 'Productos.xlsx' : 'Clientes.xlsx'}
-            </button>
-          </div>
-
-          <div className="border-t pt-sm">
-            <label className="form-label">3. Subir Archivo</label>
+          <label className="btn-secondary d-flex align-center gap-xs" style={{ cursor: 'pointer', margin: 0, borderStyle: 'dashed', borderColor: 'var(--text-secondary)' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            Subir Excel
             <input 
               type="file" 
               accept=".xlsx, .xls, .csv" 
               onChange={handleFileUpload}
-              className="form-input p-sm"
-              style={{ padding: '8px' }}
+              style={{ display: 'none' }}
             />
-          </div>
-
-          {parsedData.length > 0 && (
-            <div className="border-t pt-sm mt-auto">
-               <button 
-                onClick={handleConfirm} 
-                disabled={hasErrors}
-                className="btn-primary w-full"
-                style={{ opacity: hasErrors ? 0.5 : 1 }}
-              >
-                Confirmar Importación ({parsedData.length} filas)
-              </button>
-              {hasErrors && (
-                <p className="text-sm text-center mt-sm" style={{ color: 'hsl(var(--danger))' }}>
-                  Hay errores en los datos que deben ser corregidos.
-                </p>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Panel Derecho: Vista Previa */}
-        <div className="flex-1 bg-surface border rounded-md p-md d-flex flex-col">
-          <h3 className="font-bold mb-md">Vista Previa de Datos</h3>
-          
-          {parsedData.length === 0 ? (
-            <div className="flex-1 d-flex flex-col align-center justify-center text-muted text-center p-xl border" style={{ borderStyle: 'dashed', borderRadius: '8px' }}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mb-md"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-              <p>Aún no has subido ningún archivo.</p>
-              <p className="text-sm">Subí tu Excel para ver la validación aquí.</p>
-            </div>
-          ) : (
-            <div className="flex-1 overflow-y-auto">
-              <table className="product-table text-sm">
-                <thead>
-                  <tr>
-                    <th>Fila</th>
-                    <th>Identificador</th>
-                    <th>Nombre / Razón Social</th>
-                    <th>Estado</th>
-                    <th>Observaciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {parsedData.map((row) => {
-                    const idCol = selectedEntity === 'productos' ? row.codigo : row.cuit_dni;
-                    const nameCol = selectedEntity === 'productos' ? row.nombre : row.razon_social;
-                    const isError = row._errors && row._errors.length > 0;
-
-                    return (
-                      <tr key={row._index} style={{ background: isError ? 'rgba(239, 68, 68, 0.05)' : 'transparent' }}>
-                        <td className="text-muted">#{row._index}</td>
-                        <td className="font-semibold">{idCol || '-'}</td>
-                        <td>{nameCol || '-'}</td>
-                        <td>
-                          {isError ? (
-                            <span className="badge" style={{ background: 'hsl(var(--danger))', color: 'white' }}>Error</span>
-                          ) : (
-                            <span className="badge" style={{ background: 'hsl(var(--success))', color: 'white' }}>Ok</span>
-                          )}
-                        </td>
-                        <td style={{ color: isError ? 'hsl(var(--danger))' : 'inherit' }}>
-                          {isError ? row._errors.join(', ') : 'Listo para importar'}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+          </label>
         </div>
       </div>
+
+      <div className="flex-1 bg-surface border rounded-md d-flex flex-col overflow-hidden">
+        {isValidating ? (
+          <div className="flex-1 d-flex flex-col align-center justify-center text-muted">
+            <div className="spinner mb-md" style={{ width: '32px', height: '32px', border: '3px solid var(--border-color)', borderTopColor: 'hsl(var(--primary))', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+            <p>Validando datos con el servidor...</p>
+          </div>
+        ) : parsedData.length === 0 ? (
+          <div className="flex-1 d-flex flex-col align-center justify-center text-muted text-center p-xl">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="mb-md"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+            <p className="font-semibold text-primary">No hay datos cargados</p>
+            <p className="text-sm mt-xs">Seleccioná qué querés importar, descargá la plantilla y subila para visualizar los datos aquí.</p>
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto">
+            <table className="product-table text-sm w-full">
+              <thead style={{ position: 'sticky', top: 0, background: 'var(--bg-secondary)', zIndex: 1 }}>
+                <tr>
+                  <th style={{ width: '60px', textAlign: 'center' }}>#</th>
+                  <th>Identificador</th>
+                  <th>Nombre / Razón Social</th>
+                  <th style={{ width: '100px' }}>Estado</th>
+                  <th>Observaciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {parsedData.map((row) => {
+                  const idCol = selectedEntity === 'productos' ? row.codigo : row.cuit_dni;
+                  const nameCol = selectedEntity === 'productos' ? row.nombre : row.razon_social;
+                  const isError = row._errors && row._errors.length > 0;
+
+                  return (
+                    <tr key={row._index} style={{ background: isError ? 'rgba(239, 68, 68, 0.04)' : 'transparent' }}>
+                      <td className="text-muted text-center">{row._index}</td>
+                      <td className="font-semibold">{idCol || '-'}</td>
+                      <td>{nameCol || '-'}</td>
+                      <td>
+                        {isError ? (
+                          <span className="badge" style={{ background: 'rgba(239, 68, 68, 0.1)', color: 'hsl(var(--danger))', border: '1px solid rgba(239, 68, 68, 0.2)' }}>Error</span>
+                        ) : (
+                          <span className="badge" style={{ background: 'rgba(34, 197, 94, 0.1)', color: 'hsl(var(--success))', border: '1px solid rgba(34, 197, 94, 0.2)' }}>Válido</span>
+                        )}
+                      </td>
+                      <td style={{ color: isError ? 'hsl(var(--danger))' : 'var(--text-muted)' }}>
+                        {isError ? row._errors.join(' • ') : 'Listo para importar'}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {parsedData.length > 0 && (
+        <div className="d-flex align-center justify-between border-t pt-md mt-auto">
+          <div className="text-sm text-muted d-flex gap-lg">
+            <span>Total filas: <strong style={{ color: 'var(--text-primary)' }}>{parsedData.length}</strong></span>
+            <span>Errores: <strong style={{ color: hasErrors ? 'hsl(var(--danger))' : 'var(--text-primary)' }}>{parsedData.filter(r => r._errors?.length).length}</strong></span>
+          </div>
+          <button 
+            onClick={handleConfirm} 
+            disabled={hasErrors || isValidating}
+            className="btn-primary d-flex align-center gap-sm"
+            style={{ opacity: hasErrors ? 0.5 : 1 }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+            Confirmar e Importar
+          </button>
+        </div>
+      )}
     </div>
   );
 }

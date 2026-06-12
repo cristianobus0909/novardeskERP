@@ -1086,7 +1086,7 @@ export default function Home() {
                 </li>
 
                 {/* Sub-menú Contabilidad */}
-                <div className="overflow-hidden" style={{ maxHeight: isFinanzasDropdownOpen ? '300px' : '0', transition: 'max-height 0.3s ease' }}>
+                <div className={`sidebar-dropdown ${isFinanzasDropdownOpen ? 'open' : ''}`}>
                   {([
                     { id: 'cuentas', label: 'Cuentas Contables', icon: <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg> },
                     { id: 'movimientos', label: 'Libro de Caja', icon: <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg> },
