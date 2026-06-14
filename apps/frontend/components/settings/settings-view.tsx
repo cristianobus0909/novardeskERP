@@ -10,8 +10,19 @@ export function SettingsView() {
   const updateTenantMutation = useUpdateTenantProfile();
   const createEmployeeMutation = useCreateEmployee();
 
+  // Limites de usuarios
+  let baseUserLimit = 1;
+  if (tenant?.plan_tier === 'BASICO') baseUserLimit = 2;
+  else if (tenant?.plan_tier === 'PREMIUM') baseUserLimit = 3;
+  else if (tenant?.plan_tier === 'FULL') baseUserLimit = 4;
+
+  const allowedUsersLimit = baseUserLimit + ((tenant as any)?.usuarios_adicionales || 0);
+  const currentUsersCount = employees.length;
+  const isUserLimitReached = currentUsersCount >= allowedUsersLimit;
+
   // Tenant form state
   const [razonSocial, setRazonSocial] = useState(tenant?.razon_social || '');
+  const [rubro, setRubro] = useState(tenant?.rubro || 'Kiosco/Minisuper');
   const [cuit, setCuit] = useState(tenant?.cuit || '');
   const [domicilioFiscal, setDomicilioFiscal] = useState((tenant as any)?.domicilio_fiscal || '');
   const [condicionIva, setCondicionIva] = useState((tenant as any)?.condicion_iva || '');
@@ -46,6 +57,7 @@ export function SettingsView() {
     try {
       const result = await updateTenantMutation.mutateAsync({
         razon_social: razonSocial,
+        rubro: rubro,
         cuit: cuit,
         domicilio_fiscal: domicilioFiscal,
         condicion_iva: condicionIva,
@@ -103,15 +115,31 @@ export function SettingsView() {
       <div className="profile-card p-lg"   style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'block' }}>
         <h2 className="font-bold" style={{ fontSize: '18px', marginBottom: '16px' }}>Perfil del Comercio</h2>
         <form onSubmit={handleUpdateTenant} className="gap-lg" style={{ display: 'grid', maxWidth: '400px' }}>
-          <div className="form-group">
-            <label className="form-label">Razón Social o Nombre del Negocio</label>
-            <input
-              type="text"
-              className="form-input"
-              value={razonSocial}
-              onChange={(e) => setRazonSocial(e.target.value)}
-              required
-            />
+          <div className="gap-lg" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+            <div className="form-group">
+              <label className="form-label">Razón Social</label>
+              <input
+                type="text"
+                className="form-input"
+                value={razonSocial}
+                onChange={(e) => setRazonSocial(e.target.value)}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Rubro Comercial</label>
+              <select
+                className="form-input"
+                value={rubro}
+                onChange={(e) => setRubro(e.target.value)}
+              >
+                <option value="Kiosco/Minisuper">Kiosco / Minisuper</option>
+                <option value="Indumentaria/calzado/Accesorios">Indumentaria / Calzado / Accesorios</option>
+                <option value="Forrajeria/Semilleria">Forrajería / Semillería</option>
+                <option value="Farmacia">Farmacia</option>
+                <option value="General">Otro (General)</option>
+              </select>
+            </div>
           </div>
           <div className="form-group">
             <label className="form-label">CUIT / RUT (Opcional)</label>
@@ -251,10 +279,21 @@ export function SettingsView() {
       <div className="profile-card p-lg"   style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border-color)', display: 'block' }}>
         <div className="d-flex justify-between align-center" style={{ marginBottom: '16px' }}>
           <h2 className="font-bold" style={{ fontSize: '18px' }}>Gestión de Cuentas (Empleados)</h2>
-          <button onClick={() => setIsEmployeeModalOpen(true)} className="btn-primary" style={{ width: 'auto', padding: '6px 16px' }}>
+          <button 
+            onClick={() => setIsEmployeeModalOpen(true)} 
+            className="btn-primary" 
+            style={{ width: 'auto', padding: '6px 16px', opacity: isUserLimitReached ? 0.5 : 1 }}
+            disabled={isUserLimitReached}
+            title={isUserLimitReached ? "Límite de usuarios alcanzado" : "Registrar nuevo empleado"}
+          >
             + Nuevo Empleado
           </button>
         </div>
+        {isUserLimitReached && (
+          <div style={{ color: 'var(--danger)', fontSize: '13px', background: 'rgba(255, 71, 87, 0.05)', border: '1px solid var(--danger)', borderRadius: '6px', padding: '8px 12px', marginBottom: '16px' }}>
+            <strong>Límite de usuarios alcanzado:</strong> Tu plan actual {tenant?.plan_tier} permite hasta {allowedUsersLimit} usuarios ({baseUserLimit} base + {(tenant as any)?.usuarios_adicionales || 0} adicionales). Para registrar más empleados, contacta a soporte para contratar usuarios adicionales o mejora tu suscripción.
+          </div>
+        )}
 
         <div className="product-table-wrapper" style={{ marginTop: '16px' }}>
           <table className="product-table">

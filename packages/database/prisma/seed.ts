@@ -145,27 +145,30 @@ async function main() {
     },
   });
 
-  await prisma.productoVariante.createMany({
-    data: [
-      {
-        producto_id: jeanProducto.id,
-        tenant_id: trialTenant.id,
-        sku: 'JEAN-LEV-511-32-BLU',
-        codigo_barras: '7790011223344',
-        precio_venta: 45000.00,
-        stock_actual: 15.000,
-        atributos_extra: { talle: '32', color: 'Azul' },
-      },
-      {
-        producto_id: jeanProducto.id,
-        tenant_id: trialTenant.id,
-        sku: 'JEAN-LEV-511-34-BLK',
-        codigo_barras: '7790011223351',
-        precio_venta: 47000.00,
-        stock_actual: 8.000,
-        atributos_extra: { talle: '34', color: 'Negro' },
-      },
-    ],
+  const jeanVar1 = await prisma.productoVariante.create({
+    data: {
+      producto_id: jeanProducto.id,
+      tenant_id: trialTenant.id,
+      sku: 'JEAN-LEV-511-32-BLU',
+      codigo_barras: '7790011223344',
+      precio_venta: 45000.00,
+      costo: 27000.00,
+      stock_actual: 15.000,
+      atributos_extra: { talle: '32', color: 'Azul' },
+    },
+  });
+
+  const jeanVar2 = await prisma.productoVariante.create({
+    data: {
+      producto_id: jeanProducto.id,
+      tenant_id: trialTenant.id,
+      sku: 'JEAN-LEV-511-34-BLK',
+      codigo_barras: '7790011223351',
+      precio_venta: 47000.00,
+      costo: 28200.00,
+      stock_actual: 8.000,
+      atributos_extra: { talle: '34', color: 'Negro' },
+    },
   });
 
   // Producto Rubro: Almacén (Venta fraccionada por peso)
@@ -180,17 +183,49 @@ async function main() {
     },
   });
 
-  await prisma.productoVariante.create({
+  const quesoVar = await prisma.productoVariante.create({
     data: {
       producto_id: quesoProducto.id,
       tenant_id: trialTenant.id,
       sku: 'ALM-QUESO-CREM-LAPAULINA',
       codigo_barras: '7790022334455',
       precio_venta: 8500.00, // Precio por kg
+      costo: 5100.00,
       stock_actual: 45.250, // 45.25 kg en stock
       atributos_extra: { fraccionable: true, unidad: 'kg' },
     },
   });
+
+  // 8. Crear Listas de Precios de Ejemplo
+  console.log('💵 Seeding Price Lists...');
+  const listaMayorista = await prisma.listaPrecio.create({
+    data: {
+      tenant_id: trialTenant.id,
+      nombre: 'Lista Mayorista',
+    },
+  });
+
+  const listaDistribuidor = await prisma.listaPrecio.create({
+    data: {
+      tenant_id: trialTenant.id,
+      nombre: 'Lista Distribuidor',
+    },
+  });
+
+  await prisma.listaPrecioItem.createMany({
+    data: [
+      // Mayorista (10% descuento aprox)
+      { lista_precio_id: listaMayorista.id, variante_id: jeanVar1.id, precio: 40500.00 },
+      { lista_precio_id: listaMayorista.id, variante_id: jeanVar2.id, precio: 42300.00 },
+      { lista_precio_id: listaMayorista.id, variante_id: quesoVar.id, precio: 7650.00 },
+      
+      // Distribuidor (20% descuento aprox)
+      { lista_precio_id: listaDistribuidor.id, variante_id: jeanVar1.id, precio: 36000.00 },
+      { lista_precio_id: listaDistribuidor.id, variante_id: jeanVar2.id, precio: 37600.00 },
+      { lista_precio_id: listaDistribuidor.id, variante_id: quesoVar.id, precio: 6800.00 },
+    ],
+  });
+  console.log('💵 Price Lists seeded.');
 
   console.log('🌿 Database seeded successfully!');
 }

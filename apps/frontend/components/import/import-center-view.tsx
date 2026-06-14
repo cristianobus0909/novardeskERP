@@ -14,7 +14,7 @@ export function ImportCenterView() {
   const downloadTemplate = () => {
     let headers: string[] = [];
     if (selectedEntity === 'productos') {
-      headers = ['codigo', 'nombre', 'precio_venta', 'costo', 'stock_actual', 'categoria'];
+      headers = ['codigo', 'nombre', 'marca', 'descripcion', 'precio_venta', 'costo', 'stock_actual', 'categoria', 'codigo_barras'];
     } else if (selectedEntity === 'clientes') {
       headers = ['cuit_dni', 'razon_social', 'email', 'telefono', 'direccion', 'condicion_iva'];
     } else if (selectedEntity === 'proveedores') {

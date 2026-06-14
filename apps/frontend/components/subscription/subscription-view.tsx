@@ -3,8 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { apiRequest } from '../../lib/api-client';
 import { toast } from '../../store/use-toast-store';
+import { useAuthStore } from '../../store/use-auth-store';
 
 export function SubscriptionView() {
+  const { updateTenant } = useAuthStore();
   const [planData, setPlanData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubscribing, setIsSubscribing] = useState(false);
@@ -17,6 +19,9 @@ export function SubscriptionView() {
     try {
       const data = await apiRequest<any>('/tenants/my-plan');
       setPlanData(data);
+      if (data && data.plan_tier) {
+        updateTenant({ plan_tier: data.plan_tier, estado_plan: data.estado_plan });
+      }
     } catch (error: any) {
       toast.error('Error al cargar la información del plan: ' + error.message);
     } finally {
@@ -56,6 +61,32 @@ export function SubscriptionView() {
   const isActive = estadoSuscripcion === 'ACTIVE' || estadoSuscripcion === 'TRIAL';
   const isPastDue = estadoSuscripcion === 'PAST_DUE';
   const isCanceled = estadoSuscripcion === 'CANCELED';
+
+  const getTierWeight = (tier: string) => {
+    switch (tier) {
+      case 'TRIAL': return 0;
+      case 'BASICO': return 1;
+      case 'PREMIUM': return 2;
+      case 'FULL': return 3;
+      default: return 0;
+    }
+  };
+
+  const currentWeight = getTierWeight(planTier);
+
+  const getButtonText = (targetTier: string) => {
+    if (planTier === targetTier) return 'Plan Actual';
+    const targetWeight = getTierWeight(targetTier);
+    if (targetWeight > currentWeight) return 'Mejorar Plan';
+    return 'Bajar de Plan';
+  };
+
+  const getButtonClass = (targetTier: string) => {
+    if (planTier === targetTier) return 'btn-secondary w-full';
+    const targetWeight = getTierWeight(targetTier);
+    if (targetWeight < currentWeight) return 'btn-secondary w-full'; // Downgrades look less prominent
+    return 'btn-primary w-full';
+  };
 
   return (
     <div className="p-lg h-full overflow-y-auto fade-in" style={{ paddingBottom: '80px' }}>
@@ -111,11 +142,23 @@ export function SubscriptionView() {
               </li>
               <li className="d-flex align-center gap-sm">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--success, 142 76% 36%))" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span style={{ fontSize: '14px' }}>Catálogo: Máx 100 variantes</span>
+              </li>
+              <li className="d-flex align-center gap-sm">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--success, 142 76% 36%))" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span style={{ fontSize: '14px' }}>Hasta 1 usuario (empleado)</span>
+              </li>
+              <li className="d-flex align-center gap-sm">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--success, 142 76% 36%))" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 <span style={{ fontSize: '14px' }}>Punto de venta básico</span>
               </li>
               <li className="d-flex align-center gap-sm text-muted">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 <span style={{ fontSize: '14px', textDecoration: 'line-through' }}>Facturación Electrónica</span>
+              </li>
+              <li className="d-flex align-center gap-sm text-muted">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                <span style={{ fontSize: '14px', textDecoration: 'line-through' }}>Listas de Precios & Finanzas</span>
               </li>
             </ul>
 
@@ -140,22 +183,30 @@ export function SubscriptionView() {
               </li>
               <li className="d-flex align-center gap-sm">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--success, 142 76% 36%))" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span style={{ fontSize: '14px' }}>Catálogo: Máx 1.000 variantes</span>
+              </li>
+              <li className="d-flex align-center gap-sm">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--success, 142 76% 36%))" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span style={{ fontSize: '14px' }}>Hasta 2 usuarios simultáneos</span>
+              </li>
+              <li className="d-flex align-center gap-sm">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--success, 142 76% 36%))" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 <span style={{ fontSize: '14px' }}>Facturación Electrónica</span>
               </li>
               <li className="d-flex align-center gap-sm text-muted">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                <span style={{ fontSize: '14px', textDecoration: 'line-through' }}>Contabilidad Avanzada</span>
+                <span style={{ fontSize: '14px', textDecoration: 'line-through' }}>Listas de Precios & Finanzas</span>
               </li>
             </ul>
 
-            <button 
+              <button 
                 onClick={() => handleSubscribe('BASICO')} 
                 disabled={isSubscribing || planTier === 'BASICO'}
-                className={planTier === 'BASICO' ? "btn-secondary w-full" : "btn-primary w-full"} 
+                className={getButtonClass('BASICO')} 
                 style={{ opacity: isSubscribing ? 0.7 : 1 }}
               >
-                {planTier === 'BASICO' ? 'Plan Actual' : 'Suscribirse'}
-            </button>
+                {getButtonText('BASICO')}
+              </button>
           </div>
 
           {/* Plan Premium */}
@@ -174,26 +225,42 @@ export function SubscriptionView() {
             <ul className="flex-col gap-md" style={{ listStyle: 'none', padding: 0, margin: 0, marginBottom: '32px', flex: 1, display: 'flex' }}>
               <li className="d-flex align-center gap-sm font-semibold">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--primary))" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span style={{ fontSize: '14px' }}>Hasta 1500 ventas/mes</span>
+                <span style={{ fontSize: '14px' }}>Hasta 1.500 ventas/mes</span>
               </li>
               <li className="d-flex align-center gap-sm">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--success, 142 76% 36%))" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span style={{ fontSize: '14px' }}>Contabilidad y Cuentas</span>
+                <span style={{ fontSize: '14px' }}>Catálogo: Máx 10.000 variantes</span>
               </li>
               <li className="d-flex align-center gap-sm">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--success, 142 76% 36%))" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span style={{ fontSize: '14px' }}>Importación Masiva</span>
+                <span style={{ fontSize: '14px' }}>Hasta 3 usuarios simultáneos</span>
+              </li>
+              <li className="d-flex align-center gap-sm">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--success, 142 76% 36%))" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span style={{ fontSize: '14px' }}>Facturación Electrónica</span>
+              </li>
+              <li className="d-flex align-center gap-sm">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--success, 142 76% 36%))" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span style={{ fontSize: '14px' }}>Listas de Precios Múltiples</span>
+              </li>
+              <li className="d-flex align-center gap-sm">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--success, 142 76% 36%))" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span style={{ fontSize: '14px' }}>Contabilidad y Libro de Caja</span>
+              </li>
+              <li className="d-flex align-center gap-sm">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--success, 142 76% 36%))" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span style={{ fontSize: '14px' }}>Importación Masiva (Excel)</span>
               </li>
             </ul>
 
-            <button 
+              <button 
                 onClick={() => handleSubscribe('PREMIUM')} 
                 disabled={isSubscribing || planTier === 'PREMIUM'}
-                className={planTier === 'PREMIUM' ? "btn-secondary w-full" : "btn-primary w-full"} 
+                className={getButtonClass('PREMIUM')} 
                 style={{ opacity: isSubscribing ? 0.7 : 1 }}
               >
-                {planTier === 'PREMIUM' ? 'Plan Actual' : 'Suscribirse'}
-            </button>
+                {getButtonText('PREMIUM')}
+              </button>
           </div>
 
           {/* Plan Full */}
@@ -212,22 +279,34 @@ export function SubscriptionView() {
               </li>
               <li className="d-flex align-center gap-sm">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--success, 142 76% 36%))" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                <span style={{ fontSize: '14px' }}>Soporte técnico prioritario</span>
+                <span style={{ fontSize: '14px' }}>Catálogo de variantes ilimitado</span>
+              </li>
+              <li className="d-flex align-center gap-sm">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--success, 142 76% 36%))" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span style={{ fontSize: '14px' }}>Hasta 4 usuarios simultáneos</span>
+              </li>
+              <li className="d-flex align-center gap-sm">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--success, 142 76% 36%))" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span style={{ fontSize: '14px' }}>Facturación Electrónica</span>
               </li>
               <li className="d-flex align-center gap-sm">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--success, 142 76% 36%))" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 <span style={{ fontSize: '14px' }}>Todas las funcionalidades</span>
               </li>
+              <li className="d-flex align-center gap-sm">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="hsl(var(--success, 142 76% 36%))" strokeWidth="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span style={{ fontSize: '14px' }}>Soporte técnico prioritario</span>
+              </li>
             </ul>
 
-            <button 
+              <button 
                 onClick={() => handleSubscribe('FULL')} 
                 disabled={isSubscribing || planTier === 'FULL'}
-                className={planTier === 'FULL' ? "btn-secondary w-full" : "btn-primary w-full"} 
+                className={getButtonClass('FULL')} 
                 style={{ opacity: isSubscribing ? 0.7 : 1 }}
               >
-                {planTier === 'FULL' ? 'Plan Actual' : 'Suscribirse'}
-            </button>
+                {getButtonText('FULL')}
+              </button>
           </div>
           
         </div>

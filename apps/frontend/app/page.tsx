@@ -4,30 +4,29 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from '../store/use-toast-store';
 import { useAuthStore } from '../store/use-auth-store';
 import { apiRequest } from '../lib/api-client';
-import dynamic from 'next/dynamic';
 import { NotificationBell } from '../components/notifications/notification-bell';
-
-const LoadingFallback = () => <div className="text-center" style={{ padding: '60px', color: 'var(--text-secondary)' }}><div className="spinner" style={{ width: '30px', height: '30px', margin: '0 auto 16px' }}></div>Cargando módulo...</div>;
-
-const ClientesView = dynamic(() => import('../components/clientes/clientes-view').then(mod => mod.ClientesView), { loading: LoadingFallback });
-const PromocionesView = dynamic(() => import('../components/promociones/promociones-view').then(mod => mod.PromocionesView), { loading: LoadingFallback });
-const SettingsView = dynamic(() => import('../components/settings/settings-view').then(mod => mod.SettingsView), { loading: LoadingFallback });
-const FinanzasView = dynamic(() => import('../components/finanzas/cuentas-view').then(mod => mod.CuentasView), { loading: LoadingFallback });
-const MovimientosView = dynamic(() => import('../components/finanzas/movimientos-view').then(mod => mod.MovimientosView), { loading: LoadingFallback });
-const GastosView = dynamic(() => import('../components/finanzas/gastos-view').then(mod => mod.GastosView), { loading: LoadingFallback });
-const ProveedoresView = dynamic(() => import('../components/finanzas/proveedores-view').then(mod => mod.ProveedoresView), { loading: LoadingFallback });
-const CierreView = dynamic(() => import('../components/finanzas/cierre-view').then(mod => mod.CierreView), { loading: LoadingFallback });
-const HistorialCajaView = dynamic(() => import('../components/finanzas/historial-caja-view').then(mod => mod.HistorialCajaView), { loading: LoadingFallback });
-const DashboardView = dynamic(() => import('../components/dashboard/dashboard-view').then(mod => mod.DashboardView), { ssr: false, loading: LoadingFallback });
-const ImportCenterView = dynamic(() => import('../components/import/import-center-view').then(mod => mod.ImportCenterView), { loading: LoadingFallback });
-const SubscriptionView = dynamic(() => import('../components/subscription/subscription-view').then(mod => mod.SubscriptionView), { loading: LoadingFallback });
+import { ClientesView } from '../components/clientes/clientes-view';
+import { PromocionesView } from '../components/promociones/promociones-view';
+import { SettingsView } from '../components/settings/settings-view';
+import { CuentasView as FinanzasView } from '../components/finanzas/cuentas-view';
+import { MovimientosView } from '../components/finanzas/movimientos-view';
+import { GastosView } from '../components/finanzas/gastos-view';
+import { ProveedoresView } from '../components/finanzas/proveedores-view';
+import { CierreView } from '../components/finanzas/cierre-view';
+import { HistorialCajaView } from '../components/finanzas/historial-caja-view';
+import { InventarioView } from '../components/inventario/inventario-view';
+import { DashboardView } from '../components/dashboard/dashboard-view';
+import { ImportCenterView } from '../components/import/import-center-view';
+import { SubscriptionView } from '../components/subscription/subscription-view';;
+import { ListasPrecioView } from '../components/listas-precio/listas-precio-view';
+import { useListasPrecio, useListaPrecioDetails } from '../hooks/use-listas-precio';
 
 import { ClienteSelector } from '../components/pos/cliente-selector';
-import { useProducts, useCreateProduct } from '../hooks/use-products';
+import { useProducts, useCreateProduct, useUpdateProduct } from '../hooks/use-products';
 import { useEstadoCaja } from '../hooks/use-caja';
 import { AbrirCajaModal, CerrarCajaModal } from '../components/pos/caja-modal';
 import { TicketView } from '../components/pos/ticket-view';
-import { PosSimpleView } from '../components/pos/pos-simple-view';
+import { PosSimpleView, WeighedItemModal } from '../components/pos/pos-simple-view';
 import { useCartStore } from '../store/use-cart-store';
 import { useSales, useCreateSale } from '../hooks/use-sales';
 import { usePromocionesActivas } from '../hooks/use-promociones';
@@ -48,6 +47,7 @@ export default function Home() {
 
   // Estados del modal de creación de producto
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [categoria, setCategoria] = useState('Indumentaria');
@@ -59,21 +59,31 @@ export default function Home() {
   const [codigoBarras, setCodigoBarras] = useState('');
   const [precioVenta, setPrecioVenta] = useState('0');
   const [stockActual, setStockActual] = useState('0');
+  const [stockMinimo, setStockMinimo] = useState('0');
 
   // Atributos dinámicos específicos del rubro
   const [talle, setTalle] = useState('M');
   const [color, setColor] = useState('Azul');
+  const [unidadMedida, setUnidadMedida] = useState('unidad');
   const [unidad, setUnidad] = useState('unidad');
   const [fraccionable, setFraccionable] = useState(false);
   const [customKey, setCustomKey] = useState('');
   const [customValue, setCustomValue] = useState('');
+
+  // Nuevos estados para variantes por lote, costos y tipo de venta
+  const [tallesInput, setTallesInput] = useState('');
+  const [coloresInput, setColoresInput] = useState('');
+  const [variantsList, setVariantsList] = useState<any[]>([]);
+  const [tipoVentaAlmacen, setTipoVentaAlmacen] = useState<'unidad' | 'fraccionable'>('unidad');
+  const [precioCosto, setPrecioCosto] = useState('0');
+  const [isSkuManuallyEdited, setIsSkuManuallyEdited] = useState(false);
 
   // Filtros de búsqueda en catálogo
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategoryFilter, setActiveCategoryFilter] = useState('Todos');
 
   // Zustand Auth Store
-  const { token, user, tenant, setAuth, logout } = useAuthStore();
+  const { token, user, tenant, setAuth, updateTenant, logout } = useAuthStore();
 
   const isVendedor = user?.role === 'Vendedor';
 
@@ -95,7 +105,7 @@ export default function Home() {
 
   const { data: cuentaCorriente } = useCuentaCorriente(cliente_id || null);
 
-  type TabType = 'dashboard' | 'catalog' | 'pos' | 'sales' | 'clientes' | 'promociones' | 'settings' | 'finances' | 'subscription' | 'import-center';
+  type TabType = 'dashboard' | 'catalog' | 'pos' | 'sales' | 'clientes' | 'promociones' | 'settings' | 'finances' | 'subscription' | 'import-center' | 'inventario' | 'listas-precio';
   type FinanzasTab = 'cuentas' | 'movimientos' | 'gastos' | 'proveedores' | 'cierre' | 'historial-caja';
   // Estado de la pestaña activa en la barra lateral
   const [activeTab, setActiveTab] = useState<TabType>('pos');
@@ -104,6 +114,13 @@ export default function Home() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCajaDropdownOpen, setIsCajaDropdownOpen] = useState(false);
   const [isFinanzasDropdownOpen, setIsFinanzasDropdownOpen] = useState(false);
+  const [hasPremium, setHasPremium] = useState(false);
+
+  useEffect(() => {
+    if (tenant?.plan_tier) {
+      setHasPremium(['PREMIUM', 'FULL'].includes(tenant.plan_tier));
+    }
+  }, [tenant?.plan_tier]);
 
   useEffect(() => {
     setVisitedTabs(prev => {
@@ -243,19 +260,159 @@ export default function Home() {
   const [salesPage, setSalesPage] = useState(1);
 
   // React Query Hooks (Ahora Paginados)
-  const { data: productsData, isLoading: isLoadingProducts, error: productsError } = useProducts(productPage, 50);
+  const { data: productsData, isLoading: isLoadingProducts, error: productsError, refetch: refetchCatalog } = useProducts(productPage, 50);
   const products = productsData?.data || [];
   const productsMeta = productsData?.meta;
+
+  const { data: listasPrecio = [] } = useListasPrecio();
+  const [selectedPriceListId, setSelectedPriceListId] = useState<number | 'default'>('default');
+  const [weighingVariant, setWeighingVariant] = useState<any>(null);
+  const { data: listDetails } = useListaPrecioDetails(
+    selectedPriceListId === 'default' ? null : selectedPriceListId
+  );
+
+  const overriddenProducts = React.useMemo(() => {
+    if (selectedPriceListId === 'default' || !listDetails?.items) {
+      return products;
+    }
+    
+    const customPricesMap = new Map<number, number>();
+    listDetails.items.forEach((item: any) => {
+      customPricesMap.set(item.variante_id, typeof item.precio === 'string' ? parseFloat(item.precio) : item.precio);
+    });
+
+    return products.map((prod: any) => ({
+      ...prod,
+      variantes: prod.variantes?.map((v: any) => {
+        if (customPricesMap.has(v.id)) {
+          return {
+            ...v,
+            precio_venta: customPricesMap.get(v.id)
+          };
+        }
+        return v;
+      })
+    }));
+  }, [products, selectedPriceListId, listDetails]);
 
   const { data: salesData, isLoading: isLoadingSales } = useSales(salesPage, 50);
   const sales = salesData?.data || [];
   const salesMeta = salesData?.meta;
   const createProductMutation = useCreateProduct();
+  const updateProductMutation = useUpdateProduct();
   const createSaleMutation = useCreateSale();
+  // Generación automática de combinaciones (Talle x Color) para Indumentaria
+  useEffect(() => {
+    if (editingProduct) return;
+
+    if (categoria !== 'Indumentaria' || esServicio) {
+      setVariantsList([]);
+      return;
+    }
+
+    const tallesList = tallesInput.split(',').map(s => s.trim()).filter(Boolean);
+    const coloresList = coloresInput.split(',').map(c => c.trim()).filter(Boolean);
+
+    if (tallesList.length === 0 && coloresList.length === 0) {
+      setVariantsList([]);
+      return;
+    }
+
+    const baseSku = sku || 'PROD';
+    const basePrice = precioVenta || '0';
+    const baseCost = precioCosto || '0';
+    const baseMinStock = stockMinimo || '0';
+    const newList: any[] = [];
+
+    const generateVariantObj = (t: string, c: string) => {
+      const existing = variantsList.find(v => v.talle === t && v.color === c);
+      if (existing) {
+        return existing;
+      }
+      const suffixT = t ? `-${t.toUpperCase()}` : '';
+      const suffixC = c ? `-${c.toUpperCase()}` : '';
+      return {
+        talle: t,
+        color: c,
+        sku: `${baseSku}${suffixT}${suffixC}`.replace(/\s+/g, ''),
+        codigoBarras: '',
+        precioVenta: basePrice,
+        costo: baseCost,
+        stockActual: '0',
+        stockMinimo: baseMinStock
+      };
+    };
+
+    if (tallesList.length > 0 && coloresList.length > 0) {
+      tallesList.forEach(t => {
+        coloresList.forEach(c => {
+          newList.push(generateVariantObj(t, c));
+        });
+      });
+    } else if (tallesList.length > 0) {
+      tallesList.forEach(t => {
+        newList.push(generateVariantObj(t, ''));
+      });
+    } else if (coloresList.length > 0) {
+      coloresList.forEach(c => {
+        newList.push(generateVariantObj('', c));
+      });
+    }
+
+    setVariantsList(newList);
+  }, [tallesInput, coloresInput, categoria, sku, precioVenta, stockMinimo, precioCosto, editingProduct, esServicio]);
+
+  // Sugerencia automática de SKU basada en Nombre y Marca del Producto
+  useEffect(() => {
+    if (editingProduct || isSkuManuallyEdited) return;
+
+    if (!nombre) {
+      setSku('');
+      return;
+    }
+
+    const clean = (str: string) => {
+      return str
+        .toUpperCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^A-Z0-9]/g, '');
+    };
+
+    const nameParts = nombre.split(/\s+/).map(p => clean(p)).filter(Boolean);
+    let nameCode = '';
+    if (nameParts.length > 0) {
+      const firstPart = nameParts[0];
+      if (firstPart) {
+        if (nameParts.length === 1) {
+          nameCode = firstPart.substring(0, 5);
+        } else {
+          const initials = nameParts.slice(1).map(p => p.charAt(0)).join('');
+          nameCode = firstPart.substring(0, 3) + initials.substring(0, 3);
+        }
+      }
+    }
+
+    const brandCode = marca ? clean(marca).substring(0, 3) : '';
+    const suggestedSku = brandCode ? `${nameCode}-${brandCode}` : nameCode;
+
+    setSku(suggestedSku);
+  }, [nombre, marca, isSkuManuallyEdited, editingProduct]);
 
   // Asegurar hidratación en el cliente para evitar mismatch de SSR con Zustand Persist
   useEffect(() => {
     setMounted(true);
+
+    // Sincronizar permisos de plan desde el backend al cargar (ej. después del checkout)
+    if (token) {
+      apiRequest<any>('/tenants/my-plan')
+        .then(data => {
+          if (data && data.plan_tier) {
+            updateTenant({ plan_tier: data.plan_tier, estado_plan: data.estado_plan });
+          }
+        })
+        .catch(console.error);
+    }
 
     // Cargar preferencia de tema guardada o usar la del sistema
     const savedTheme = localStorage.getItem('novardesk-theme') as 'light' | 'dark' | null;
@@ -279,7 +436,7 @@ export default function Home() {
   };
 
   // --- CÁLCULO DE SALDO RESTANTE PARA EL INPUT DE PAGO ---
-  const globalSubtotal = cartItems.reduce((acc, item) => acc + (item.subtotal * item.cantidad), 0);
+  const globalSubtotal = cartItems.reduce((acc, item) => acc + item.subtotal, 0);
   const globalTotalConDescuento = Math.max(0, globalSubtotal - discountMonto);
   const globalRecargoTotal = pagosAgregados.reduce((acc, p) => acc + (p.recargo_monto || 0), 0);
   const globalTotalReal = globalTotalConDescuento + globalRecargoTotal;
@@ -323,50 +480,199 @@ export default function Home() {
 
 
   // --- CONTROLADORES DEL FORMULARIO DE PRODUCTOS ---
-  const handleCreateProduct = async (e: React.FormEvent) => {
+  const closeProductModal = () => {
+    setIsModalOpen(false);
+    setEditingProduct(null);
+    setNombre('');
+    setDescripcion('');
+    setMarca('');
+    setSku('');
+    setCodigoBarras('');
+    setPrecioVenta('0');
+    setPrecioCosto('0');
+    setStockActual('0');
+    setStockMinimo('0');
+    setTalle('M');
+    setColor('Azul');
+    setUnidadMedida('unidad');
+    setUnidad('unidad');
+    setFraccionable(false);
+    setCustomKey('');
+    setCustomValue('');
+    setTallesInput('');
+    setColoresInput('');
+    setVariantsList([]);
+    setTipoVentaAlmacen('unidad');
+    setIsSkuManuallyEdited(false);
+    setEsServicio(false);
+  };
+
+  const openEditProductModal = (product: any) => {
+    setIsSkuManuallyEdited(true);
+    setEditingProduct(product);
+    setNombre(product.nombre);
+    setDescripcion(product.descripcion || '');
+    setCategoria(product.categoria || 'Indumentaria');
+    setMarca(product.marca || '');
+    setEsServicio(product.es_servicio);
+    setUnidadMedida(product.unidad_medida || 'unidad');
+    
+    // Configuración específica de Almacén
+    if (product.categoria === 'Almacén') {
+      const isFrac = product.variantes?.[0]?.atributos_extra?.fraccionable === true || product.variantes?.[0]?.atributos_extra?.fraccionable === 'true';
+      setTipoVentaAlmacen(isFrac ? 'fraccionable' : 'unidad');
+      setFraccionable(isFrac);
+      setUnidad(product.variantes?.[0]?.atributos_extra?.unidad || 'unidad');
+    }
+    
+    // Carga de variantes para edición
+    const loadedVariants = product.variantes?.map((v: any) => ({
+      id: v.id,
+      talle: v.atributos_extra?.talle || '',
+      color: v.atributos_extra?.color || '',
+      sku: v.sku,
+      codigoBarras: v.codigo_barras || '',
+      precioVenta: String(v.precio_venta),
+      costo: String(v.costo || 0),
+      stockActual: String(v.stock_actual),
+      stockMinimo: String(v.stock_minimo || 0)
+    })) || [];
+    setVariantsList(loadedVariants);
+
+    // Extraer talles y colores únicos para prellenar los campos de texto
+    const tallesSet = new Set(loadedVariants.map((v: any) => v.talle).filter(Boolean));
+    const coloresSet = new Set(loadedVariants.map((v: any) => v.color).filter(Boolean));
+    setTallesInput(Array.from(tallesSet).join(', '));
+    setColoresInput(Array.from(coloresSet).join(', '));
+
+    // Primera variante (fallback de inputs principales)
+    const v = product.variantes?.[0];
+    if (v) {
+      setSku(v.sku);
+      setCodigoBarras(v.codigo_barras || '');
+      setPrecioVenta(String(v.precio_venta));
+      setPrecioCosto(String(v.costo || 0));
+      setStockActual(String(v.stock_actual));
+      setStockMinimo(String(v.stock_minimo || 0));
+      
+      const extras = v.atributos_extra || {};
+      if (product.categoria === 'Indumentaria') {
+        setTalle(extras.talle || 'M');
+        setColor(extras.color || 'Azul');
+      } else if (product.categoria === 'Otros') {
+        const keys = Object.keys(extras);
+        if (keys.length > 0) {
+          setCustomKey(keys[0] || '');
+          setCustomValue(String(extras[keys[0] || ''] || ''));
+        }
+      }
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleSubmitProduct = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Estructurar atributos extra basados en el rubro/categoría
     let atributos_extra: Record<string, any> = {};
-    if (categoria === 'Indumentaria') {
+    if (esServicio) {
+      atributos_extra = {};
+    } else if (categoria === 'Indumentaria') {
       atributos_extra = { talle, color };
     } else if (categoria === 'Almacén') {
-      atributos_extra = { unidad, fraccionable };
+      const isFrac = tipoVentaAlmacen === 'fraccionable';
+      atributos_extra = { 
+        unidad: isFrac ? unidadMedida : 'unidad', 
+        fraccionable: isFrac 
+      };
     } else if (categoria === 'Otros' && customKey) {
       atributos_extra = { [customKey]: customValue };
     }
 
-    const payload = {
+    // Construir lista de variantes para el payload
+    let variantesPayload: any[] = [];
+    if (variantsList.length > 0 && !esServicio) {
+      variantesPayload = variantsList.map(v => ({
+        id: v.id || undefined,
+        sku: v.sku,
+        codigo_barras: v.codigoBarras || undefined,
+        precio_venta: Number(v.precioVenta),
+        costo: Number(v.costo || 0),
+        stock_actual: Number(v.stockActual),
+        stock_minimo: Number(v.stockMinimo),
+        atributos_extra: { talle: v.talle, color: v.color }
+      }));
+    } else {
+      variantesPayload = [
+        {
+          sku,
+          codigo_barras: codigoBarras || undefined,
+          precio_venta: Number(precioVenta),
+          costo: Number(precioCosto || 0),
+          stock_actual: esServicio ? 0 : Number(stockActual),
+          stock_minimo: esServicio ? 0 : Number(stockMinimo),
+          atributos_extra
+        }
+      ];
+    }
+
+    const payload: any = {
       nombre,
       descripcion: descripcion || undefined,
       categoria: categoria || undefined,
       marca: marca || undefined,
       es_servicio: esServicio,
-      variantes: [
-        {
-          sku,
-          codigo_barras: codigoBarras || undefined,
-          precio_venta: parseFloat(precioVenta) || 0,
-          stock_actual: parseFloat(stockActual) || 0,
-          atributos_extra,
-        },
-      ],
+      unidad_medida: !esServicio && categoria === 'Almacén' && tipoVentaAlmacen === 'fraccionable' ? unidadMedida : 'unidad',
+      variantes: variantesPayload,
     };
 
     try {
-      await createProductMutation.mutateAsync(payload);
+      if (editingProduct) {
+        await updateProductMutation.mutateAsync({ id: editingProduct.id, product: payload });
+        toast.success('Producto actualizado exitosamente');
+      } else {
+        await createProductMutation.mutateAsync(payload);
+        toast.success('Producto creado exitosamente');
+      }
       
-      // Limpiar formulario y cerrar modal
-      setNombre('');
-      setDescripcion('');
-      setMarca('');
-      setSku('');
-      setCodigoBarras('');
-      setPrecioVenta('0');
-      setStockActual('0');
-      setIsModalOpen(false);
+      closeProductModal();
+      refetchCatalog();
     } catch (err: any) {
       toast.error(err.message || 'Error al guardar el producto');
+    }
+  };
+
+  // Función para abrir el modal con defaults según rubro
+  const openProductModal = () => {
+    setEditingProduct(null);
+    setNombre('');
+    setDescripcion('');
+    setMarca('');
+    setSku('');
+    setCodigoBarras('');
+    setPrecioVenta('0');
+    setPrecioCosto('0');
+    setStockActual('0');
+    setStockMinimo('0');
+    setTalle('M');
+    setColor('Azul');
+    setUnidad('unidad');
+    setFraccionable(false);
+    setCustomKey('');
+    setCustomValue('');
+    setTallesInput('');
+    setColoresInput('');
+    setVariantsList([]);
+    setTipoVentaAlmacen('unidad');
+    setIsSkuManuallyEdited(false);
+
+    setIsModalOpen(true);
+    if (tenant?.rubro === 'Forrajeria/Semilleria') {
+      setUnidadMedida('kg');
+      setTipoVentaAlmacen('fraccionable');
+    } else {
+      setUnidadMedida('unidad');
+      setTipoVentaAlmacen('unidad');
     }
   };
 
@@ -404,7 +710,7 @@ export default function Home() {
     }
 
     // Calcular total base, descuentos y recargos
-    const subtotal = cartItems.reduce((acc, item) => acc + (item.subtotal * item.cantidad), 0);
+    const subtotal = cartItems.reduce((acc, item) => acc + item.subtotal, 0);
     const totalConDescuento = Math.max(0, subtotal - discountMonto);
 
     // Calcular el recargo de los pagos agregados
@@ -644,31 +950,49 @@ export default function Home() {
                 
                 <div className="d-flex justify-between align-center">
                   <div className="d-flex align-center gap-xs" style={{ background: 'var(--bg-secondary)', borderRadius: '6px', padding: '2px' }}>
-                    <button 
-                      type="button"
-                      className="p-0 d-flex align-center justify-center" style={{ width: '24px', height: '24px', background: 'none', border: 'none', cursor: 'pointer', borderRadius: '4px' }}
-                      onClick={() => updateQuantity(item.variantId, item.cantidad - 1)}
-                    >
-                      -
-                    </button>
-                    <input
-                      type="number"
-                      step={item.es_servicio ? '1' : '0.001'}
-                      className="text-center p-0 font-semibold" style={{ width: '40px', height: '24px', background: 'transparent', border: 'none', fontSize: '13px', color: 'var(--text-primary)' }}
-                      value={item.cantidad}
-                      onChange={(e) => updateQuantity(item.variantId, parseFloat(e.target.value) || 0)}
-                    />
-                    <button 
-                      type="button"
-                      className="p-0 d-flex align-center justify-center" style={{ width: '24px', height: '24px', background: 'none', border: 'none', cursor: 'pointer', borderRadius: '4px' }}
-                      onClick={() => updateQuantity(item.variantId, item.cantidad + 1)}
-                    >
-                      +
-                    </button>
+                    {item.unidad_medida === 'unidad' ? (
+                      <>
+                        <button 
+                          type="button"
+                          className="p-0 d-flex align-center justify-center" style={{ width: '24px', height: '24px', background: 'none', border: 'none', cursor: 'pointer', borderRadius: '4px' }}
+                          onClick={() => updateQuantity(item.variantId, item.cantidad - 1)}
+                        >
+                          -
+                        </button>
+                        <input
+                          type="number"
+                          className="text-center p-0 font-semibold" style={{ width: '40px', height: '24px', background: 'transparent', border: 'none', fontSize: '13px', color: 'var(--text-primary)' }}
+                          value={item.cantidad}
+                          onChange={(e) => updateQuantity(item.variantId, parseFloat(e.target.value) || 0)}
+                        />
+                        <button 
+                          type="button"
+                          className="p-0 d-flex align-center justify-center" style={{ width: '24px', height: '24px', background: 'none', border: 'none', cursor: 'pointer', borderRadius: '4px' }}
+                          onClick={() => updateQuantity(item.variantId, item.cantidad + 1)}
+                        >
+                          +
+                        </button>
+                      </>
+                    ) : (
+                      <div className="d-flex align-center gap-xs" style={{ padding: '0 8px' }}>
+                        <input
+                          type="number"
+                          step="0.001"
+                          min="0.001"
+                          className="text-center p-0 font-semibold" style={{ width: '65px', height: '24px', background: 'transparent', border: 'none', fontSize: '13px', color: 'var(--text-primary)' }}
+                          value={item.cantidad}
+                          onChange={(e) => {
+                            const val = parseFloat(e.target.value);
+                            if (!isNaN(val)) updateQuantity(item.variantId, val);
+                          }}
+                        />
+                        <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{item.unidad_medida}</span>
+                      </div>
+                    )}
                   </div>
                   <div className="text-right">
                     <span className="font-bold" style={{ fontSize: '16px', color: 'var(--text-primary)' }}>
-                      ${(item.subtotal * item.cantidad).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                      ${item.subtotal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                     </span>
                   </div>
                 </div>
@@ -987,7 +1311,7 @@ export default function Home() {
             {!isVendedor && (
               <li 
                 className={`nav-item d-flex align-center gap-md ${activeTab === 'dashboard' ? 'active' : ''}`} style={{ cursor: 'pointer' }}
-                onClick={() => React.startTransition(() => setActiveTab('dashboard'))}
+                onClick={() => setActiveTab('dashboard')}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
                 <span>Dashboard</span>
@@ -1020,7 +1344,7 @@ export default function Home() {
                   
                    style={{ cursor: 'pointer' }}
                   onClick={() => {
-                    React.startTransition(() => setActiveTab('pos'));
+                    setActiveTab('pos');
                   }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
@@ -1041,21 +1365,43 @@ export default function Home() {
 
             <li 
               className={`nav-item d-flex align-center gap-md ${activeTab === 'sales' ? 'active' : ''}`} style={{ cursor: 'pointer' }}
-              onClick={() => React.startTransition(() => setActiveTab('sales'))}
+              onClick={() => setActiveTab('sales')}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
               <span>Historial de Ventas</span>
             </li>
             <li 
               className={`nav-item d-flex align-center gap-md ${activeTab === 'catalog' ? 'active' : ''}`} style={{ cursor: 'pointer' }}
-              onClick={() => React.startTransition(() => setActiveTab('catalog'))}
+              onClick={() => setActiveTab('catalog')}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
               <span>Catálogo de Productos</span>
             </li>
             <li 
+              className={`nav-item d-flex align-center gap-md ${activeTab === 'listas-precio' ? 'active' : ''}`} 
+              style={{ cursor: 'pointer', opacity: !hasPremium ? 0.5 : 1, order: !hasPremium ? 99 : 0 }}
+              onClick={() => {
+                if (!hasPremium) {
+                  toast.error('Esta función es exclusiva para planes Premium y Full. ¡Actualiza tu plan!');
+                  setActiveTab('subscription');
+                  return;
+                }
+                setActiveTab('listas-precio');
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+              <span>Listas de Precios</span>
+            </li>
+            <li 
+              className={`nav-item d-flex align-center gap-md ${activeTab === 'inventario' ? 'active' : ''}`} style={{ cursor: 'pointer' }}
+              onClick={() => setActiveTab('inventario')}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>
+              <span>Depósito</span>
+            </li>
+            <li 
               className={`nav-item d-flex align-center gap-md ${activeTab === 'clientes' ? 'active' : ''}`} style={{ cursor: 'pointer' }}
-              onClick={() => React.startTransition(() => setActiveTab('clientes'))}
+              onClick={() => setActiveTab('clientes')}
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
               <span>Clientes</span>
@@ -1064,14 +1410,20 @@ export default function Home() {
               <>
                 <li 
                   className={`nav-item d-flex align-center gap-md ${activeTab === 'promociones' ? 'active' : ''}`} style={{ cursor: 'pointer' }}
-                  onClick={() => React.startTransition(() => setActiveTab('promociones'))}
+                  onClick={() => setActiveTab('promociones')}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
                   <span>Promociones</span>
                 </li>
                 <li 
-                  className={`nav-item d-flex align-center gap-md justify-between ${activeTab === 'finances' ? 'active' : ''}`} style={{ cursor: 'pointer' }}
+                  className={`nav-item d-flex align-center gap-md justify-between ${activeTab === 'finances' ? 'active' : ''}`} 
+                  style={{ cursor: 'pointer', opacity: !hasPremium ? 0.5 : 1, order: !hasPremium ? 99 : 0 }}
                   onClick={() => {
+                    if (!hasPremium) {
+                      toast.error('Esta función es exclusiva para planes Premium y Full. ¡Actualiza tu plan!');
+                      setActiveTab('subscription');
+                      return;
+                    }
                     setIsFinanzasDropdownOpen(!isFinanzasDropdownOpen);
                     if (activeTab !== 'finances') {
                       setActiveTab('finances');
@@ -1087,7 +1439,7 @@ export default function Home() {
                 </li>
 
                 {/* Sub-menú Contabilidad */}
-                <div className={`sidebar-dropdown ${isFinanzasDropdownOpen ? 'open' : ''}`}>
+                <div className={`sidebar-dropdown ${isFinanzasDropdownOpen ? 'open' : ''}`} style={{ order: !hasPremium ? 99 : 0 }}>
                   {([
                     { id: 'cuentas', label: 'Cuentas Contables', icon: <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg> },
                     { id: 'movimientos', label: 'Libro de Caja', icon: <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg> },
@@ -1100,7 +1452,7 @@ export default function Home() {
                       key={item.id}
                       
                        style={{ cursor: 'pointer', gap: '10px', paddingLeft: '36px', fontSize: '13px', background: activeTab === 'finances' && finanzasSubTab === item.id ? 'rgba(var(--primary-rgb), 0.08)' : 'transparent', color: activeTab === 'finances' && finanzasSubTab === item.id ? 'hsl(var(--primary))' : 'var(--text-secondary)', fontWeight: activeTab === 'finances' && finanzasSubTab === item.id ? '700' : '400', borderRadius: '8px', marginBottom: '2px' }}
-                      onClick={() => React.startTransition(() => { setActiveTab('finances'); setFinanzasSubTab(item.id); })}
+                        onClick={() => { setActiveTab('finances'); setFinanzasSubTab(item.id); }}
                     >
                       {item.icon}
                       <span>{item.label}</span>
@@ -1109,14 +1461,22 @@ export default function Home() {
                 </div>
                 <li 
                   className={`nav-item d-flex align-center gap-md ${activeTab === 'settings' ? 'active' : ''}`} style={{ cursor: 'pointer' }}
-                  onClick={() => React.startTransition(() => setActiveTab('settings'))}
+                  onClick={() => setActiveTab('settings')}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                   <span>Configuración</span>
                 </li>
                 <li 
-                  className={`nav-item d-flex align-center gap-md ${activeTab === 'import-center' ? 'active' : ''}`} style={{ cursor: 'pointer' }}
-                  onClick={() => React.startTransition(() => setActiveTab('import-center'))}
+                  className={`nav-item d-flex align-center gap-md ${activeTab === 'import-center' ? 'active' : ''}`} 
+                  style={{ cursor: 'pointer', opacity: !hasPremium ? 0.5 : 1, order: !hasPremium ? 99 : 0 }}
+                  onClick={() => {
+                    if (!hasPremium) {
+                      toast.error('Esta función es exclusiva para planes Premium y Full. ¡Actualiza tu plan!');
+                      setActiveTab('subscription');
+                      return;
+                    }
+                    setActiveTab('import-center');
+                  }}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                   <span>Importar Datos</span>
@@ -1157,7 +1517,7 @@ export default function Home() {
               
             {/* Mi Suscripción */}
             <button
-              onClick={() => React.startTransition(() => setActiveTab('subscription'))}
+              onClick={() => setActiveTab('subscription')}
               className="d-flex align-center w-full text-left" style={{ gap: '10px', padding: '8px 10px', background: activeTab === 'subscription' ? 'rgba(var(--primary-rgb), 0.08)' : 'none', border: 'none', borderRadius: '8px', cursor: 'pointer', color: activeTab === 'subscription' ? 'hsl(var(--primary))' : 'var(--text-secondary)', fontSize: '13px', fontWeight: activeTab === 'subscription' ? '700' : '550', transition: 'background 0.2s' }}
               onMouseEnter={e => { if (activeTab !== 'subscription') e.currentTarget.style.background = 'var(--bg-tertiary)'; }}
               onMouseLeave={e => { if (activeTab !== 'subscription') e.currentTarget.style.background = 'none'; }}
@@ -1203,6 +1563,7 @@ export default function Home() {
             <h1 className="font-bold" style={{ fontSize: '26px' }}>
               {activeTab === 'dashboard' && 'Dashboard Gerencial'}
               {activeTab === 'catalog' && 'Inventario de Comercio'}
+              {activeTab === 'inventario' && 'Gestión de Depósito'}
               {activeTab === 'import-center' && 'Centro de Importación'}
               {activeTab === 'pos' && 'Punto de Venta (POS)'}
               {activeTab === 'sales' && 'Historial de Transacciones'}
@@ -1211,10 +1572,12 @@ export default function Home() {
               {activeTab === 'finances' && 'Gestión de Contabilidad'}
               {activeTab === 'settings' && 'Configuración de la Empresa'}
               {activeTab === 'subscription' && 'Mi Suscripción'}
+              {activeTab === 'listas-precio' && 'Listas de Precios'}
             </h1>
             <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginTop: '4px' }}>
               {activeTab === 'dashboard' && 'Monitorea el rendimiento de ventas y productos en tiempo real.'}
               {activeTab === 'catalog' && 'Administra tus productos, variantes y niveles de stock.'}
+              {activeTab === 'inventario' && 'Gestiona existencias, entradas, salidas y auditoría de stock.'}
               {activeTab === 'sales' && 'Consulta y audita las ventas registradas y estados fiscales.'}
               {activeTab === 'clientes' && 'Gestiona tu base de clientes y sus historiales de compra.'}
               {activeTab === 'promociones' && 'Crea reglas automáticas de descuento para el Punto de Venta.'}
@@ -1222,6 +1585,7 @@ export default function Home() {
               {activeTab === 'settings' && 'Administra la información de tu empresa y cuentas de empleados.'}
               {activeTab === 'import-center' && 'Importa masivamente clientes y productos desde planillas de cálculo.'}
               {activeTab === 'subscription' && 'Gestiona tu plan, facturación y estados de cuenta.'}
+              {activeTab === 'listas-precio' && 'Administra precios diferenciados para tus productos.'}
             </p>
           </div>
           
@@ -1312,7 +1676,7 @@ export default function Home() {
 
                 <div className="action-row">
                   {!isVendedor && (
-                    <button onClick={() => setIsModalOpen(true)} className="btn-primary" style={{ width: 'auto' }}>
+                    <button onClick={openProductModal} className="btn-primary" style={{ width: 'auto' }}>
                       + Cargar Producto
                     </button>
                   )}
@@ -1385,7 +1749,7 @@ export default function Home() {
                                     {v.sku}
                                   </span>
                                   <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>
-                                    (Stock: {v.stock_actual} | ${parseFloat(v.precio_venta as string).toLocaleString('es-AR')})
+                                    ({p.es_servicio ? 'Servicio' : `Stock: ${v.stock_actual}`} | ${parseFloat(v.precio_venta as string).toLocaleString('es-AR')})
                                   </span>
                                   {Object.entries(v.atributos_extra || {}).map(([key, val]) => (
                                     <span key={key} className="attribute-pill">
@@ -1398,21 +1762,38 @@ export default function Home() {
                           </td>
                           <td>
                             {!isVendedor && (
-                              <button
-                                onClick={() => handleDeleteProduct(p.id)}
-                                className="btn-secondary"
-                                style={{
-                                  padding: '6px 12px',
-                                  color: 'hsl(var(--danger))',
-                                  borderColor: 'rgba(220, 38, 38, 0.2)',
-                                  background: 'rgba(220, 38, 38, 0.05)',
-                                  width: 'auto',
-                                  height: 'auto',
-                                  fontSize: '12px'
-                                }}
-                              >
-                                Eliminar
-                              </button>
+                              <div className="d-flex gap-xs flex-wrap">
+                                <button
+                                  onClick={() => openEditProductModal(p)}
+                                  className="btn-secondary"
+                                  style={{
+                                    padding: '6px 12px',
+                                    color: 'hsl(var(--primary))',
+                                    borderColor: 'rgba(var(--primary-rgb), 0.2)',
+                                    background: 'rgba(var(--primary-rgb), 0.05)',
+                                    width: 'auto',
+                                    height: 'auto',
+                                    fontSize: '12px'
+                                  }}
+                                >
+                                  Editar
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteProduct(p.id)}
+                                  className="btn-secondary"
+                                  style={{
+                                    padding: '6px 12px',
+                                    color: 'hsl(var(--danger))',
+                                    borderColor: 'rgba(220, 38, 38, 0.2)',
+                                    background: 'rgba(220, 38, 38, 0.05)',
+                                    width: 'auto',
+                                    height: 'auto',
+                                    fontSize: '12px'
+                                  }}
+                                >
+                                  Eliminar
+                                </button>
+                              </div>
                             )}
                           </td>
                         </tr>
@@ -1589,6 +1970,9 @@ export default function Home() {
         {/* --- VISTA PROMOCIONES --- */}
         {activeTab === 'promociones' && <PromocionesView />}
 
+        {/* --- VISTA INVENTARIO --- */}
+        {activeTab === 'inventario' && <InventarioView />}
+
         {/* --- VISTA CLIENTES --- */}
         {activeTab === 'clientes' && <ClientesView />}
 
@@ -1606,42 +1990,76 @@ export default function Home() {
         {activeTab === 'settings' && <SettingsView />}
         {activeTab === 'import-center' && <ImportCenterView />}
         {activeTab === 'subscription' && <SubscriptionView />}
+        {activeTab === 'listas-precio' && <ListasPrecioView />}
 
         {/* --- VISTA POS --- */}
         {activeTab === 'pos' && (
           estadoCaja?.status === 'CERRADA' ? (
             <AbrirCajaModal />
-          ) : posLayout === 'simple' ? (
-            <PosSimpleView
-              products={products}
-              discountMonto={discountMonto}
-              discountMotivo={discountMotivo}
-              pagosAgregados={pagosAgregados}
-              setPagosAgregados={setPagosAgregados}
-              setDiscountMonto={setDiscountMonto}
-              setDiscountMotivo={setDiscountMotivo}
-              setIsDescuentoModalOpen={setIsDescuentoModalOpen}
-              tenant={tenant}
-              isVendedor={isVendedor}
-            />
           ) : (
-          <div className="pos-grid">
+            <>
+              {weighingVariant && (
+                <WeighedItemModal
+                  variant={weighingVariant}
+                  onClose={() => setWeighingVariant(null)}
+                  onConfirm={(weight) => {
+                    addItem(weighingVariant, weight);
+                    setWeighingVariant(null);
+                  }}
+                />
+              )}
+              {posLayout === 'simple' ? (
+                <PosSimpleView
+                  products={overriddenProducts}
+                  discountMonto={discountMonto}
+                  discountMotivo={discountMotivo}
+                  pagosAgregados={pagosAgregados}
+                  setPagosAgregados={setPagosAgregados}
+                  setDiscountMonto={setDiscountMonto}
+                  setDiscountMotivo={setDiscountMotivo}
+                  setIsDescuentoModalOpen={setIsDescuentoModalOpen}
+                  tenant={tenant}
+                  isVendedor={isVendedor}
+                  hasPremium={hasPremium}
+                  listasPrecio={listasPrecio}
+                  selectedPriceListId={selectedPriceListId}
+                  setSelectedPriceListId={setSelectedPriceListId}
+                />
+              ) : (
+              <div className="pos-grid">
             {/* Columna Izquierda: Catálogo Visual */}
             <div className="pos-catalog-panel">
-              <div className="pos-catalog-header">
-                <input className="form-input w-full"
+              <div className="pos-catalog-header flex gap-md align-center" style={{ display: 'flex', gap: '12px' }}>
+                <input className="form-input flex-1"
                   type="text"
                   placeholder="Buscar por nombre, SKU o marca..."
-                  
-                   style={{ fontSize: '15px' }}
+                  style={{ fontSize: '15px' }}
                   value={posSearchQuery}
                   onChange={(e) => setPosSearchQuery(e.target.value)}
                   autoFocus
                 />
+                {hasPremium && listasPrecio.length > 0 && (
+                  <div className="d-flex align-center gap-xs" style={{ minWidth: '220px' }}>
+                    <select
+                      className="form-input"
+                      style={{ padding: '6px 12px', fontSize: '13px' }}
+                      value={selectedPriceListId}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setSelectedPriceListId(val === 'default' ? 'default' : Number(val));
+                      }}
+                    >
+                      <option value="default">Precio Base (Estándar)</option>
+                      {listasPrecio?.map((l: any) => (
+                        <option key={l.id} value={l.id}>{l.nombre}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
 
               <div className="pos-catalog-grid">
-                {products.flatMap((prod: any) => prod.variantes?.map((v: any) => ({ ...v, producto: prod })) || [])
+                {overriddenProducts.flatMap((prod: any) => prod.variantes?.map((v: any) => ({ ...v, producto: prod })) || [])
                   .filter((v: any) => {
                     if (!posSearchQuery) return true;
                     const query = posSearchQuery.toLowerCase();
@@ -1662,7 +2080,14 @@ export default function Home() {
                     return (
                       <div 
                         key={variante.id}
-                        onClick={() => addItem(variante)}
+                        onClick={() => {
+                          const isFraccionable = variante.producto?.unidad_medida !== 'unidad' || variante.atributos_extra?.fraccionable === true || variante.atributos_extra?.fraccionable === 'true';
+                          if (isFraccionable) {
+                            setWeighingVariant(variante);
+                          } else {
+                            addItem(variante);
+                          }
+                        }}
                         className="overflow-hidden d-flex flex-col" style={{ background: 'var(--bg-primary)', borderRadius: '12px', border: '1px solid var(--border-color)', cursor: 'pointer', transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.02)' }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.transform = 'translateY(-4px)';
@@ -1705,7 +2130,7 @@ export default function Home() {
                 <div className="d-flex flex-col">
                   <span className="font-semibold" style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Ticket ({cartItems.length} ítems)</span>
                   <span className="font-extrabold" style={{ fontSize: '22px', color: 'hsl(var(--primary))', lineHeight: 1 }}>
-                    ${cartItems.reduce((acc, item) => acc + (item.subtotal * item.cantidad), 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                    ${cartItems.reduce((acc, item) => acc + item.subtotal, 0).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                   </span>
                 </div>
                 <button 
@@ -1754,8 +2179,11 @@ export default function Home() {
             )}
 
           </div>
+          )}
+          </>
           )
-        )}
+          )
+        }
 
         {activeTab === 'sales' && (
           <div className="p-lg">
@@ -1868,13 +2296,13 @@ export default function Home() {
         <div className="modal-overlay">
           <div className="modal-content scale-up">
             <div className="modal-header">
-              <h2 className="modal-title">Cargar Nuevo Producto</h2>
-              <button className="close-btn" onClick={() => setIsModalOpen(false)}>
+              <h2 className="modal-title">{editingProduct ? 'Editar Producto' : 'Cargar Nuevo Producto'}</h2>
+              <button className="close-btn" onClick={closeProductModal}>
                 &times;
               </button>
             </div>
 
-            <form onSubmit={handleCreateProduct}>
+            <form onSubmit={handleSubmitProduct}>
               <div className="gap-lg" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
                 <div className="form-group">
                   <label className="form-label">Nombre del Producto</label>
@@ -1945,117 +2373,313 @@ export default function Home() {
               {/* Formulario de Variantes */}
               <div className="variants-section">
                 <h3 className="font-bold" style={{ fontSize: '15px', marginBottom: '16px', color: 'hsl(var(--primary))' }}>
-                  Datos de la Variante Principal (SKU)
+                  {esServicio ? 'Datos del Servicio (SKU)' : (variantsList.length > 0 ? 'Gestión de Variantes Múltiples' : 'Datos de la Variante Principal (SKU)')}
                 </h3>
 
-                <div className="variant-form-card">
-                  <div className="form-group">
-                    <label className="form-label">SKU (Identificador Único)</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="Ej: JEAN-LEV-M-BLU"
-                      value={sku}
-                      onChange={(e) => setSku(e.target.value)}
-                      required
-                    />
-                  </div>
+                {/* Si hay variantes en la lista (creadas por talles/colores), se muestra aviso y se ocultan los campos base */}
+                {variantsList.length === 0 ? (
+                  <div className="variant-form-card">
+                    <div className="form-group">
+                      <label className="form-label">SKU (Identificador Único)</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        placeholder="Ej: JEAN-LEV-M-BLU"
+                        value={sku}
+                        onChange={(e) => {
+                          setSku(e.target.value);
+                          setIsSkuManuallyEdited(true);
+                        }}
+                        required
+                      />
+                    </div>
 
-                  <div className="form-group">
-                    <label className="form-label">Código de Barras</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      placeholder="Ej: 779012345678"
-                      value={codigoBarras}
-                      onChange={(e) => setCodigoBarras(e.target.value)}
-                    />
-                  </div>
+                    <div className="form-group">
+                      <label className="form-label">Código de Barras</label>
+                      <input
+                        type="text"
+                        className="form-input"
+                        placeholder="Ej: 779012345678"
+                        value={codigoBarras}
+                        onChange={(e) => setCodigoBarras(e.target.value)}
+                      />
+                    </div>
 
-                  <div className="form-group">
-                    <label className="form-label">Precio de Venta ($)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      className="form-input"
-                      value={precioVenta}
-                      onChange={(e) => setPrecioVenta(e.target.value)}
-                      required
-                    />
-                  </div>
+                    <div className="gap-lg" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+                      <div className="form-group">
+                        <label className="form-label">Precio de Venta Predet. (Lista por Defecto) ($)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          className="form-input"
+                          value={precioVenta}
+                          onChange={(e) => setPrecioVenta(e.target.value)}
+                          required
+                        />
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+                          * Lista predeterminada. Puedes configurar otras listas después.
+                        </span>
+                      </div>
+                      <div className="form-group">
+                        <label className="form-label">Precio de Costo ($)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          className="form-input"
+                          value={precioCosto}
+                          onChange={(e) => setPrecioCosto(e.target.value)}
+                          required
+                        />
+                      </div>
+                    </div>
 
-                  <div className="form-group">
-                    <label className="form-label">Stock Inicial</label>
-                    <input
-                      type="number"
-                      step="0.001"
-                      className="form-input"
-                      value={stockActual}
-                      onChange={(e) => setStockActual(e.target.value)}
-                      required
-                    />
-                  </div>
+                    {!esServicio ? (
+                      <>
+                        <div className="gap-lg" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+                          <div className="form-group">
+                            <label className="form-label">Stock Inicial</label>
+                            <input
+                              type="number"
+                              step="0.001"
+                              className="form-input"
+                              value={stockActual}
+                              onChange={(e) => setStockActual(e.target.value)}
+                              required
+                            />
+                          </div>
 
-                  {/* Carga dinámica de atributos según el rubro */}
-                  <div className="variant-full-row" style={{ borderTop: '1px dashed var(--border-color)', paddingTop: '12px' }}>
-                    <h4 className="font-bold" style={{ fontSize: '12px', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '12px' }}>
-                      Atributos Extra de Rubro ({categoria})
-                    </h4>
+                          <div className="form-group">
+                            <label className="form-label">Stock Mínimo (Alerta)</label>
+                            <input
+                              type="number"
+                              step="0.001"
+                              className="form-input"
+                              value={stockMinimo}
+                              onChange={(e) => setStockMinimo(e.target.value)}
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        {categoria !== 'Almacén' && (
+                          <div className="form-group">
+                            <label className="form-label">Unidad de Medida</label>
+                            <select
+                              className="form-input"
+                              value={unidadMedida}
+                              onChange={(e) => setUnidadMedida(e.target.value)}
+                            >
+                              <option value="unidad">Unidad / Pieza</option>
+                              <option value="kg">Kilos (kg)</option>
+                              <option value="g">Gramos (g)</option>
+                              <option value="litro">Litros (L)</option>
+                              <option value="mt">Metros (m)</option>
+                            </select>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div style={{ padding: '12px', background: 'var(--bg-secondary)', border: '1px dashed var(--border-color)', borderRadius: '8px', marginBottom: '16px', fontSize: '13px', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span>ℹ️</span>
+                        <span>Los servicios no requieren control de stock físico ni unidad de medida.</span>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div style={{ padding: '16px', background: 'rgba(var(--primary-rgb), 0.03)', borderRadius: '12px', border: '1px dashed hsl(var(--primary))', marginBottom: '16px' }}>
+                    <p className="font-semibold text-center" style={{ margin: 0, fontSize: '13px', color: 'hsl(var(--primary))' }}>
+                      ✓ Variantes múltiples detectadas. Por favor ingresa los datos correspondientes en la tabla de abajo.
+                    </p>
+                  </div>
+                )}
+
+                {!esServicio && (
+                  <div className="variant-form-card" style={{ marginTop: '16px' }}>
+                    {/* Carga dinámica de atributos según el rubro */}
+                    <div className="variant-full-row" style={{ paddingTop: '0' }}>
+                      <h4 className="font-bold" style={{ fontSize: '12px', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '12px' }}>
+                        Atributos Extra de Rubro ({categoria})
+                      </h4>
 
                     {categoria === 'Indumentaria' && (
-                      <div className="gap-lg" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-                        <div className="form-group">
-                          <label className="form-label">Talle</label>
-                          <select className="form-input" value={talle} onChange={(e) => setTalle(e.target.value)}>
-                            <option value="S">S</option>
-                            <option value="M">M</option>
-                            <option value="L">L</option>
-                            <option value="XL">XL</option>
-                            <option value="XXL">XXL</option>
-                            <option value="38">38</option>
-                            <option value="40">40</option>
-                            <option value="42">42</option>
-                            <option value="44">44</option>
-                          </select>
+                      <>
+                        <div className="gap-lg" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', marginBottom: '16px' }}>
+                          <div className="form-group">
+                            <label className="form-label">Talles (separados por coma, ej: S, M, L)</label>
+                            <input 
+                              type="text" 
+                              className="form-input" 
+                              placeholder="S, M, L, XL" 
+                              value={tallesInput} 
+                              onChange={e => setTallesInput(e.target.value)}
+                              disabled={!!editingProduct}
+                            />
+                            {editingProduct && <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>No se pueden regenerar combinaciones en edición.</span>}
+                          </div>
+                          <div className="form-group">
+                            <label className="form-label">Colores (separados por coma, ej: Rojo, Azul)</label>
+                            <input 
+                              type="text" 
+                              className="form-input" 
+                              placeholder="Rojo, Azul, Negro" 
+                              value={coloresInput} 
+                              onChange={e => setColoresInput(e.target.value)}
+                              disabled={!!editingProduct}
+                            />
+                          </div>
                         </div>
-                        <div className="form-group">
-                          <label className="form-label">Color</label>
-                          <input
-                            type="text"
-                            className="form-input"
-                            placeholder="Ej: Negro"
-                            value={color}
-                            onChange={(e) => setColor(e.target.value)}
-                          />
-                        </div>
-                      </div>
+
+                        {variantsList.length > 0 && (
+                          <div style={{ overflowX: 'auto', border: '1px solid var(--border-color)', borderRadius: '8px', marginTop: '12px' }}>
+                            <table className="product-table" style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
+                              <thead>
+                                <tr style={{ background: 'var(--bg-tertiary)' }}>
+                                  <th style={{ padding: '8px', textAlign: 'left' }}>Variante</th>
+                                  <th style={{ padding: '8px', textAlign: 'left' }}>SKU</th>
+                                  <th style={{ padding: '8px', textAlign: 'left' }}>Código Barras</th>
+                                  <th style={{ padding: '8px', textAlign: 'center', width: '85px' }}>Costo ($)</th>
+                                  <th style={{ padding: '8px', textAlign: 'center', width: '90px' }}>Precio Predet. ($)</th>
+                                  <th style={{ padding: '8px', textAlign: 'center', width: '75px' }}>Stock</th>
+                                  <th style={{ padding: '8px', textAlign: 'center', width: '75px' }}>Stock Mín</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {variantsList.map((v, index) => (
+                                  <tr key={index} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                                    <td style={{ padding: '8px', fontWeight: 'bold' }}>
+                                      {v.talle || '-'} / {v.color || '-'}
+                                    </td>
+                                    <td style={{ padding: '4px' }}>
+                                      <input 
+                                        type="text" 
+                                        className="form-input" 
+                                        style={{ padding: '4px 8px', fontSize: '12px', height: '30px' }}
+                                        value={v.sku} 
+                                        onChange={e => {
+                                          const newList = [...variantsList];
+                                          newList[index].sku = e.target.value;
+                                          setVariantsList(newList);
+                                        }}
+                                        required
+                                      />
+                                    </td>
+                                    <td style={{ padding: '4px' }}>
+                                      <input 
+                                        type="text" 
+                                        className="form-input" 
+                                        style={{ padding: '4px 8px', fontSize: '12px', height: '30px' }}
+                                        placeholder="Opcional"
+                                        value={v.codigoBarras} 
+                                        onChange={e => {
+                                          const newList = [...variantsList];
+                                          newList[index].codigoBarras = e.target.value;
+                                          setVariantsList(newList);
+                                        }}
+                                      />
+                                    </td>
+                                    <td style={{ padding: '4px' }}>
+                                      <input 
+                                        type="number" 
+                                        className="form-input text-center" 
+                                        style={{ padding: '4px', fontSize: '12px', height: '30px' }}
+                                        value={v.costo} 
+                                        onChange={e => {
+                                          const newList = [...variantsList];
+                                          newList[index].costo = e.target.value;
+                                          setVariantsList(newList);
+                                        }}
+                                        required
+                                      />
+                                    </td>
+                                    <td style={{ padding: '4px' }}>
+                                      <input 
+                                        type="number" 
+                                        className="form-input text-center" 
+                                        style={{ padding: '4px', fontSize: '12px', height: '30px' }}
+                                        value={v.precioVenta} 
+                                        onChange={e => {
+                                          const newList = [...variantsList];
+                                          newList[index].precioVenta = e.target.value;
+                                          setVariantsList(newList);
+                                        }}
+                                        required
+                                      />
+                                    </td>
+                                    <td style={{ padding: '4px' }}>
+                                      <input 
+                                        type="number" 
+                                        className="form-input text-center" 
+                                        style={{ padding: '4px', fontSize: '12px', height: '30px' }}
+                                        value={v.stockActual} 
+                                        onChange={e => {
+                                          const newList = [...variantsList];
+                                          newList[index].stockActual = e.target.value;
+                                          setVariantsList(newList);
+                                        }}
+                                        required
+                                        disabled={!!editingProduct && v.id !== undefined}
+                                      />
+                                    </td>
+                                    <td style={{ padding: '4px' }}>
+                                      <input 
+                                        type="number" 
+                                        className="form-input text-center" 
+                                        style={{ padding: '4px', fontSize: '12px', height: '30px' }}
+                                        value={v.stockMinimo} 
+                                        onChange={e => {
+                                          const newList = [...variantsList];
+                                          newList[index].stockMinimo = e.target.value;
+                                          setVariantsList(newList);
+                                        }}
+                                        required
+                                      />
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </>
                     )}
 
                     {categoria === 'Almacén' && (
                       <div className="gap-lg" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
                         <div className="form-group">
-                          <label className="form-label">Unidad de Medida</label>
-                          <select className="form-input" value={unidad} onChange={(e) => setUnidad(e.target.value)}>
-                            <option value="unidad">Unidad</option>
-                            <option value="kg">Kilogramo (kg)</option>
-                            <option value="g">Gramo (g)</option>
-                            <option value="litro">Litro (l)</option>
+                          <label className="form-label">Tipo de Venta</label>
+                          <select 
+                            className="form-input" 
+                            value={tipoVentaAlmacen} 
+                            onChange={(e) => {
+                              const val = e.target.value as 'unidad' | 'fraccionable';
+                              setTipoVentaAlmacen(val);
+                              if (val === 'unidad') {
+                                setUnidadMedida('unidad');
+                              } else {
+                                setUnidadMedida('kg');
+                              }
+                            }}
+                          >
+                            <option value="unidad">Por Unidad / Pieza entera</option>
+                            <option value="fraccionable">Fraccionable / Por Peso</option>
                           </select>
                         </div>
-                        <div className="form-group">
-                          <label className="form-label">¿Es Fraccionable?</label>
-                          <div className="d-flex align-center gap-sm" style={{ height: '42px' }}>
-                            <input
-                              type="checkbox"
-                              checked={fraccionable}
-                              onChange={(e) => setFraccionable(e.target.checked)}
-                              style={{ width: '20px', height: '20px' }}
-                            />
-                            <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                              Permite vender en decimales (ej. 0.5 kg).
-                            </span>
+                        
+                        {tipoVentaAlmacen === 'fraccionable' && (
+                          <div className="form-group">
+                            <label className="form-label">Unidad de Medida de Peso</label>
+                            <select 
+                              className="form-input" 
+                              value={unidadMedida} 
+                              onChange={(e) => setUnidadMedida(e.target.value)}
+                            >
+                              <option value="kg">Kilogramo (kg)</option>
+                              <option value="g">Gramo (g)</option>
+                              <option value="litro">Litro (l)</option>
+                              <option value="mt">Metro (m)</option>
+                            </select>
                           </div>
-                        </div>
+                        )}
                       </div>
                     )}
 
@@ -2085,13 +2709,14 @@ export default function Home() {
                     )}
                   </div>
                 </div>
-              </div>
+              )}
+            </div>
 
               <div className="d-flex gap-md" style={{ marginTop: '24px' }}>
-                <button type="submit" className="btn-primary" disabled={createProductMutation.isPending}>
-                  {createProductMutation.isPending ? 'Guardando...' : 'Crear Producto'}
+                <button type="submit" className="btn-primary" disabled={createProductMutation.isPending || updateProductMutation.isPending}>
+                  {createProductMutation.isPending || updateProductMutation.isPending ? 'Guardando...' : (editingProduct ? 'Guardar Cambios' : 'Crear Producto')}
                 </button>
-                <button type="button" className="btn-secondary" onClick={() => setIsModalOpen(false)}>
+                <button type="button" className="btn-secondary" onClick={closeProductModal}>
                   Cancelar
                 </button>
               </div>

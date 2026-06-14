@@ -17,6 +17,33 @@ export class ProductosService {
       throw new UnauthorizedException('Inquilino no especificado en el contexto de la solicitud');
     }
 
+    // 0. Validar límite de catálogo según el plan
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId },
+    });
+
+    if (!tenant) {
+      throw new UnauthorizedException('Inquilino no encontrado');
+    }
+
+    const currentVariantsCount = await this.prisma.productoVariante.count({
+      where: { tenant_id: tenantId },
+    });
+
+    const newVariantsCount = dto.variantes.length;
+    const totalVariantsCount = currentVariantsCount + newVariantsCount;
+
+    let productLimit = -1;
+    if (tenant.plan_tier === 'TRIAL') productLimit = 100;
+    else if (tenant.plan_tier === 'BASICO') productLimit = 1000;
+    else if (tenant.plan_tier === 'PREMIUM') productLimit = 10000;
+
+    if (productLimit !== -1 && totalVariantsCount > productLimit) {
+      throw new ConflictException(
+        `Has alcanzado el límite de variantes permitido para tu plan ${tenant.plan_tier} (${productLimit} variantes). Tu conteo actual es de ${currentVariantsCount} variantes, e intentas agregar ${newVariantsCount}. Por favor mejora tu plan para continuar.`
+      );
+    }
+
     // 1. Validar que ninguno de los SKUs provistos colisione dentro del mismo Tenant
     for (const variant of dto.variantes) {
       const existingVariant = await this.prisma.productoVariante.findUnique({
@@ -42,13 +69,16 @@ export class ProductosService {
           categoria: dto.categoria,
           marca: dto.marca,
           es_servicio: dto.es_servicio ?? false,
+          unidad_medida: dto.unidad_medida ?? 'unidad',
           tenant_id: tenantId,
           variantes: {
             create: dto.variantes.map((v) => ({
               sku: v.sku,
               codigo_barras: v.codigo_barras,
               precio_venta: v.precio_venta,
+              costo: v.costo ?? 0,
               stock_actual: v.stock_actual,
+              stock_minimo: v.stock_minimo ?? 0,
               atributos_extra: v.atributos_extra || {},
               tenant_id: tenantId, // Vinculación explícita para la restricción única compuesta
             })),
@@ -131,21 +161,99 @@ export class ProductosService {
   }
 
   async update(id: number, dto: UpdateProductoDto): Promise<any> {
-    // Validar existencia en el Tenant actual
-    await this.findOne(id);
+    const tenantId = this.tenantContext.getTenantId();
+    if (!tenantId) {
+      throw new UnauthorizedException('Inquilino no especificado en el contexto de la solicitud');
+    }
 
-    return this.prisma.producto.update({
-      where: { id },
-      data: {
-        nombre: dto.nombre,
-        descripcion: dto.descripcion,
-        categoria: dto.categoria,
-        marca: dto.marca,
-        es_servicio: dto.es_servicio,
-      },
-      include: {
-        variantes: true,
-      },
+    // Validar existencia en el Tenant actual y cargar variante(s)
+    const existingProduct = await this.findOne(id);
+
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Actualizar el producto
+      await tx.producto.update({
+        where: { id },
+        data: {
+          nombre: dto.nombre,
+          descripcion: dto.descripcion,
+          categoria: dto.categoria,
+          marca: dto.marca,
+          es_servicio: dto.es_servicio,
+          unidad_medida: dto.unidad_medida,
+        },
+      });
+
+      // 2. Actualizar variantes si se proveen
+      if (dto.variantes && dto.variantes.length > 0) {
+        for (const v of dto.variantes) {
+          if (v.id) {
+            // Validar SKU único en caso de cambio de SKU
+            if (v.sku) {
+              const duplicateSku = await tx.productoVariante.findFirst({
+                where: {
+                  tenant_id: tenantId,
+                  sku: v.sku,
+                  NOT: { id: v.id },
+                },
+              });
+              if (duplicateSku) {
+                throw new ConflictException(`El SKU "${v.sku}" ya se encuentra registrado por otro producto`);
+              }
+            }
+
+            await tx.productoVariante.update({
+              where: { id: v.id },
+              data: {
+                sku: v.sku,
+                codigo_barras: v.codigo_barras,
+                precio_venta: v.precio_venta,
+                costo: v.costo,
+                stock_actual: v.stock_actual,
+                stock_minimo: v.stock_minimo,
+                atributos_extra: v.atributos_extra,
+              },
+            });
+          } else {
+            // Fallback: Actualizar la primera variante del producto
+            const firstVariant = existingProduct.variantes[0];
+            if (firstVariant) {
+              if (v.sku) {
+                const duplicateSku = await tx.productoVariante.findFirst({
+                  where: {
+                    tenant_id: tenantId,
+                    sku: v.sku,
+                    NOT: { id: firstVariant.id },
+                  },
+                });
+                if (duplicateSku) {
+                  throw new ConflictException(`El SKU "${v.sku}" ya se encuentra registrado por otro producto`);
+                }
+              }
+
+              await tx.productoVariante.update({
+                where: { id: firstVariant.id },
+                data: {
+                  sku: v.sku,
+                  codigo_barras: v.codigo_barras,
+                  precio_venta: v.precio_venta,
+                  costo: v.costo,
+                  stock_actual: v.stock_actual,
+                  stock_minimo: v.stock_minimo,
+                  atributos_extra: v.atributos_extra,
+                },
+              });
+            }
+          }
+        }
+      }
+
+      // Devolver producto actualizado con sus variantes
+      return tx.producto.findUnique({
+        where: { id },
+        include: {
+          variantes: true,
+        },
+      });
     });
   }
 

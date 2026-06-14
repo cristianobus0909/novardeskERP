@@ -1,6 +1,6 @@
 import { useAuthStore } from '../store/use-auth-store';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3000';
 
 export async function apiRequest<T = any>(path: string, options: RequestInit = {}): Promise<T> {
   const { token } = useAuthStore.getState();

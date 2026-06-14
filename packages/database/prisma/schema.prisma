@@ -18,11 +18,14 @@ model Tenant {
   afip_key            String?    @db.Text
   afip_punto_venta    Int?
   afip_facturacion_automatica Boolean @default(false)
+  rubro               String     @default("Kiosco/Minisuper")
   estado_plan         EstadoPlan @default(TRIAL)
   plan_tier           PlanTier   @default(TRIAL)
   mp_suscripcion_id   String?    
   mp_access_token     String?    @db.Text
   mp_caja_id          String?
+  sucursales_adicionales Int       @default(0)
+  usuarios_adicionales   Int       @default(0)
   fin_prueba          DateTime?
   fecha_proximo_cobro DateTime?
   creado_el           DateTime   @default(now())
@@ -42,6 +45,9 @@ model Tenant {
   proveedores         Proveedor[]
   gastos              Gasto[]
   notificaciones      Notificacion[]
+  depositos           Deposito[]
+  movimientos_stock   StockMovimiento[]
+  listas_precio       ListaPrecio[]
 
   @@map("tenants")
 }
@@ -122,6 +128,7 @@ model User {
   caja_turnos CajaTurno[]
   
   pin_autorizacion String? // PIN para autorizar descuentos/devoluciones
+  movimientos_stock StockMovimiento[]
 
   @@unique([tenant_id, email])
   @@map("usuarios")
@@ -135,6 +142,7 @@ model Producto {
   categoria   String?
   marca       String?
   es_servicio Boolean  @default(false)
+  unidad_medida String @default("unidad")
 
   tenant      Tenant             @relation(fields: [tenant_id], references: [id])
   variantes   ProductoVariante[]
@@ -149,12 +157,16 @@ model ProductoVariante {
   sku             String   
   codigo_barras   String?
   precio_venta    Decimal  @db.Decimal(10, 2)
+  costo           Decimal  @db.Decimal(10, 2) @default(0)
   stock_actual    Decimal  @default(0) @db.Decimal(10, 3) 
+  stock_minimo    Decimal  @default(0) @db.Decimal(10, 3)
   atributos_extra Json?    
   
   producto        Producto       @relation(fields: [producto_id], references: [id], onDelete: Cascade)
   tenant          Tenant         @relation(fields: [tenant_id], references: [id])
   detalles_venta  VentaDetalle[]
+  movimientos_stock StockMovimiento[]
+  lista_precio_items ListaPrecioItem[]
 
   @@unique([tenant_id, sku])
   @@map("producto_variantes")
@@ -463,3 +475,73 @@ model MovimientoCuentaCorriente {
 
   @@map("movimientos_cuenta_corriente")
 }
+
+model Deposito {
+  id          Int      @id @default(autoincrement())
+  tenant_id   Int
+  nombre      String
+  direccion   String?
+  is_principal Boolean @default(false)
+  activo      Boolean  @default(true)
+  creado_el   DateTime @default(now())
+
+  tenant      Tenant   @relation(fields: [tenant_id], references: [id])
+  movimientos StockMovimiento[]
+
+  @@map("depositos")
+}
+
+enum TipoMovimientoStock {
+  ENTRADA_COMPRA
+  ENTRADA_AJUSTE
+  SALIDA_VENTA
+  SALIDA_AJUSTE
+  TRASLADO
+  REMITO_ENTREGA
+}
+
+model StockMovimiento {
+  id              Int      @id @default(autoincrement())
+  tenant_id       Int
+  deposito_id     Int
+  variante_id     Int
+  usuario_id      Int
+  tipo            TipoMovimientoStock
+  cantidad        Decimal  @db.Decimal(10, 3) // Positivo o negativo dependiendo de la consulta, pero generalmente guardado en valor absoluto o siempre sumando/restando.
+  concepto        String?
+  comprobante     String?
+  fecha           DateTime @default(now())
+
+  tenant          Tenant           @relation(fields: [tenant_id], references: [id])
+  deposito        Deposito         @relation(fields: [deposito_id], references: [id])
+  variante        ProductoVariante @relation(fields: [variante_id], references: [id])
+  usuario         User             @relation(fields: [usuario_id], references: [id])
+
+  @@map("movimientos_stock")
+}
+
+model ListaPrecio {
+  id        Int      @id @default(autoincrement())
+  tenant_id Int
+  nombre    String
+  creado_el DateTime @default(now())
+
+  tenant    Tenant   @relation(fields: [tenant_id], references: [id])
+  items     ListaPrecioItem[]
+
+  @@map("listas_precio")
+}
+
+model ListaPrecioItem {
+  id              Int              @id @default(autoincrement())
+  lista_precio_id Int
+  variante_id     Int
+  precio          Decimal          @db.Decimal(10, 2)
+
+  lista_precio    ListaPrecio      @relation(fields: [lista_precio_id], references: [id], onDelete: Cascade)
+  variante        ProductoVariante @relation(fields: [variante_id], references: [id], onDelete: Cascade)
+
+  @@unique([lista_precio_id, variante_id])
+  @@map("lista_precio_items")
+}
+

@@ -33,6 +33,28 @@ export class UsersService {
   async createEmployee(dto: CreateEmployeeDto) {
     const tenantId = this.tenantContext.getTenantId();
     if (!tenantId) throw new UnauthorizedException('Tenant no identificado');
+
+    // 0. Validar límite de usuarios según el plan + adicionales contratados
+    const tenant = await this.prisma.tenant.findUnique({
+      where: { id: tenantId }
+    });
+    if (!tenant) throw new UnauthorizedException('Tenant no encontrado');
+
+    let baseUserLimit = 1;
+    if (tenant.plan_tier === 'BASICO') baseUserLimit = 2;
+    else if (tenant.plan_tier === 'PREMIUM') baseUserLimit = 3;
+    else if (tenant.plan_tier === 'FULL') baseUserLimit = 4;
+
+    const allowedUsersLimit = baseUserLimit + tenant.usuarios_adicionales;
+    const currentUsersCount = await this.prisma.user.count({
+      where: { tenant_id: tenantId }
+    });
+
+    if (currentUsersCount >= allowedUsersLimit) {
+      throw new ConflictException(
+        `Límite de usuarios alcanzado para tu plan ${tenant.plan_tier} (${allowedUsersLimit} usuarios permitidos: ${baseUserLimit} base + ${tenant.usuarios_adicionales} adicionales). Por favor contrata más usuarios o mejora tu plan.`
+      );
+    }
     
     // 1. Verificar si el email ya existe en el tenant (o global)
     const existingUser = await this.prisma.user.findFirst({

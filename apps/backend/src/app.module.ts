@@ -20,6 +20,8 @@ import { ProveedoresModule } from './proveedores/proveedores.module';
 import { GastosModule } from './gastos/gastos.module';
 import { ImportModule } from './import/import.module';
 import { NotificacionesModule } from './notificaciones/notificaciones.module';
+import { InventarioModule } from './inventario/inventario.module';
+import { ListasPrecioModule } from './listas-precio/listas-precio.module';
 
 @Module({
   imports: [
@@ -43,6 +45,8 @@ import { NotificacionesModule } from './notificaciones/notificaciones.module';
     GastosModule,
     ImportModule,
     NotificacionesModule,
+    InventarioModule,
+    ListasPrecioModule,
   ],
   controllers: [AppController],
   providers: [

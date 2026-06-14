@@ -44,7 +44,8 @@ function MockCheckoutContent() {
         }
       };
 
-      const res = await fetch('http://localhost:3000/webhooks/mercadopago', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3000';
+      const res = await fetch(`${apiUrl}/webhooks/mercadopago`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -55,10 +56,10 @@ function MockCheckoutContent() {
       });
 
       if (!res.ok) {
-        throw new Error('Error al enviar webhook simulado');
+        throw new Error('Error al procesar el pago simulado');
       }
 
-      toast.success(`Webhook enviado exitosamente (Simulación: ${status}).`);
+      toast.success(`Pago procesado exitosamente (Simulación: ${status}).`);
       router.push('/');
     } catch (err: any) {
       toast.error(err.message);

@@ -8,6 +8,89 @@ import { useCuentaCorriente } from '../../hooks/use-cuenta-corriente';
 import { useCreateSale } from '../../hooks/use-sales';
 import { TicketView } from './ticket-view';
 
+interface WeighedItemModalProps {
+  variant: any;
+  onClose: () => void;
+  onConfirm: (weight: number) => void;
+}
+
+export function WeighedItemModal({ variant, onClose, onConfirm }: WeighedItemModalProps) {
+  const [weight, setWeight] = useState('1.000');
+  const unit = variant.producto?.unidad_medida || 'kg';
+  const price = typeof variant.precio_venta === 'string' ? parseFloat(variant.precio_venta) : variant.precio_venta;
+  
+  const parsedWeight = parseFloat(weight) || 0;
+  const total = parsedWeight * price;
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (parsedWeight <= 0) {
+      toast.error('Por favor ingrese un peso válido.');
+      return;
+    }
+    onConfirm(parsedWeight);
+  };
+
+  return (
+    <div className="modal-backdrop fade-in" style={{
+      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+      background: 'rgba(0, 0, 0, 0.6)', display: 'flex', alignItems: 'center',
+      justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)'
+    }}>
+      <div className="modal-content" style={{
+        background: 'var(--bg-secondary)', padding: '24px', borderRadius: '16px',
+        border: '1px solid var(--border-color)', width: '100%', maxWidth: '400px',
+        boxShadow: 'var(--shadow-xl)', display: 'flex', flexDirection: 'column', gap: '16px'
+      }}>
+        <div className="d-flex justify-between align-center">
+          <h3 className="font-bold" style={{ fontSize: '18px', margin: 0 }}>Venta por Fracción / Peso</h3>
+          <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px', color: 'var(--text-secondary)' }}>&times;</button>
+        </div>
+
+        <div style={{ background: 'var(--bg-tertiary)', padding: '12px', borderRadius: '8px', fontSize: '14px' }}>
+          <div style={{ fontWeight: '700', color: 'var(--text-primary)' }}>{variant.producto?.nombre}</div>
+          <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontFamily: 'monospace', marginTop: '2px' }}>SKU: {variant.sku}</div>
+          <div style={{ fontSize: '13px', color: 'hsl(var(--primary))', fontWeight: '600', marginTop: '6px' }}>
+            Precio Unitario: ${price.toLocaleString('es-AR', { minimumFractionDigits: 2 })} / {unit}
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="d-flex flex-col gap-md">
+          <div className="form-group">
+            <label className="form-label" style={{ fontWeight: '600' }}>Ingrese el Peso / Cantidad ({unit})</label>
+            <div className="d-flex align-center gap-sm" style={{ marginTop: '6px' }}>
+              <input
+                type="number"
+                step="0.001"
+                min="0.001"
+                required
+                className="form-input"
+                style={{ fontSize: '18px', fontWeight: 'bold', height: '48px', textAlign: 'center' }}
+                value={weight}
+                onChange={e => setWeight(e.target.value)}
+                autoFocus
+              />
+              <span className="font-bold" style={{ fontSize: '16px', color: 'var(--text-secondary)' }}>{unit}</span>
+            </div>
+          </div>
+
+          <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '14px', color: 'var(--text-secondary)', fontWeight: '600' }}>Total calculado:</span>
+            <span className="font-extrabold" style={{ fontSize: '22px', color: 'hsl(var(--success))' }}>
+              ${total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+            </span>
+          </div>
+
+          <div className="d-flex gap-sm" style={{ marginTop: '8px' }}>
+            <button type="button" className="btn-secondary flex-1" onClick={onClose}>Cancelar</button>
+            <button type="submit" className="btn-primary flex-1">Agregar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 interface PosSimpleViewProps {
   products: any[];
   discountMonto: number;
@@ -19,6 +102,10 @@ interface PosSimpleViewProps {
   setIsDescuentoModalOpen: (v: boolean) => void;
   tenant: any;
   isVendedor: boolean;
+  hasPremium: boolean;
+  listasPrecio: any[];
+  selectedPriceListId: number | 'default';
+  setSelectedPriceListId: (v: number | 'default') => void;
 }
 
 export function PosSimpleView({
@@ -31,7 +118,11 @@ export function PosSimpleView({
   setDiscountMotivo,
   setIsDescuentoModalOpen,
   tenant,
-  isVendedor
+  isVendedor,
+  hasPremium,
+  listasPrecio,
+  selectedPriceListId,
+  setSelectedPriceListId
 }: PosSimpleViewProps) {
   const {
     items: cartItems,
@@ -47,19 +138,21 @@ export function PosSimpleView({
   const { data: cuentasContables = [] } = useCuentasContables();
   const { data: cuentaCorriente } = useCuentaCorriente(cliente_id || null);
   const createSaleMutation = useCreateSale();
-
   const [searchQuery, setSearchQuery] = useState('');
   const [ticketSale, setTicketSale] = useState<any>(null);
   const [nuevoMonto, setNuevoMonto] = useState('');
   const [selectedMedio, setSelectedMedio] = useState('EFECTIVO');
   const [selectedCuentaId, setSelectedCuentaId] = useState<number | string>('');
   const [selectedPlanId, setSelectedPlanId] = useState<number | ''>('');
+  const [weighingVariant, setWeighingVariant] = useState<any>(null);
 
   const [lastCardType, setLastCardType] = useState('TARJETA_CREDITO');
   const [lastCuentaId, setLastCuentaId] = useState<number | string>('');
 
   React.useEffect(() => {
-    if (selectedMedio === 'TARJETA_CREDITO' || selectedMedio === 'TARJETA_DEBITO') {
+    if (selectedMedio !== lastCardType) {
+      setSelectedCuentaId('');
+      setSelectedPlanId('');
       setLastCardType(selectedMedio);
     }
   }, [selectedMedio]);
@@ -70,7 +163,7 @@ export function PosSimpleView({
     }
   }, [selectedCuentaId]);
 
-  const subtotal = cartItems.reduce((acc, item) => acc + item.subtotal * item.cantidad, 0);
+  const subtotal = cartItems.reduce((acc, item) => acc + item.subtotal, 0);
   const totalConDescuento = Math.max(0, subtotal - discountMonto);
   const recargoTotal = pagosAgregados.reduce((acc, p) => acc + (p.recargo_monto || 0), 0);
   
@@ -174,12 +267,22 @@ export function PosSimpleView({
         />
       )}
 
-      <div className="overflow-hidden gap-md" style={{ display: 'grid', gridTemplateColumns: '1fr', height: 'calc(100vh - 160px)' }}>
+      {weighingVariant && (
+        <WeighedItemModal
+          variant={weighingVariant}
+          onClose={() => setWeighingVariant(null)}
+          onConfirm={(weight) => {
+            addItem(weighingVariant, weight);
+            setWeighingVariant(null);
+          }}
+        />
+      )}
+
+      <div className="pos-simple-container overflow-hidden gap-md" style={{ display: 'grid', gridTemplateColumns: '1fr', height: 'calc(100vh - 160px)' }}>
         {/* ─── Buscador de productos ─── */}
         <div className="d-flex flex-col gap-md overflow-hidden">
-
-          <div className="d-flex align-center" style={{ gap: '10px' }}>
-            <div className="relative flex-1">
+          <div className="d-flex align-center flex-wrap" style={{ gap: '10px' }}>
+            <div className="relative flex-1" style={{ minWidth: '200px' }}>
               <svg className="absolute" style={{ left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }}
                 xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -194,6 +297,24 @@ export function PosSimpleView({
                 style={{ paddingLeft: '38px', fontSize: '15px', height: '44px' }}
               />
             </div>
+            {hasPremium && listasPrecio.length > 0 && (
+              <div className="d-flex align-center gap-xs" style={{ minWidth: '200px', height: '44px' }}>
+                <select
+                  className="form-input"
+                  style={{ height: '44px', padding: '0 12px', fontSize: '13px' }}
+                  value={selectedPriceListId}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setSelectedPriceListId(val === 'default' ? 'default' : Number(val));
+                  }}
+                >
+                  <option value="default">Precio Base (Estándar)</option>
+                  {listasPrecio?.map((l: any) => (
+                    <option key={l.id} value={l.id}>{l.nombre}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             {discountMonto > 0 && (
               <span className="font-bold" style={{ fontSize: '13px', color: 'hsl(var(--success))', whiteSpace: 'nowrap', background: 'rgba(22, 163, 74, 0.1)', padding: '6px 12px', borderRadius: '8px' }}>
                 Dto: -${discountMonto.toFixed(2)}
@@ -210,7 +331,7 @@ export function PosSimpleView({
           </div>
 
           {/* Split: productos arriba, carrito + cobro abajo */}
-          <div className="gap-lg flex-1 overflow-hidden" style={{ display: 'grid', gridTemplateColumns: '1fr 360px', minHeight: 0 }}>
+          <div className="pos-simple-split gap-lg flex-1 overflow-hidden" style={{ display: 'grid', gridTemplateColumns: '1fr 360px', minHeight: 0 }}>
 
             {/* Productos */}
             <div className="overflow-hidden d-flex flex-col gap-sm">
@@ -226,10 +347,18 @@ export function PosSimpleView({
                   const stock = typeof v.stock_actual === 'string' ? parseFloat(v.stock_actual) : v.stock_actual;
                   const precio = typeof v.precio_venta === 'string' ? parseFloat(v.precio_venta) : v.precio_venta;
                   const sinStock = !v.producto.es_servicio && stock <= 0;
+                  const isFraccionable = v.producto?.unidad_medida !== 'unidad' || v.atributos_extra?.fraccionable === true || v.atributos_extra?.fraccionable === 'true';
                   return (
                     <div
                       key={v.id}
-                      onClick={() => !sinStock && addItem(v)}
+                      onClick={() => {
+                        if (sinStock) return;
+                        if (isFraccionable) {
+                          setWeighingVariant(v);
+                        } else {
+                          addItem(v);
+                        }
+                      }}
                       className="d-flex flex-col gap-xs" style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '12px', cursor: sinStock ? 'not-allowed' : 'pointer', opacity: sinStock ? 0.5 : 1, transition: 'all 0.15s ease' }}
                       onMouseEnter={e => {
                         if (!sinStock) {
@@ -300,16 +429,36 @@ export function PosSimpleView({
                             <div style={{ fontSize: '10px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{item.sku}</div>
                           </td>
                           <td className="p-sm text-center">
-                            <div className="d-flex align-center justify-center" style={{ gap: '2px' }}>
-                              <button type="button" onClick={() => updateQuantity(item.variantId, item.cantidad - 1)}
-                                className="d-flex align-center justify-center" style={{ width: '20px', height: '20px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', borderRadius: '4px', cursor: 'pointer', fontSize: '14px', lineHeight: 1 }}>-</button>
-                              <span className="text-center font-bold" style={{ minWidth: '28px' }}>{item.cantidad}</span>
-                              <button type="button" onClick={() => updateQuantity(item.variantId, item.cantidad + 1)}
-                                className="d-flex align-center justify-center" style={{ width: '20px', height: '20px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', borderRadius: '4px', cursor: 'pointer', fontSize: '14px', lineHeight: 1 }}>+</button>
-                            </div>
+                            {item.unidad_medida && item.unidad_medida !== 'unidad' ? (
+                              <div className="d-flex align-center justify-center" style={{ gap: '4px' }}>
+                                <input
+                                  type="number"
+                                  step="0.001"
+                                  min="0.001"
+                                  className="form-input text-center"
+                                  style={{ width: '75px', padding: '2px 4px', height: '28px', fontSize: '13px', fontWeight: 'bold' }}
+                                  value={item.cantidad}
+                                  onChange={(e) => {
+                                    const val = parseFloat(e.target.value);
+                                    if (!isNaN(val)) {
+                                      updateQuantity(item.variantId, val);
+                                    }
+                                  }}
+                                />
+                                <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>{item.unidad_medida}</span>
+                              </div>
+                            ) : (
+                              <div className="d-flex align-center justify-center" style={{ gap: '2px' }}>
+                                <button type="button" onClick={() => updateQuantity(item.variantId, item.cantidad - 1)}
+                                  className="d-flex align-center justify-center" style={{ width: '20px', height: '20px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', borderRadius: '4px', cursor: 'pointer', fontSize: '14px', lineHeight: 1 }}>-</button>
+                                <span className="text-center font-bold" style={{ minWidth: '28px' }}>{item.cantidad}</span>
+                                <button type="button" onClick={() => updateQuantity(item.variantId, item.cantidad + 1)}
+                                  className="d-flex align-center justify-center" style={{ width: '20px', height: '20px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', borderRadius: '4px', cursor: 'pointer', fontSize: '14px', lineHeight: 1 }}>+</button>
+                              </div>
+                            )}
                           </td>
                           <td className="text-right" style={{ padding: '8px 12px' }}>
-                            <div className="font-bold" style={{ fontSize: '13px' }}>${(item.subtotal * item.cantidad).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</div>
+                            <div className="font-bold" style={{ fontSize: '13px' }}>${item.subtotal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</div>
                             <button type="button" onClick={() => removeItem(item.variantId)}
                               className="p-0 font-semibold" style={{ fontSize: '10px', color: 'hsl(var(--danger))', background: 'none', border: 'none', cursor: 'pointer' }}>
                               Quitar

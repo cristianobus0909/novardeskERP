@@ -21,6 +21,8 @@ export interface Tenant {
   afip_punto_venta?: number | null;
   afip_crt?: string | null;
   afip_facturacion_automatica?: boolean | null;
+  plan_tier?: string | null;
+  rubro?: string | null;
 }
 
 interface AuthState {
@@ -28,6 +30,7 @@ interface AuthState {
   user: User | null;
   tenant: Tenant | null;
   setAuth: (token: string, user: User, tenant: Tenant) => void;
+  updateTenant: (tenantUpdates: Partial<Tenant>) => void;
   logout: () => void;
 }
 
@@ -38,6 +41,9 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       tenant: null,
       setAuth: (token, user, tenant) => set({ token, user, tenant }),
+      updateTenant: (tenantUpdates) => set((state) => ({ 
+        tenant: state.tenant ? { ...state.tenant, ...tenantUpdates } : null 
+      })),
       logout: () => set({ token: null, user: null, tenant: null }),
     }),
     {

@@ -12,6 +12,7 @@ export interface CartItem {
   es_servicio: boolean;
   producto_id?: number;
   categoria?: string;
+  unidad_medida?: string;
 }
 
 interface CartState {
@@ -25,7 +26,7 @@ interface CartState {
   recargo_monto: number;
   solicita_factura: boolean;
   
-  addItem: (variant: any) => void;
+  addItem: (variant: any, customQuantity?: number) => void;
   removeItem: (variantId: number) => void;
   updateQuantity: (variantId: number, cantidad: number) => void;
   updatePrice: (variantId: number, precio: number) => void;
@@ -45,7 +46,7 @@ export const useCartStore = create<CartState>((set) => ({
   recargo_monto: 0,
   solicita_factura: false,
 
-  addItem: (variant) => set((state) => {
+  addItem: (variant, customQuantity) => set((state) => {
     const existingIndex = state.items.findIndex(item => item.variantId === variant.id);
     const itemPrecio = typeof variant.precio_venta === 'string' ? parseFloat(variant.precio_venta) : variant.precio_venta;
     const itemStock = typeof variant.stock_actual === 'string' ? parseFloat(variant.stock_actual) : variant.stock_actual;
@@ -56,10 +57,12 @@ export const useCartStore = create<CartState>((set) => ({
       .join(', ') : '';
     const nombreCompleto = variant.producto?.nombre + (attrs ? ` (${attrs})` : '');
 
+    const addedQty = customQuantity !== undefined ? customQuantity : 1;
+
     if (existingIndex > -1) {
       const existingItem = state.items[existingIndex];
       if (!existingItem) return state;
-      const nuevaCantidad = existingItem.cantidad + 1;
+      const nuevaCantidad = existingItem.cantidad + addedQty;
 
       if (!esServicio && nuevaCantidad > itemStock) {
         toast.error(`No hay stock suficiente. Máximo disponible: ${itemStock}`);
@@ -77,7 +80,7 @@ export const useCartStore = create<CartState>((set) => ({
       return { items: updatedItems };
     }
 
-    if (!esServicio && itemStock < 1) {
+    if (!esServicio && itemStock < addedQty) {
       toast.error(`No hay stock disponible para este artículo.`);
       return state;
     }
@@ -87,12 +90,13 @@ export const useCartStore = create<CartState>((set) => ({
       sku: variant.sku,
       nombre: nombreCompleto,
       precio_unitario: itemPrecio,
-      cantidad: 1,
-      subtotal: itemPrecio,
+      cantidad: addedQty,
+      subtotal: addedQty * itemPrecio,
       stock_actual: itemStock,
       es_servicio: esServicio,
       producto_id: variant.producto?.id,
-      categoria: variant.producto?.categoria?.nombre
+      categoria: variant.producto?.categoria?.nombre,
+      unidad_medida: variant.producto?.unidad_medida || 'unidad'
     };
 
     toast.success('Producto agregado al carrito');

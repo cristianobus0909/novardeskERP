@@ -37,4 +37,8 @@ export class UpdateTenantDto {
 
   @IsOptional()
   afip_facturacion_automatica?: boolean;
+
+  @IsString()
+  @IsOptional()
+  rubro?: string;
 }

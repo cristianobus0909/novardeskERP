@@ -71,6 +71,22 @@ export function useCreateProduct() {
   });
 }
 
+// Hook para editar un producto y sus variantes
+export function useUpdateProduct() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, product }: { id: number; product: any }) =>
+      apiRequest<Producto>(`/productos/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(product),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    },
+  });
+}
+
 // Hook para búsqueda de variante en el POS (escaneo)
 export function useSearchVariant(searchQuery: string, isEnabled = false) {
   return useQuery<ProductoVariante & { producto: Producto }>({

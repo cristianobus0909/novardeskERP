@@ -107,13 +107,17 @@ export class ImportService {
         for (const row of data) {
           await tx.producto.create({
             data: {
-              nombre: row.nombre.toString(),
+              nombre: row.nombre?.toString() || '',
+              marca: row.marca?.toString() || undefined,
+              descripcion: row.descripcion?.toString() || undefined,
               categoria: row.categoria?.toString() || 'Sin Categoría',
               tenant_id: tenantId,
               variantes: {
                 create: [{
-                  sku: row.codigo.toString(),
-                  precio_venta: Number(row.precio_venta),
+                  sku: row.codigo?.toString() || '',
+                  codigo_barras: row.codigo_barras?.toString() || undefined,
+                  precio_venta: Number(row.precio_venta) || 0,
+                  costo: row.costo !== undefined && !isNaN(Number(row.costo)) ? Number(row.costo) : 0,
                   stock_actual: Number(row.stock_actual) || 0,
                   tenant_id: tenantId,
                 }]
