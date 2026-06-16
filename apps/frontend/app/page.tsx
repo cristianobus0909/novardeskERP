@@ -45,6 +45,17 @@ export default function Home() {
   const [authError, setAuthError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Estados para la landing page y el registro de nuevos comercios
+  const [authView, setAuthView] = useState<'landing' | 'login' | 'register'>('landing');
+  const [activeLegalModal, setActiveLegalModal] = useState<'terms' | 'privacy' | 'dpa' | null>(null);
+  const [regRazonSocial, setRegRazonSocial] = useState('');
+  const [regCuit, setRegCuit] = useState('');
+  const [regNombre, setRegNombre] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regPassword, setRegPassword] = useState('');
+  const [regLoading, setRegLoading] = useState(false);
+  const [regError, setRegError] = useState<string | null>(null);
+
   // Estados del modal de creación de producto
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
@@ -478,6 +489,118 @@ export default function Home() {
     }
   };
 
+  const getLegalModalTitle = () => {
+    switch (activeLegalModal) {
+      case 'terms': return 'Términos y Condiciones de Uso';
+      case 'privacy': return 'Política de Privacidad y Tratamiento de Datos';
+      case 'dpa': return 'Acuerdo de Tratamiento de Datos (DPA)';
+      default: return '';
+    }
+  };
+
+  const renderLegalModalContent = () => {
+    switch (activeLegalModal) {
+      case 'terms':
+        return (
+          <div>
+            <h4>1. Aceptación de los Términos</h4>
+            <p>Al registrarse y utilizar la plataforma NovarDesk ERP, usted acepta y se obliga a cumplir con estos Términos y Condiciones de Uso. Si no está de acuerdo con alguna cláusula, le solicitamos que no utilice nuestro servicio.</p>
+            
+            <h4>2. Descripción del Servicio</h4>
+            <p>NovarDesk ERP proporciona un sistema integral de gestión empresarial basado en la nube. Incluye control de inventario, punto de venta (POS), facturación electrónica, administración de listas de precios y cuentas corrientes. El servicio se ofrece bajo modelos de suscripción mensual.</p>
+            
+            <h4>3. Registro y Cuenta de Usuario</h4>
+            <p>Para utilizar el servicio es indispensable registrarse y crear una cuenta de comercio. Usted es responsable de mantener la confidencialidad de sus credenciales de acceso y de todas las actividades que ocurran bajo su cuenta.</p>
+            
+            <h4>4. Período de Prueba Gratis y Suscripción</h4>
+            <p>NovarDesk ERP ofrece un período de prueba gratuito de 14 días para nuevos usuarios. Al finalizar el período, para continuar utilizando el servicio deberá suscribirse a uno de nuestros planes de pago. Los pagos se realizan por adelantado de forma mensual y no son reembolsables.</p>
+            
+            <h4>5. Limitaciones de Responsabilidad</h4>
+            <p>NovarDesk ERP no será responsable por daños indirectos, incidentales, especiales o consecuentes que resulten del uso o la imposibilidad de usar el servicio. El usuario asume toda la responsabilidad por la carga de stock, precios y la emisión de comprobantes ante las entidades fiscales pertinentes.</p>
+          </div>
+        );
+      case 'privacy':
+        return (
+          <div>
+            <h4>1. Información que Recopilamos</h4>
+            <p>Recopilamos información relacionada con su comercio (Razón Social, CUIT, correo electrónico del administrador, etc.), así como datos comerciales cargados por el usuario para el funcionamiento del ERP (productos, clientes, listas de precios y registros de ventas).</p>
+            
+            <h4>2. Uso de la Información</h4>
+            <p>La información recopilada se utiliza exclusivamente para proporcionar, mantener y mejorar el servicio de NovarDesk ERP, procesar transacciones y brindar soporte técnico. Bajo ninguna circunstancia vendemos, alquilamos ni compartimos sus datos con terceros con fines comerciales.</p>
+            
+            <h4>3. Seguridad de los Datos</h4>
+            <p>Implementamos medidas de seguridad técnicas y organizativas adecuadas para proteger sus datos personales y comerciales contra el acceso no autorizado, alteración, divulgación o destrucción. Usamos bases de datos cifradas y conexiones SSL seguras.</p>
+            
+            <h4>4. Derechos del Usuario</h4>
+            <p>Usted conserva todos los derechos sobre la propiedad de sus datos comerciales. Puede acceder, rectificar, exportar o eliminar sus datos personales y comerciales en cualquier momento contactando a nuestro soporte.</p>
+          </div>
+        );
+      case 'dpa':
+        return (
+          <div>
+            <h4>1. Objeto y Alcance</h4>
+            <p>Este Acuerdo de Tratamiento de Datos (DPA) regula el procesamiento de datos personales y comerciales que realiza NovarDesk ERP en calidad de encargado de tratamiento, por cuenta del cliente (responsable del tratamiento), en el marco del servicio contratado.</p>
+            
+            <h4>2. Instrucciones del Responsable</h4>
+            <p>NovarDesk procesará los datos únicamente de acuerdo con las instrucciones documentadas del Cliente y para las finalidades específicas de gestión comercial del ERP, salvo que la ley aplicable exija lo contrario.</p>
+            
+            <h4>3. Confidencialidad y Seguridad</h4>
+            <p>NovarDesk garantiza que todo el personal autorizado para tratar los datos se compromete a mantener absoluta confidencialidad. Asimismo, implementamos controles de seguridad robustos para prevenir incidentes de datos.</p>
+            
+            <h4>4. Subcontratación y Transferencias</h4>
+            <p>El cliente autoriza a NovarDesk a utilizar subencargados (como proveedores de infraestructura en la nube) que cumplan con estándares de protección de datos equivalentes a los establecidos en este acuerdo.</p>
+            
+            <h4>5. Auditoría y Colaboración</h4>
+            <p>NovarDesk colaborará con el cliente en la medida de lo posible para responder a solicitudes de derechos de los titulares de datos y auditorías de cumplimiento normativo aplicable.</p>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setRegError(null);
+    setRegLoading(true);
+    try {
+      await apiRequest('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          razon_social: regRazonSocial,
+          cuit: regCuit || undefined,
+          nombre: regNombre,
+          email: regEmail,
+          password: regPassword,
+        }),
+      });
+      toast.success('¡Registro exitoso! Iniciando sesión automáticamente...');
+      
+      // Auto-iniciar sesión transparente
+      try {
+        const loginData = await apiRequest<{ access_token: string; user: any; tenant: any }>('/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ email: regEmail, password: regPassword }),
+        });
+        setAuth(loginData.access_token, loginData.user, loginData.tenant);
+        if (loginData.user.role !== 'Vendedor') {
+          setActiveTab('dashboard');
+        } else {
+          setActiveTab('pos');
+        }
+      } catch (loginErr) {
+        setEmail(regEmail);
+        setPassword(regPassword);
+        setAuthView('login');
+        toast.info('Ingresa tu contraseña para iniciar sesión.');
+      }
+    } catch (err: any) {
+      setRegError(err.message || 'Error al registrar tu comercio');
+    } finally {
+      setRegLoading(false);
+    }
+  };
+
 
   // --- CONTROLADORES DEL FORMULARIO DE PRODUCTOS ---
   const closeProductModal = () => {
@@ -835,71 +958,1202 @@ export default function Home() {
 
   const uniqueCategories = ['Todos', ...Array.from(new Set(products.map((p) => p.categoria).filter((cat): cat is string => !!cat)))];
 
-  // --- RENDER VISTA LOGIN ---
+  // --- RENDER VISTA LANDING / LOGIN / REGISTER ---
   if (!token) {
     return (
-      <div className="auth-wrapper fade-in relative"  >
-        <div className="absolute" style={{ top: '24px', right: '24px', zIndex: 10 }}>
-          <div
-            onClick={toggleTheme}
-            className="theme-switch-container"
-            title={theme === 'light' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'}
-          >
-            <div className="theme-switch-thumb"></div>
-            <div className="theme-switch-icons">
-              <span className={`theme-switch-icon ${theme === 'light' ? 'active' : ''}`}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-              </span>
-              <span className={`theme-switch-icon ${theme === 'dark' ? 'active' : ''}`}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-              </span>
-            </div>
-          </div>
-        </div>
-        <div className="auth-card scale-up">
-          <div className="auth-header">
-            <h1 className="auth-title">NovarDesk ERP</h1>
-            <p className="auth-subtitle">Ingresa para administrar tu comercio</p>
-          </div>
+      <div className="landing-wrapper">
+        <style dangerouslySetInnerHTML={{ __html: `
+          .landing-wrapper {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+          }
+          
+          /* Top Bar Promocional */
+          .promo-topbar {
+            background-color: #0c2540;
+            color: #ffffff;
+            padding: 10px 24px;
+            font-size: 13px;
+            font-weight: 500;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            z-index: 101;
+            position: relative;
+            letter-spacing: 0.02em;
+          }
+          .promo-topbar-link {
+            color: #38bdf8;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: underline;
+            margin-left: 4px;
+          }
+          .promo-topbar-link:hover {
+            color: #7dd3fc;
+          }
 
-          <form onSubmit={handleLogin}>
-            <div className="form-group">
-              <label className="form-label">Correo Electrónico</label>
-              <input
-                type="email"
-                className="form-input"
-                placeholder="ejemplo@comercio.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+          /* Navigation Bar */
+          .landing-navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 48px;
+            background: rgba(255, 255, 255, 0.85);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: all 0.3s ease;
+          }
+          [data-theme='dark'] .landing-navbar {
+            background: rgba(15, 23, 42, 0.85);
+            border-bottom: 1px solid rgba(51, 65, 85, 0.8);
+          }
+          .navbar-brand {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: linear-gradient(135deg, hsl(var(--primary)) 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            cursor: pointer;
+            transition: opacity 0.2s;
+          }
+          .navbar-brand:hover {
+            opacity: 0.9;
+          }
+          .navbar-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+          }
+          .navbar-link {
+            font-size: 14.5px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s ease;
+          }
+          .navbar-link:hover {
+            color: hsl(var(--primary));
+          }
+          .navbar-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+          }
+
+          /* Hero Section */
+          .hero-section {
+            padding: 96px 24px 80px 24px;
+            background: linear-gradient(135deg, rgba(239, 246, 255, 0.5) 0%, rgba(249, 250, 251, 0.9) 50%, rgba(243, 232, 255, 0.3) 100%);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            position: relative;
+            overflow: hidden;
+          }
+          [data-theme='dark'] .hero-section {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.8) 50%, rgba(24, 24, 37, 0.8) 100%);
+          }
+          .hero-badge {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            color: #2563eb;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 6px 18px;
+            border-radius: 99px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.05);
+          }
+          [data-theme='dark'] .hero-badge {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: #38bdf8;
+          }
+          .hero-title {
+            font-size: 56px;
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.03em;
+            max-width: 900px;
+            color: #0f172a;
+            margin: 0;
+          }
+          [data-theme='dark'] .hero-title {
+            color: #f8fafc;
+          }
+          .hero-subtitle {
+            font-size: 18px;
+            color: #475569;
+            max-width: 750px;
+            line-height: 1.6;
+            margin: 0;
+          }
+          [data-theme='dark'] .hero-subtitle {
+            color: #cbd5e1;
+          }
+          .hero-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+          }
+          .video-container {
+            width: 100%;
+            max-width: 860px;
+            margin: 48px auto 0 auto;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            background: #000;
+            aspect-ratio: 16/9;
+          }
+          [data-theme='dark'] .video-container {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(51, 65, 85, 0.8);
+          }
+
+          /* Marquesina Infinita */
+          .marquee-section {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 32px 0;
+            overflow: hidden;
+            position: relative;
+          }
+          .marquee-title {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 20px;
+          }
+          .marquee-wrapper {
+            display: flex;
+            overflow: hidden;
+            width: 100%;
+            mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+          }
+          .marquee-track {
+            display: flex;
+            gap: 64px;
+            animation: scroll-marquee 25s linear infinite;
+            min-width: max-content;
+          }
+          @keyframes scroll-marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          .marquee-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            white-space: nowrap;
+          }
+          .marquee-icon {
+            font-size: 20px;
+          }
+
+          /* Secciones Generales */
+          .landing-section {
+            padding: 96px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+          }
+          .section-header {
+            text-align: center;
+            margin-bottom: 64px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+          }
+          .section-title {
+            font-size: 38px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: #0f172a;
+            margin: 0;
+          }
+          [data-theme='dark'] .section-title {
+            color: #f8fafc;
+          }
+          .section-desc {
+            font-size: 17px;
+            color: var(--text-secondary);
+            max-width: 650px;
+            line-height: 1.6;
+            margin: 0;
+          }
+
+          /* Dolores vs Soluciones */
+          .pain-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 32px;
+          }
+          .pain-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 36px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          }
+          .pain-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08);
+            border-color: rgba(59, 130, 246, 0.3);
+          }
+          .pain-item {
+            display: flex;
+            gap: 16px;
+          }
+          .pain-icon-red {
+            color: #a855f7; /* Violeta/Púrpura del Logo */
+            font-weight: 900;
+            flex-shrink: 0;
+            font-size: 20px;
+            line-height: 1.2;
+          }
+          .pain-icon-green {
+            color: #2563eb; /* Azul del Logo */
+            font-weight: 900;
+            flex-shrink: 0;
+            font-size: 20px;
+            line-height: 1.2;
+          }
+          .pain-text h4 {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0 0 6px 0;
+          }
+          .pain-text p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin: 0;
+          }
+
+          /* Funcionalidades */
+          .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+          }
+          .feature-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+          }
+          .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.08);
+          }
+          .feature-icon-wrapper {
+            background: rgba(59, 130, 246, 0.08);
+            color: #2563eb;
+            padding: 14px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+          }
+          [data-theme='dark'] .feature-icon-wrapper {
+            background: rgba(56, 189, 248, 0.1);
+            color: #38bdf8;
+          }
+          .feature-info h4 {
+            font-size: 17px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+          }
+          .feature-info p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin: 0;
+          }
+
+          /* Planes y Pricing */
+          .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-top: 16px;
+          }
+          
+          @media (max-width: 1024px) and (min-width: 769px) {
+            .pricing-grid {
+              grid-template-columns: repeat(2, 1fr);
+              gap: 24px;
+            }
+          }
+          .price-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 40px 32px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          }
+          .price-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08);
+          }
+          .price-card.recommended {
+            border: 2px solid #2563eb;
+            box-shadow: 0 20px 40px -10px rgba(59, 130, 246, 0.15);
+            background: linear-gradient(180deg, var(--bg-primary) 0%, rgba(59, 130, 246, 0.02) 100%);
+          }
+          [data-theme='dark'] .price-card.recommended {
+            border: 2px solid #38bdf8;
+            box-shadow: 0 20px 40px -10px rgba(56, 189, 248, 0.15);
+          }
+          .recommended-badge {
+            position: absolute;
+            top: -14px;
+            right: 28px;
+            background: #2563eb;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 6px 14px;
+            border-radius: 99px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+          }
+          [data-theme='dark'] .recommended-badge {
+            background: #38bdf8;
+            color: #0f172a;
+          }
+          .price-title {
+            font-size: 19px;
+            font-weight: 700;
+            margin: 0 0 16px 0;
+          }
+          .price-val {
+            font-size: 38px;
+            font-weight: 800;
+            line-height: 1;
+            color: #0f172a;
+          }
+          [data-theme='dark'] .price-val {
+            color: #f8fafc;
+          }
+          .price-period {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 500;
+          }
+          .price-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin: 12px 0 28px 0;
+            min-height: 42px;
+          }
+          .price-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 32px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            flex: 1;
+          }
+          .price-feature {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: var(--text-primary);
+          }
+          .price-feature.disabled {
+            color: var(--text-muted);
+            text-decoration: line-through;
+            opacity: 0.6;
+          }
+
+          /* Floating WhatsApp */
+          .floating-whatsapp {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            z-index: 9999;
+            background: #25d366;
+            color: #fff;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          }
+          .floating-whatsapp:hover {
+            transform: scale(1.1) translateY(-2px);
+            box-shadow: 0 12px 30px rgba(37, 211, 102, 0.6);
+          }
+          .floating-whatsapp::after {
+            content: 'Chatea con un asesor';
+            position: absolute;
+            right: 80px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            font-size: 13px;
+            font-weight: 600;
+            padding: 10px 18px;
+            border-radius: 10px;
+            white-space: nowrap;
+            opacity: 0;
+            transform: translateX(10px);
+            pointer-events: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+          }
+          .floating-whatsapp:hover::after {
+            opacity: 1;
+            transform: translateX(0);
+          }
+          .whatsapp-pulse {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #25d366;
+            border-radius: 50%;
+            z-index: -1;
+            animation: pulse-ring 2s infinite;
+            opacity: 0.4;
+          }
+          @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 0.4; }
+            100% { transform: scale(1.4); opacity: 0; }
+          }
+
+          /* Modal Legal Styling */
+          .legal-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+          }
+          .legal-modal-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 720px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            animation: modal-enter 0.2s ease-out;
+          }
+          @keyframes modal-enter {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+          }
+          .legal-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-color);
+          }
+          .legal-modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--text-primary);
+          }
+          .legal-modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
+            transition: color 0.2s;
+          }
+          .legal-modal-close:hover {
+            color: var(--text-primary);
+          }
+          .legal-modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            text-align: left;
+          }
+          .legal-modal-body h4 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 20px 0 8px 0;
+          }
+          .legal-modal-body h4:first-child {
+            margin-top: 0;
+          }
+          .legal-modal-body p {
+            margin: 0 0 12px 0;
+          }
+
+          /* Footer links */
+          .footer-links-container {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+          }
+          .footer-link {
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-weight: 600;
+            transition: color 0.2s ease;
+          }
+          .footer-link:hover {
+            color: #2563eb;
+            text-decoration: underline;
+          }
+          [data-theme='dark'] .footer-link:hover {
+            color: #38bdf8;
+          }
+
+          @media (max-width: 768px) {
+            .landing-navbar {
+              padding: 16px 24px;
+              flex-direction: column;
+              gap: 16px;
+            }
+            .navbar-links {
+              gap: 20px;
+              flex-wrap: wrap;
+              justify-content: center;
+            }
+            .navbar-actions {
+              width: 100%;
+              justify-content: center;
+              flex-wrap: wrap;
+            }
+            .hero-title {
+              font-size: 36px;
+            }
+            .hero-section {
+              padding: 64px 20px;
+            }
+            .landing-section {
+              padding: 64px 20px;
+            }
+            .hero-actions {
+              flex-direction: column;
+              width: 100%;
+              gap: 12px;
+            }
+            .hero-actions button, .hero-actions a {
+              width: 100% !important;
+            }
+            .pricing-grid {
+              grid-template-columns: 1fr;
+              gap: 24px;
+            }
+          }
+        ` }} />
+
+        {authView === 'landing' && (
+          <>
+            {/* Top Bar Promocional */}
+            <div className="promo-topbar">
+              <span>🚀 ¡Probá el sistema de gestión completo por solo $29000! Sin tarjetas ni contratos.</span>
+              <span className="promo-topbar-link" onClick={() => setAuthView('register')}>Empezar hoy mismo &rarr;</span>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Contraseña</label>
-              <input
-                type="password"
-                className="form-input"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
+            {/* Navigation Bar */}
+            <header className="landing-navbar">
+              <div className="navbar-brand" onClick={() => setAuthView('landing')}>NovarDesk ERP</div>
+              <nav className="navbar-links">
+                <a href="#soluciones" className="navbar-link">Soluciones</a>
+                <a href="#funciones" className="navbar-link">Funcionalidades</a>
+                <a href="#planes" className="navbar-link">Planes</a>
+              </nav>
+              <div className="navbar-actions">
+                <button 
+                  className="btn-secondary" 
+                  style={{ width: 'auto', height: '38px', padding: '0 16px', fontSize: '13px', margin: 0 }} 
+                  onClick={() => setAuthView('login')}
+                >
+                  Iniciar Sesión
+                </button>
+                <a 
+                  href="https://wa.me/5491123456789?text=Hola!%20Me%20gustaria%20solicitar%20una%20demo%20guiada%20de%20NovarDesk%20ERP"
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="btn-secondary d-flex align-center justify-center" 
+                  style={{ width: 'auto', height: '38px', padding: '0 16px', fontSize: '13px', margin: 0, textDecoration: 'none', borderColor: 'hsl(var(--primary))', color: 'hsl(var(--primary))', gap: '8px' }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#25d366' }}>
+                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.623-1.023-5.086-2.885-6.948C16.2 2.016 13.75 1.006 11.75 1.006c-5.437 0-9.863 4.37-9.866 9.801 0 1.768.47 3.49 1.362 5.022L2.245 21.5l5.89-1.53c.026.002.049.006.074.006.01 0 .02 0 .03-.001.01 0 .02.001.03.001.031-.001.054-.003.084-.006l.114-.015zM17.33 14.39c-.287-.144-1.702-.84-1.965-.936-.263-.096-.456-.144-.648.144-.192.288-.744.936-.912 1.128-.168.192-.336.216-.624.072-1.352-.677-2.28-1.21-3.188-2.77-.24-.412.24-.383.687-1.272.072-.144.036-.271-.018-.38-.054-.107-.456-1.104-.624-1.51-.164-.397-.333-.343-.456-.349-.12-.006-.26-.007-.4-.007-.14 0-.368.052-.56.26-.192.208-.732.716-.732 1.745s.748 2.023.852 2.164c.104.14 1.472 2.248 3.566 3.149 2.094.9 2.094.6 2.454.564.36-.036 1.702-.696 1.942-1.368.24-.672.24-1.248.168-1.368-.072-.12-.264-.216-.552-.36z"/>
+                  </svg>
+                  Solicitar Demo
+                </a>
+                <button 
+                  className="btn-primary" 
+                  style={{ width: 'auto', height: '38px', padding: '0 16px', fontSize: '13px', margin: 0 }} 
+                  onClick={() => setAuthView('register')}
+                >
+                  Crear Cuenta
+                </button>
+              </div>
+            </header>
 
-            {authError && (
-              <p className="text-center" style={{ color: 'red', fontSize: '13px', marginBottom: '16px' }}>
-                {authError}
+            {/* Hero Section */}
+            <section className="hero-section">
+              <div className="hero-badge">Revolucionando Comercios</div>
+              <h1 className="hero-title">El sistema de gestión que ordena tu negocio</h1>
+              <p className="hero-subtitle">
+                Centralizá ventas, facturación electrónica, stock en tiempo real, múltiples listas de precios y cuentas corrientes en una sola plataforma en la nube. Simple, veloz y sin instalaciones.
               </p>
-            )}
+              <div className="hero-actions">
+                <button 
+                  className="btn-primary shadow-lg" 
+                  style={{ width: 'auto', height: '48px', padding: '0 32px', fontSize: '15px' }} 
+                  onClick={() => setAuthView('register')}
+                >
+                  Crear Cuenta Gratis (14 días)
+                </button>
+                <a 
+                  href="https://wa.me/5491123456789?text=Hola!%20Me%20gustaria%20recibir%20una%20demo%20de%20NovarDesk%20ERP" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-secondary d-flex align-center justify-center" 
+                  style={{ width: 'auto', height: '48px', padding: '0 32px', fontSize: '15px', textDecoration: 'none', gap: '10px' }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#25d366' }}>
+                    <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.623-1.023-5.086-2.885-6.948C16.2 2.016 13.75 1.006 11.75 1.006c-5.437 0-9.863 4.37-9.866 9.801 0 1.768.47 3.49 1.362 5.022L2.245 21.5l5.89-1.53c.026.002.049.006.074.006.01 0 .02 0 .03-.001.01 0 .02.001.03.001.031-.001.054-.003.084-.006l.114-.015zM17.33 14.39c-.287-.144-1.702-.84-1.965-.936-.263-.096-.456-.144-.648.144-.192.288-.744.936-.912 1.128-.168.192-.336.216-.624.072-1.352-.677-2.28-1.21-3.188-2.77-.24-.412.24-.383.687-1.272.072-.144.036-.271-.018-.38-.054-.107-.456-1.104-.624-1.51-.164-.397-.333-.343-.456-.349-.12-.006-.26-.007-.4-.007-.14 0-.368.052-.56.26-.192.208-.732.716-.732 1.745s.748 2.023.852 2.164c.104.14 1.472 2.248 3.566 3.149 2.094.9 2.094.6 2.454.564.36-.036 1.702-.696 1.942-1.368.24-.672.24-1.248.168-1.368-.072-.12-.264-.216-.552-.36z"/>
+                  </svg>
+                  Contactar Asesor
+                </a>
+              </div>
 
-            <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? 'Validando...' : 'Iniciar Sesión'}
-            </button>
-          </form>
+              {/* Video Demostrativo */}
+              <div className="video-container">
+                <iframe 
+                  id="hero-youtube-player" 
+                  src="https://www.youtube.com/embed/kkKBJ8tWW5M?enablejsapi=1" 
+                  title="Demostración de NovarDesk ERP" 
+                  style={{ width: '100%', height: '100%', border: 'none' }}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                  allowFullScreen
+                ></iframe>
+              </div>
+            </section>
 
+            {/* Marquesina de Marcas / Rubros (Social Proof) */}
+            <section className="marquee-section">
+              <div className="marquee-title">Soportamos todo tipo de negocios y rubros</div>
+              <div className="marquee-wrapper">
+                <div className="marquee-track">
+                  {[
+                    { text: 'Minimercados y Almacenes', icon: '🏪' },
+                    { text: 'Tiendas de Ropa y Calzado', icon: '👕' },
+                    { text: 'Ferreterías y Corralones', icon: '🔨' },
+                    { text: 'Forrajerías y Petshops', icon: '🐕' },
+                    { text: 'Kioscos y Maxikioscos', icon: '🍬' },
+                    { text: 'Distribuidoras y Mayoristas', icon: '📦' },
+                    { text: 'Fiambrerías y Carnicerías', icon: '🥩' },
+                    { text: 'Bazares y Librerías', icon: '📚' }
+                  ].concat([
+                    { text: 'Minimercados y Almacenes', icon: '🏪' },
+                    { text: 'Tiendas de Ropa y Calzado', icon: '👕' },
+                    { text: 'Ferreterías y Corralones', icon: '🔨' },
+                    { text: 'Forrajerías y Petshops', icon: '🐕' },
+                    { text: 'Kioscos y Maxikioscos', icon: '🍬' },
+                    { text: 'Distribuidoras y Mayoristas', icon: '📦' },
+                    { text: 'Fiambrerías y Carnicerías', icon: '🥩' },
+                    { text: 'Bazares y Librerías', icon: '📚' }
+                  ]).map((item, idx) => (
+                    <div key={idx} className="marquee-item">
+                      <span className="marquee-icon">{item.icon}</span>
+                      <span>{item.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
 
-        </div>
+            {/* Dolores vs Soluciones Section */}
+            <section id="soluciones" className="landing-section" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <div className="section-header">
+                <div className="hero-badge">Gestión Inteligente</div>
+                <h2 className="section-title">¿Cansado del desorden en tu administración?</h2>
+                <p className="section-desc">Entendemos los problemas del comercio diario. Por eso diseñamos soluciones efectivas y directas.</p>
+              </div>
+              
+              <div className="pain-grid">
+                {/* Card 1 */}
+                <div className="pain-card">
+                  <div className="pain-item">
+                    <span className="pain-icon-red">✕</span>
+                    <div className="pain-text">
+                      <h4 style={{ color: '#a855f7' }}>Pérdidas de Stock y Descontrol</h4>
+                      <p>No saber qué mercadería queda, sufrir diferencias de stock y frustrar a tus clientes por quiebres de inventario.</p>
+                    </div>
+                  </div>
+                  <div className="pain-item" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '20px' }}>
+                    <span className="pain-icon-green">✓</span>
+                    <div className="pain-text">
+                      <h4 style={{ color: '#2563eb' }}>Control de Depósito Inteligente</h4>
+                      <p>Inventario exacto en tiempo real, alertas automáticas de stock mínimo y registro detallado de cada movimiento.</p>
+                    </div>
+                  </div>
+                </div>
+                {/* Card 2 */}
+                <div className="pain-card">
+                  <div className="pain-item">
+                    <span className="pain-icon-red">✕</span>
+                    <div className="pain-text">
+                      <h4 style={{ color: '#a855f7' }}>Filas Interminables en Mostrador</h4>
+                      <p>Colas largas debido a un sistema lento, demora en la búsqueda manual de artículos y facturación engorrosa.</p>
+                    </div>
+                  </div>
+                  <div className="pain-item" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '20px' }}>
+                    <span className="pain-icon-green">✓</span>
+                    <div className="pain-text">
+                      <h4 style={{ color: '#2563eb' }}>POS Ultra-rápido compatible con Barras</h4>
+                      <p>Punto de venta simple y dinámico. Buscá por lectora o nombre en milisegundos y emití facturas en un solo clic.</p>
+                    </div>
+                  </div>
+                </div>
+                {/* Card 3 */}
+                <div className="pain-card">
+                  <div className="pain-item">
+                    <span className="pain-icon-red">✕</span>
+                    <div className="pain-text">
+                      <h4 style={{ color: '#a855f7' }}>Precios Desactualizados y Pérdida de Margen</h4>
+                      <p>Actualizar precios uno a uno es agotador, lo que destruye tus márgenes de ganancia sin que te des cuenta.</p>
+                    </div>
+                  </div>
+                  <div className="pain-item" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '20px' }}>
+                    <span className="pain-icon-green">✓</span>
+                    <div className="pain-text">
+                      <h4 style={{ color: '#2563eb' }}>Costos Exactos y Listas de Precios</h4>
+                      <p>Actualización ágil. Definí una lista predeterminada y cargá precios diferentes por canal de venta de forma masiva.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Funcionalidades */}
+            <section id="funciones" className="landing-section" style={{ borderTop: '1px solid var(--border-color)' }}>
+              <div className="section-header">
+                <h2 className="section-title">Herramientas creadas para crecer</h2>
+                <p className="section-desc">Todo el ecosistema administrativo que tu comercio necesita, sin complejidades innecesarias.</p>
+              </div>
+              <div className="features-grid">
+                <div className="feature-card">
+                  <div className="feature-icon-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect><line x1="6" y1="20" x2="18" y2="20"></line></svg>
+                  </div>
+                  <div className="feature-info">
+                    <h4>Punto de Venta Simple (POS)</h4>
+                    <p>Facturación de múltiples medios de pago, compatibilidad con lectora de barras y calculadora inteligente de peso para productos fraccionables.</p>
+                  </div>
+                </div>
+                <div className="feature-card">
+                  <div className="feature-icon-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                  </div>
+                  <div className="feature-info">
+                    <h4>Múltiples Listas de Precios</h4>
+                    <p>Crea listas de precios personalizadas (Minorista, Mayorista, Promoción) y asígnaselas a tus clientes para automatizar el cobro en mostrador.</p>
+                  </div>
+                </div>
+                <div className="feature-card">
+                  <div className="feature-icon-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                  </div>
+                  <div className="feature-info">
+                    <h4>Contabilidad y Caja Diaria</h4>
+                    <p>Aperturas y cierres de turno, arqueo de caja con desglose de efectivo, transferencias y tarjetas para que las cuentas cierren a la perfección.</p>
+                  </div>
+                </div>
+                <div className="feature-card">
+                  <div className="feature-icon-wrapper">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                  </div>
+                  <div className="feature-info">
+                    <h4>Importador Masivo de Excel</h4>
+                    <p>Actualiza o migra tu catálogo de miles de artículos, marcas, precios de venta, costos y stock en segundos mediante archivos Excel.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Planes */}
+            <section id="planes" className="landing-section" style={{ borderTop: '1px solid var(--border-color)', marginBottom: '80px' }}>
+              <div className="section-header">
+                <h2 className="section-title">Planes adaptados a tu escala</h2>
+                <p className="section-desc">Elegí el plan ideal para tu negocio. Empezá gratis hoy mismo y escalá cuando lo necesites.</p>
+              </div>
+              
+              <div className="pricing-grid">
+                {/* Trial */}
+                <div className="price-card">
+                  <h3 className="price-title">Prueba Gratuita</h3>
+                  <div style={{ marginBottom: '16px' }}>
+                    <span className="price-val">$0</span>
+                    <span className="price-period"> / 14 días</span>
+                  </div>
+                  <p className="price-desc">Ideal para explorar y conocer la plataforma completa.</p>
+                  <ul className="price-features">
+                    <li className="price-feature">✓ Hasta 50 ventas/mes</li>
+                    <li className="price-feature">✓ Catálogo: Máx 100 variantes</li>
+                    <li className="price-feature">✓ Hasta 1 usuario (empleado)</li>
+                    <li className="price-feature font-semibold">✓ Punto de venta básico</li>
+                    <li className="price-feature disabled">✕ Facturación Electrónica</li>
+                    <li className="price-feature disabled">✕ Listas de Precios & Finanzas</li>
+                  </ul>
+                  <button className="btn-secondary w-full" onClick={() => setAuthView('register')}>Contratar</button>
+                </div>
+                
+                {/* Básico */}
+                <div className="price-card">
+                  <h3 className="price-title">Básico</h3>
+                  <div style={{ marginBottom: '16px' }}>
+                    <span className="price-val">$19.000</span>
+                    <span className="price-period"> / mes</span>
+                  </div>
+                  <p className="price-desc">Para pequeños comercios que recién empiezan.</p>
+                  <ul className="price-features">
+                    <li className="price-feature">✓ Hasta 250 ventas/mes</li>
+                    <li className="price-feature">✓ Catálogo: Máx 1.000 variantes</li>
+                    <li className="price-feature">✓ Hasta 2 usuarios simultáneos</li>
+                    <li className="price-feature font-semibold">✓ Facturación Electrónica</li>
+                    <li className="price-feature disabled">✕ Listas de Precios & Finanzas</li>
+                  </ul>
+                  <button className="btn-primary w-full" onClick={() => setAuthView('register')}>Contratar</button>
+                </div>
+
+                {/* Premium */}
+                <div className="price-card recommended">
+                  <div className="recommended-badge">Recomendado</div>
+                  <h3 className="price-title">Premium</h3>
+                  <div style={{ marginBottom: '16px' }}>
+                    <span className="price-val">$29.000</span>
+                    <span className="price-period"> / mes</span>
+                  </div>
+                  <p className="price-desc">Acceso total para hacer crecer tu negocio.</p>
+                  <ul className="price-features">
+                    <li className="price-feature font-semibold">✓ Hasta 1.500 ventas/mes</li>
+                    <li className="price-feature font-semibold">✓ Catálogo: Máx 10.000 variantes</li>
+                    <li className="price-feature">✓ Hasta 3 usuarios simultáneos</li>
+                    <li className="price-feature">✓ Facturación Electrónica</li>
+                    <li className="price-feature font-semibold">✓ Listas de Precios Múltiples</li>
+                    <li className="price-feature font-semibold">✓ Contabilidad y Caja Diaria</li>
+                    <li className="price-feature font-semibold">✓ Importación Masiva Excel</li>
+                  </ul>
+                  <button className="btn-primary w-full" onClick={() => setAuthView('register')}>Contratar</button>
+                </div>
+
+                {/* Full */}
+                <div className="price-card">
+                  <h3 className="price-title">Full</h3>
+                  <div style={{ marginBottom: '16px' }}>
+                    <span className="price-val">$44.900</span>
+                    <span className="price-period"> / mes</span>
+                  </div>
+                  <p className="price-desc">Sin límites para empresas consolidadas.</p>
+                  <ul className="price-features">
+                    <li className="price-feature font-semibold">✓ Ventas Ilimitadas</li>
+                    <li className="price-feature font-semibold">✓ Catálogo Ilimitado</li>
+                    <li className="price-feature font-semibold">✓ Hasta 4 usuarios simultáneos</li>
+                    <li className="price-feature">✓ Facturación Electrónica</li>
+                    <li className="price-feature">✓ Todas las funcionalidades</li>
+                    <li className="price-feature font-semibold">✓ Soporte técnico prioritario</li>
+                  </ul>
+                  <button className="btn-primary w-full" onClick={() => setAuthView('register')}>Contratar</button>
+                </div>
+              </div>
+            </section>
+
+            {/* Footer */}
+            <footer style={{ background: 'var(--bg-secondary)', borderTop: '1px solid var(--border-color)', padding: '40px 24px', textAlign: 'center', fontSize: '13px', color: 'var(--text-muted)' }}>
+              <div className="footer-links-container">
+                <span className="footer-link" onClick={() => setActiveLegalModal('terms')}>Términos y Condiciones</span>
+                <span className="footer-link" onClick={() => setActiveLegalModal('privacy')}>Política de Privacidad</span>
+                <span className="footer-link" onClick={() => setActiveLegalModal('dpa')}>Acuerdo de Tratamiento de Datos (DPA)</span>
+              </div>
+              <p style={{ margin: 0 }}>© {new Date().getFullYear()} NovarDesk ERP. Todos los derechos reservados.</p>
+            </footer>
+
+            {/* Floating WhatsApp Widget */}
+            <a 
+              href="https://wa.me/5491123456789?text=Hola!%20Me%20gustaria%20recibir%20asesoramiento%20sobre%20NovarDesk%20ERP.%20Vengo%20desde%20la%20Home."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="floating-whatsapp"
+              title="Chatear con un asesor"
+            >
+              <div className="whatsapp-pulse"></div>
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#fff' }}>
+                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.623-1.023-5.086-2.885-6.948C16.2 2.016 13.75 1.006 11.75 1.006c-5.437 0-9.863 4.37-9.866 9.801 0 1.768.47 3.49 1.362 5.022L2.245 21.5l5.89-1.53c.026.002.049.006.074.006.01 0 .02 0 .03-.001.01 0 .02.001.03.001.031-.001.054-.003.084-.006l.114-.015zM17.33 14.39c-.287-.144-1.702-.84-1.965-.936-.263-.096-.456-.144-.648.144-.192.288-.744.936-.912 1.128-.168.192-.336.216-.624.072-1.352-.677-2.28-1.21-3.188-2.77-.24-.412.24-.383.687-1.272.072-.144.036-.271-.018-.38-.054-.107-.456-1.104-.624-1.51-.164-.397-.333-.343-.456-.349-.12-.006-.26-.007-.4-.007-.14 0-.368.052-.56.26-.192.208-.732.716-.732 1.745s.748 2.023.852 2.164c.104.14 1.472 2.248 3.566 3.149 2.094.9 2.094.6 2.454.564.36-.036 1.702-.696 1.942-1.368.24-.672.24-1.248.168-1.368-.072-.12-.264-.216-.552-.36z"/>
+              </svg>
+            </a>
+
+          </>
+        )}
+
+        {authView === 'login' && (
+          <div className="auth-wrapper fade-in relative">
+            <div className="absolute" style={{ top: '24px', right: '24px', zIndex: 10 }}>
+              <div
+                onClick={toggleTheme}
+                className="theme-switch-container"
+                title={theme === 'light' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'}
+              >
+                <div className="theme-switch-thumb"></div>
+                <div className="theme-switch-icons">
+                  <span className={`theme-switch-icon ${theme === 'light' ? 'active' : ''}`}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                  </span>
+                  <span className={`theme-switch-icon ${theme === 'dark' ? 'active' : ''}`}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="auth-card scale-up">
+              <div className="auth-header">
+                <h1 className="auth-title">NovarDesk ERP</h1>
+                <p className="auth-subtitle">Ingresa para administrar tu comercio</p>
+              </div>
+
+              <form onSubmit={handleLogin}>
+                <div className="form-group">
+                  <label className="form-label">Correo Electrónico</label>
+                  <input
+                    type="email"
+                    className="form-input"
+                    placeholder="ejemplo@comercio.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Contraseña</label>
+                  <input
+                    type="password"
+                    className="form-input"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+
+                {authError && (
+                  <p className="text-center" style={{ color: 'red', fontSize: '13px', marginBottom: '16px' }}>
+                    {authError}
+                  </p>
+                )}
+
+                <button type="submit" className="btn-primary" disabled={loading}>
+                  {loading ? 'Validando...' : 'Iniciar Sesión'}
+                </button>
+              </form>
+
+              <div style={{ textAlign: 'center', marginTop: '20px', borderTop: '1px dashed var(--border-color)', paddingTop: '16px' }}>
+                <a href="#" onClick={(e) => { e.preventDefault(); setAuthView('landing'); }} style={{ color: 'hsl(var(--primary))', fontSize: '13px', fontWeight: '600', textDecoration: 'none' }}>
+                  ← Volver al Inicio
+                </a>
+              </div>
+              <div style={{ textAlign: 'center', marginTop: '12px' }}>
+                <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>¿No tienes una cuenta? </span>
+                <a href="#" onClick={(e) => { e.preventDefault(); setAuthView('register'); }} style={{ color: 'hsl(var(--primary))', fontSize: '13px', fontWeight: '700', textDecoration: 'none' }}>
+                  Regístrate gratis
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {authView === 'register' && (
+          <div className="auth-wrapper fade-in relative">
+            <div className="absolute" style={{ top: '24px', right: '24px', zIndex: 10 }}>
+              <div
+                onClick={toggleTheme}
+                className="theme-switch-container"
+                title={theme === 'light' ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro'}
+              >
+                <div className="theme-switch-thumb"></div>
+                <div className="theme-switch-icons">
+                  <span className={`theme-switch-icon ${theme === 'light' ? 'active' : ''}`}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                  </span>
+                  <span className={`theme-switch-icon ${theme === 'dark' ? 'active' : ''}`}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="auth-card scale-up">
+              <div className="auth-header">
+                <h1 className="auth-title">Crea tu Comercio</h1>
+                <p className="auth-subtitle">Prueba NovarDesk ERP gratis por 14 días</p>
+              </div>
+
+              <form onSubmit={handleRegister}>
+                <div className="form-group">
+                  <label className="form-label">Nombre del Comercio (Razón Social)</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Ej: Minimercado El Sol"
+                    value={regRazonSocial}
+                    onChange={(e) => setRegRazonSocial(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">CUIT (Opcional)</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Ej: 20123456789"
+                    value={regCuit}
+                    onChange={(e) => setRegCuit(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group" style={{ borderTop: '1px dashed var(--border-color)', paddingTop: '16px', marginTop: '16px' }}>
+                  <label className="form-label">Tu Nombre Completo</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    placeholder="Ej: Juan Pérez"
+                    value={regNombre}
+                    onChange={(e) => setRegNombre(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Correo Electrónico de Administrador</label>
+                  <input
+                    type="email"
+                    className="form-input"
+                    placeholder="admin@comercio.com"
+                    value={regEmail}
+                    onChange={(e) => setRegEmail(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Contraseña</label>
+                  <input
+                    type="password"
+                    className="form-input"
+                    placeholder="Mínimo 6 caracteres"
+                    value={regPassword}
+                    onChange={(e) => setRegPassword(e.target.value)}
+                    required
+                  />
+                </div>
+
+                {regError && (
+                  <p className="text-center" style={{ color: 'red', fontSize: '13px', marginBottom: '16px' }}>
+                    {regError}
+                  </p>
+                )}
+
+                <button type="submit" className="btn-primary" disabled={regLoading}>
+                  {regLoading ? 'Registrando comercio...' : 'Crear Cuenta y Comenzar'}
+                </button>
+              </form>
+
+              <div style={{ textAlign: 'center', marginTop: '20px', borderTop: '1px dashed var(--border-color)', paddingTop: '16px' }}>
+                <a href="#" onClick={(e) => { e.preventDefault(); setAuthView('landing'); }} style={{ color: 'hsl(var(--primary))', fontSize: '13px', fontWeight: '600', textDecoration: 'none' }}>
+                  ← Volver al Inicio
+                </a>
+              </div>
+              <div style={{ textAlign: 'center', marginTop: '12px' }}>
+                <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>¿Ya tienes una cuenta? </span>
+                <a href="#" onClick={(e) => { e.preventDefault(); setAuthView('login'); }} style={{ color: 'hsl(var(--primary))', fontSize: '13px', fontWeight: '700', textDecoration: 'none' }}>
+                  Inicia Sesión
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Legal */}
+        {activeLegalModal && (
+          <div className="legal-modal-overlay" onClick={() => setActiveLegalModal(null)}>
+            <div className="legal-modal-card" onClick={(e) => e.stopPropagation()}>
+              <div className="legal-modal-header">
+                <h3>{getLegalModalTitle()}</h3>
+                <button className="legal-modal-close" onClick={() => setActiveLegalModal(null)}>✕</button>
+              </div>
+              <div className="legal-modal-body">
+                {renderLegalModalContent()}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
